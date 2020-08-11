@@ -1,14 +1,12 @@
 package auth
 
 import (
-	"encoding/hex"
 	"fmt"
 	posCrypto "github.com/pokt-network/pocket-core/crypto"
 	sdk "github.com/pokt-network/pocket-core/types"
 	"github.com/pokt-network/pocket-core/x/auth/keeper"
 	"github.com/pokt-network/pocket-core/x/auth/types"
 	"github.com/tendermint/tendermint/state/txindex"
-	tmTypes "github.com/tendermint/tendermint/types"
 	"os"
 )
 
@@ -60,12 +58,12 @@ func ValidateTransaction(ctx sdk.Ctx, k Keeper, stdTx StdTx, params Params, txIn
 		}
 	}
 	// check for duplicate transaction to prevent replay attacks
-	txHash := tmTypes.Tx(txBz).Hash()
-	// make http call to tendermint to check txIndexer
-	res, _ := (*txIndexer).Get(txHash)
-	if res != nil {
-		return types.ErrDuplicateTx(ModuleName, hex.EncodeToString(txHash))
-	}
+	//txHash := tmTypes.Tx(txBz).Hash()
+	//// make http call to tendermint to check txIndexer
+	//res, _ := (*txIndexer).Get(txHash)
+	//if res != nil {
+	//	return types.ErrDuplicateTx(ModuleName, hex.EncodeToString(txHash))
+	//}
 	// get the sign bytes from the tx
 	signBytes, err := GetSignBytes(ctx.ChainID(), stdTx)
 	if err != nil {
