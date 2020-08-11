@@ -122,6 +122,10 @@ type prefixIterator struct {
 	valid      bool
 }
 
+func (iter *prefixIterator) Error() error {
+	panic("implement me")
+}
+
 func newPrefixIterator(prefix, start, end []byte, parent types.Iterator) *prefixIterator {
 	return &prefixIterator{
 		prefix: prefix,

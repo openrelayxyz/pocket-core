@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"github.com/tendermint/tendermint/libs/strings"
 	"time"
 
 	"github.com/pokt-network/pocket-core/crypto"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/libs/common"
 
 	sdk "github.com/pokt-network/pocket-core/types"
 	"github.com/pokt-network/pocket-core/x/nodes/types"
@@ -118,7 +118,7 @@ func (k Keeper) ValidateValidatorStaking(ctx sdk.Ctx, validator types.Validator,
 					err.Error(),
 					ctx.ConsensusParams().Validator.PubKeyTypes)
 			}
-			if !common.StringInSlice(tmPubKey.Type, ctx.ConsensusParams().Validator.PubKeyTypes) {
+			if !strings.StringInSlice(tmPubKey.Type, ctx.ConsensusParams().Validator.PubKeyTypes) {
 				return types.ErrValidatorPubKeyTypeNotSupported(k.Codespace(),
 					tmPubKey.Type,
 					ctx.ConsensusParams().Validator.PubKeyTypes)

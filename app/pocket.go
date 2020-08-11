@@ -137,7 +137,7 @@ func (app *PocketCoreApp) ExportState(height int64, chainID string) (string, err
 				TimeIotaMs: 1,
 			},
 			Evidence: types.EvidenceParams{
-				MaxAge: 1000000,
+				MaxAgeNumBlocks: 1000000,
 			},
 			Validator: types.ValidatorParams{
 				PubKeyTypes: []string{"ed25519"},

@@ -2,6 +2,7 @@ package iavl
 
 import (
 	"fmt"
+	"github.com/tendermint/tendermint/libs/kv"
 	"io"
 	"sync"
 
@@ -13,7 +14,6 @@ import (
 	"github.com/tendermint/iavl"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto/merkle"
-	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tm-db"
 )
 
@@ -23,9 +23,13 @@ const (
 
 // LoadStore loads the iavl store
 func LoadStore(db dbm.DB, id types.CommitID, pruning types.PruningOptions, lazyLoading bool) (types.CommitStore, error) {
-	tree := iavl.NewMutableTree(db, defaultIAVLCacheSize)
-
 	var err error
+
+	tree, err := iavl.NewMutableTree(db, defaultIAVLCacheSize)
+	if err != nil {
+		return nil, err
+	}
+
 	if lazyLoading {
 		_, err = tree.LazyLoadVersion(id.Version)
 	} else {
@@ -260,7 +264,7 @@ func (st *Store) Query(req abci.RequestQuery) (res abci.ResponseQuery) {
 
 		res.Key = key
 		if !st.VersionExists(res.Height) {
-			res.Log = cmn.ErrorWrap(iavl.ErrVersionDoesNotExist, "").Error()
+			res.Log = iavl.ErrVersionDoesNotExist.Error()
 			break
 		}
 
@@ -279,11 +283,11 @@ func (st *Store) Query(req abci.RequestQuery) (res abci.ResponseQuery) {
 			if value != nil {
 				// value was found
 				res.Value = value
-				res.Proof = &merkle.Proof{Ops: []merkle.ProofOp{iavl.NewIAVLValueOp(key, proof).ProofOp()}}
+				res.Proof = &merkle.Proof{Ops: []merkle.ProofOp{iavl.NewValueOp(key, proof).ProofOp()}}
 			} else {
 				// value wasn't found
 				res.Value = nil
-				res.Proof = &merkle.Proof{Ops: []merkle.ProofOp{iavl.NewIAVLAbsenceOp(key, proof).ProofOp()}}
+				res.Proof = &merkle.Proof{Ops: []merkle.ProofOp{iavl.NewAbsenceOp(key, proof).ProofOp()}}
 			}
 		} else {
 			_, res.Value = tree.GetVersioned(key, res.Height)
@@ -325,7 +329,7 @@ type iavlIterator struct {
 	ascending bool
 
 	// Channel to push iteration values.
-	iterCh chan cmn.KVPair
+	iterCh chan kv.Pair
 
 	// Close this to release goroutine.
 	quitCh chan struct{}
@@ -342,6 +346,10 @@ type iavlIterator struct {
 	value   []byte // The current value
 }
 
+func (iter *iavlIterator) Error() error {
+	panic("implement me")
+}
+
 var _ types.Iterator = (*iavlIterator)(nil)
 
 // newIAVLIterator will create a new iavlIterator.
@@ -353,7 +361,7 @@ func newIAVLIterator(tree *iavl.ImmutableTree, start, end []byte, ascending bool
 		start:     types.Cp(start),
 		end:       types.Cp(end),
 		ascending: ascending,
-		iterCh:    make(chan cmn.KVPair), // Set capacity > 0?
+		iterCh:    make(chan kv.Pair), // Set capacity > 0?
 		quitCh:    make(chan struct{}),
 		initCh:    make(chan struct{}),
 	}
@@ -370,7 +378,7 @@ func (iter *iavlIterator) iterateRoutine() {
 			select {
 			case <-iter.quitCh:
 				return true // done with iteration.
-			case iter.iterCh <- cmn.KVPair{Key: key, Value: value}:
+			case iter.iterCh <- kv.Pair{Key: key, Value: value}:
 				return false // yay.
 			}
 		},
