@@ -2,7 +2,7 @@ package app
 
 import (
 	"context"
-	"fmt"
+	"github.com/tendermint/tendermint/rpc/client/http"
 	"io"
 	"os"
 	"testing"
@@ -129,7 +129,8 @@ func inMemTendermintNode(genesisState []byte) (*node.Node, keys.Keybase) {
 					TimeIotaMs: 1,
 				},
 				Evidence: types.EvidenceParams{
-					MaxAge: 1000000,
+					MaxAgeNumBlocks: 10000,
+					MaxAgeDuration:  48 * time.Hour,
 				},
 				Validator: types.ValidatorParams{
 					PubKeyTypes: []string{"ed25519"},
@@ -165,31 +166,31 @@ func inMemTendermintNode(genesisState []byte) (*node.Node, keys.Keybase) {
 		p := NewPocketCoreApp(GenState, getInMemoryKeybase(), getInMemoryTMClient(), &pocketTypes.HostedBlockchains{M: m}, logger, db, bam.SetPruning(store.PruneNothing))
 		return p
 	}
-	upgradePrivVal(c.TmConfig)
+	//upgradePrivVal(c.TmConfig)
 	dbProvider := func(*node.DBContext) (dbm.DB, error) {
 		return db, nil
 	}
 	app := creator(c.Logger, db, traceWriter)
-	txIndexer, err := node.CreateTxIndexer(c.TmConfig, node.DefaultDBProvider)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, nil
-	}
-	// setup blockstore
-	blockStore, stateDB, err := node.InitDBs(c.TmConfig, node.DefaultDBProvider)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, nil
-	}
-	// Make Evidence Reactor
-	evidenceReactor, evidencePool, err := node.CreateEvidenceReactor(c.TmConfig, node.DefaultDBProvider, stateDB, c.Logger)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, nil
-	}
-	app.SetTxIndexer(txIndexer)
-	app.SetBlockstore(blockStore)
-	app.SetEvidencePool(evidencePool)
+	//txIndexer, err := node.CreateTxIndexer(c.TmConfig, node.DefaultDBProvider)
+	//if err != nil {
+	//	fmt.Println(err.Error())
+	//	return nil, nil
+	//}
+	//// setup blockstore
+	//blockStore, stateDB, err := node.InitDBs(c.TmConfig, node.DefaultDBProvider)
+	//if err != nil {
+	//	fmt.Println(err.Error())
+	//	return nil, nil
+	//}
+	//// Make Evidence Reactor
+	//evidenceReactor, evidencePool, err := node.CreateEvidenceReactor(c.TmConfig, node.DefaultDBProvider, stateDB, c.Logger)
+	//if err != nil {
+	//	fmt.Println(err.Error())
+	//	return nil, nil
+	//}
+	//app.SetTxIndexer(txIndexer)
+	//app.SetBlockstore(blockStore)
+	//app.SetEvidencePool(evidencePool)
 	tmNode, err := node.NewNode(
 		c.TmConfig,
 		privVal,
@@ -199,11 +200,6 @@ func inMemTendermintNode(genesisState []byte) (*node.Node, keys.Keybase) {
 		dbProvider,
 		node.DefaultMetricsProvider(c.TmConfig.Instrumentation),
 		c.Logger.With("module", "node"),
-		txIndexer,
-		blockStore,
-		stateDB,
-		evidencePool,
-		evidenceReactor,
 	)
 	if err != nil {
 		panic(err)
@@ -232,7 +228,7 @@ func memCodec() *codec.Codec {
 
 func getInMemoryTMClient() client.Client {
 	if memCLI == nil || !memCLI.IsRunning() {
-		memCLI = client.NewHTTP(tmCfg.TestConfig().RPC.ListenAddress, "/websocket")
+		memCLI, _ = http.New(tmCfg.TestConfig().RPC.ListenAddress, "/websocket")
 	}
 	return memCLI
 }

@@ -5,8 +5,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/tendermint/tendermint/libs/log"
+	rand2 "github.com/tendermint/tendermint/libs/rand"
 	"math/rand"
-	"os"
 	"strings"
 	"testing"
 
@@ -36,7 +36,7 @@ func TestMain(m *testing.M) {
 		M: make(map[string]pocketTypes.HostedBlockchain),
 	}, logger, "26660", 3, 3000)
 	m.Run()
-	os.Exit(0)
+	os.Exit("0")
 }
 
 func TestUnstakeApp(t *testing.T) {
@@ -230,7 +230,7 @@ func TestDuplicateTxWithRawTx(t *testing.T) {
 			Amount:      sdk.NewInt(1),
 		},
 		pk,
-		common.RandInt64(),
+		rand2.Int64(),
 		sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(100000)))))
 	assert.Nil(t, err)
 	// create the transaction
@@ -241,7 +241,7 @@ func TestDuplicateTxWithRawTx(t *testing.T) {
 			Amount:      sdk.NewInt(1),
 		},
 		pk,
-		common.RandInt64(),
+		rand2.Int64(),
 		sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(100000)))))
 	assert.Nil(t, err)
 
