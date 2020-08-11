@@ -105,7 +105,8 @@ func TestRemoveStakedApplicationTokens(t *testing.T) {
 			}
 			assert.True(t, application.StakedTokens.Equal(test.want.tokens), "application staked tokens is not as want")
 			store := context.KVStore(keeper.storeKey)
-			assert.NotNil(t, store.Get(types.KeyForAppInStakingSet(application)))
+			sg, _ := store.Get(types.KeyForAppInStakingSet(application))
+			assert.NotNil(t, sg)
 
 		})
 	}

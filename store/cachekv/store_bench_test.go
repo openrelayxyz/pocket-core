@@ -30,7 +30,7 @@ func benchmarkCacheKVStoreIterator(numKVs int, b *testing.B) {
 	sort.Strings(keys)
 
 	for n := 0; n < b.N; n++ {
-		iter := cstore.Iterator([]byte(keys[0]), []byte(keys[numKVs-1]))
+		iter, _ := cstore.Iterator([]byte(keys[0]), []byte(keys[numKVs-1]))
 
 		for _ = iter.Key(); iter.Valid(); iter.Next() {
 		}

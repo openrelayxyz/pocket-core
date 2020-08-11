@@ -131,9 +131,11 @@ func TestSubspace(t *testing.T) {
 	space := keeper.Subspace("test").WithKeyTable(table)
 	// Test space.Set, space.Modified
 	for i, kv := range kvs {
-		require.False(t, space.Modified(ctx, []byte(kv.key)), "space.Modified returns true before setting, tc #%d", i)
+		sm, _ := space.Modified(ctx, []byte(kv.key))
+		require.False(t, sm, "space.Modified returns true before setting, tc #%d", i)
 		require.NotPanics(t, func() { space.Set(ctx, []byte(kv.key), kv.param) }, "space.Set panics, tc #%d", i)
-		require.True(t, space.Modified(ctx, []byte(kv.key)), "space.Modified returns false after setting, tc #%d", i)
+		sm, _ = space.Modified(ctx, []byte(kv.key))
+		require.True(t, sm, "space.Modified returns false after setting, tc #%d", i)
 	}
 	// Test space.Get, space.GetIfExists
 	for i, kv := range kvs {
