@@ -19,7 +19,7 @@ var (
 )
 
 // "InitConfig" - Initializes the cache for sessions and evidence
-func InitConfig(userAgent, evidenceDir, sessionDir string, sessionDBType, evidenceDBType db.DBBackendType, maxEvidenceEntries, maxSessionEntries int, evidenceDBName, sessionDBName string, chains HostedBlockchains, logger log.Logger, prometheusAddr string, maxOpenConn int, timeout int64) {
+func InitConfig(userAgent, evidenceDir, sessionDir string, sessionDBType, evidenceDBType db.BackendType, maxEvidenceEntries, maxSessionEntries int, evidenceDBName, sessionDBName string, chains HostedBlockchains, logger log.Logger, prometheusAddr string, maxOpenConn int, timeout int64) {
 	cacheOnce.Do(func() {
 		globalEvidenceCache = new(CacheStorage)
 		globalSessionCache = new(CacheStorage)

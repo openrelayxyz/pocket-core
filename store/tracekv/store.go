@@ -109,6 +109,11 @@ type traceIterator struct {
 	context types.TraceContext
 }
 
+func (ti *traceIterator) Error() error {
+	//TODO change me
+	return nil
+}
+
 func newTraceIterator(w io.Writer, parent types.Iterator, tc types.TraceContext) types.Iterator {
 	return &traceIterator{writer: w, parent: parent, context: tc}
 }

@@ -2,10 +2,10 @@ package types
 
 import (
 	"fmt"
+	"github.com/tendermint/tendermint/libs/kv"
 	"io"
 
 	abci "github.com/tendermint/tendermint/abci/types"
-	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tm-db"
 )
 
@@ -271,7 +271,7 @@ func (key *TransientStoreKey) String() string {
 //----------------------------------------
 
 // key-value result for iterator queries
-type KVPair cmn.KVPair
+type KVPair kv.Pair
 
 //----------------------------------------
 

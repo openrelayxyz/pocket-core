@@ -58,7 +58,7 @@ func (kb *dbKeybase) SetCoinbase(address types.Address) error {
 // List returns the keys from storage in alphabetical order.
 func (kb dbKeybase) List() ([]KeyPair, error) {
 	var res []KeyPair
-	iter := kb.db.Iterator(nil, nil)
+	iter, _ := kb.db.Iterator(nil, nil)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
 		kp, err := readKeyPair(iter.Value())
@@ -72,7 +72,7 @@ func (kb dbKeybase) List() ([]KeyPair, error) {
 
 // Get returns the public information about one key.
 func (kb dbKeybase) Get(address types.Address) (KeyPair, error) {
-	ik := kb.db.Get(addrKey(address))
+	ik, _ := kb.db.Get(addrKey(address))
 	if len(ik) == 0 {
 		return KeyPair{}, fmt.Errorf("key with address %s not found", address)
 	}

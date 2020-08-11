@@ -58,16 +58,16 @@ const (
 type BaseApp struct {
 	// initialized on creation
 	logger       log.Logger
-	name         string                 // application name from abci.Info
-	db           dbm.DB                 // common DB backend
-	tmNode       *node.Node             // <---- todo updated here
-	txIndexer    *txindex.TxIndexer     // <---- todo updated here
-	blockstore   *tmStore.BlockStore    // <---- todo updated here
-	evidencePool *evidence.EvidencePool // <---- todo updated here
-	cms          sdk.CommitMultiStore   // Main (uncached) state
-	router       sdk.Router             // handle any kind of message
-	queryRouter  sdk.QueryRouter        // router for redirecting query calls
-	txDecoder    sdk.TxDecoder          // unmarshal []byte into sdk.Tx
+	name         string               // application name from abci.Info
+	db           dbm.DB               // common DB backend
+	tmNode       *node.Node           // <---- todo updated here
+	txIndexer    *txindex.TxIndexer   // <---- todo updated here
+	blockstore   *tmStore.BlockStore  // <---- todo updated here
+	evidencePool *evidence.Pool       // <---- todo updated here
+	cms          sdk.CommitMultiStore // Main (uncached) state
+	router       sdk.Router           // handle any kind of message
+	queryRouter  sdk.QueryRouter      // router for redirecting query calls
+	txDecoder    sdk.TxDecoder        // unmarshal []byte into sdk.Tx
 
 	// set upon RollbackVersion or LoadLatestVersion.
 	baseKey *sdk.KVStoreKey // Main KVStore in cms
@@ -151,11 +151,11 @@ func (app *BaseApp) Blockstore() (blockstore *tmStore.BlockStore) {
 	return app.blockstore
 }
 
-func (app *BaseApp) SetEvidencePool(evidencePool *evidence.EvidencePool) {
+func (app *BaseApp) SetEvidencePool(evidencePool *evidence.Pool) {
 	app.evidencePool = evidencePool
 }
 
-func (app *BaseApp) EvidencePool() (evidencePool *evidence.EvidencePool) {
+func (app *BaseApp) EvidencePool() (evidencePool *evidence.Pool) {
 	return app.evidencePool
 }
 

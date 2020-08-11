@@ -15504,7 +15504,7 @@ func newDefaultGenesisState() []byte {
 				TimeIotaMs: 1,
 			},
 			Evidence: tmType.EvidenceParams{
-				MaxAge: 1000000,
+				MaxAgeNumBlocks: 1000000,
 			},
 			Validator: tmType.ValidatorParams{
 				PubKeyTypes: []string{"ed25519"},

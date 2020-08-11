@@ -112,6 +112,11 @@ type gasIterator struct {
 	parent    types.Iterator
 }
 
+func (gi *gasIterator) Error() error {
+	//TODO
+	return nil
+}
+
 func newGasIterator(gasMeter types.GasMeter, gasConfig types.GasConfig, parent types.Iterator) types.Iterator {
 	return &gasIterator{
 		gasMeter:  gasMeter,

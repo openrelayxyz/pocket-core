@@ -22,7 +22,7 @@ import (
 	nodeTypes "github.com/pokt-network/pocket-core/x/nodes/types"
 	pocketTypes "github.com/pokt-network/pocket-core/x/pocketcore/types"
 	"github.com/stretchr/testify/assert"
-	"github.com/tendermint/tendermint/libs/common"
+	"github.com/tendermint/tendermint/libs/os"
 	tmTypes "github.com/tendermint/tendermint/types"
 	db "github.com/tendermint/tm-db"
 )
