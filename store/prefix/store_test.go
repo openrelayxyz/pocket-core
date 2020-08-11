@@ -55,8 +55,8 @@ func TestPrefixStoreIterate(t *testing.T) {
 
 	setRandomKVPairs(t, prefixStore)
 
-	bIter := types.KVStorePrefixIterator(baseStore, prefix)
-	pIter := types.KVStorePrefixIterator(prefixStore, nil)
+	bIter, _ := types.KVStorePrefixIterator(baseStore, prefix)
+	pIter, _ := types.KVStorePrefixIterator(prefixStore, nil)
 
 	for bIter.Valid() && pIter.Valid() {
 		require.Equal(t, bIter.Key(), append(prefix, pIter.Key()...))
@@ -198,7 +198,7 @@ func mockStoreWithStuff() types.KVStore {
 }
 
 func checkValue(t *testing.T, store types.KVStore, key []byte, expected []byte) {
-	bz := store.Get(key)
+	bz, _ := store.Get(key)
 	require.Equal(t, expected, bz)
 }
 

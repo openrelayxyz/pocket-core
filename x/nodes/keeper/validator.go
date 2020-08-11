@@ -9,7 +9,7 @@ import (
 // GetValidator - Retrieve validator with address from the main store
 func (k Keeper) GetValidator(ctx sdk.Ctx, addr sdk.Address) (validator types.Validator, found bool) {
 	store := ctx.KVStore(k.storeKey)
-	value := store.Get(types.KeyForValByAllVals(addr))
+	value, _ := store.Get(types.KeyForValByAllVals(addr))
 	if value == nil {
 		return validator, false
 	}
@@ -46,7 +46,7 @@ func (k Keeper) DeleteValidator(ctx sdk.Ctx, addr sdk.Address) {
 func (k Keeper) GetAllValidators(ctx sdk.Ctx) (validators []types.Validator) {
 	validators = make([]types.Validator, 0)
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		validator := types.MustUnmarshalValidator(k.cdc, iterator.Value())
@@ -59,7 +59,7 @@ func (k Keeper) GetAllValidators(ctx sdk.Ctx) (validators []types.Validator) {
 func (k Keeper) GetAllValidatorsWithOpts(ctx sdk.Ctx, opts types.QueryValidatorsParams) (validators []types.Validator) {
 	validators = make([]types.Validator, 0)
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		validator := types.MustUnmarshalValidator(k.cdc, iterator.Value())
@@ -74,7 +74,7 @@ func (k Keeper) GetAllValidatorsWithOpts(ctx sdk.Ctx, opts types.QueryValidators
 func (k Keeper) GetValidators(ctx sdk.Ctx, maxRetrieve uint16) (validators []types.Validator) {
 	store := ctx.KVStore(k.storeKey)
 	validators = make([]types.Validator, maxRetrieve)
-	iterator := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
 	defer iterator.Close()
 	i := 0
 	for ; iterator.Valid() && i < int(maxRetrieve); iterator.Next() {
@@ -95,7 +95,7 @@ func (k Keeper) ClearSessionCache() {
 func (k Keeper) IterateAndExecuteOverVals(
 	ctx sdk.Ctx, fn func(index int64, validator exported.ValidatorI) (stop bool)) {
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
 	defer iterator.Close()
 	i := int64(0)
 	for ; iterator.Valid(); iterator.Next() {

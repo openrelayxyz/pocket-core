@@ -105,21 +105,21 @@ func TestIAVLStoreGetSetHasDelete(t *testing.T) {
 
 	key := "hello"
 
-	exists := iavlStore.Has([]byte(key))
+	exists, _ := iavlStore.Has([]byte(key))
 	require.True(t, exists)
 
-	value := iavlStore.Get([]byte(key))
+	value, _ := iavlStore.Get([]byte(key))
 	require.EqualValues(t, value, treeData[key])
 
 	value2 := "notgoodbye"
 	iavlStore.Set([]byte(key), []byte(value2))
 
-	value = iavlStore.Get([]byte(key))
+	value, _ = iavlStore.Get([]byte(key))
 	require.EqualValues(t, value, value2)
 
 	iavlStore.Delete([]byte(key))
 
-	exists = iavlStore.Has([]byte(key))
+	exists, _ = iavlStore.Has([]byte(key))
 	require.False(t, exists)
 }
 
@@ -251,7 +251,7 @@ func TestIAVLPrefixIterator(t *testing.T) {
 
 	var i int
 
-	iter := types.KVStorePrefixIterator(iavlStore, []byte("test"))
+	iter, _ := types.KVStorePrefixIterator(iavlStore, []byte("test"))
 	expected := []string{"test1", "test2", "test3"}
 	for i = 0; iter.Valid(); iter.Next() {
 		expectedKey := expected[i]
@@ -263,7 +263,7 @@ func TestIAVLPrefixIterator(t *testing.T) {
 	iter.Close()
 	require.Equal(t, len(expected), i)
 
-	iter = types.KVStorePrefixIterator(iavlStore, []byte{byte(55), byte(255), byte(255)})
+	iter, _ = types.KVStorePrefixIterator(iavlStore, []byte{byte(55), byte(255), byte(255)})
 	expected2 := [][]byte{
 		{byte(55), byte(255), byte(255), byte(0)},
 		{byte(55), byte(255), byte(255), byte(1)},
@@ -279,7 +279,7 @@ func TestIAVLPrefixIterator(t *testing.T) {
 	iter.Close()
 	require.Equal(t, len(expected), i)
 
-	iter = types.KVStorePrefixIterator(iavlStore, []byte{byte(255), byte(255)})
+	iter, _ = types.KVStorePrefixIterator(iavlStore, []byte{byte(255), byte(255)})
 	expected2 = [][]byte{
 		{byte(255), byte(255), byte(0)},
 		{byte(255), byte(255), byte(1)},
@@ -313,7 +313,7 @@ func TestIAVLReversePrefixIterator(t *testing.T) {
 
 	var i int
 
-	iter := types.KVStoreReversePrefixIterator(iavlStore, []byte("test"))
+	iter, _ := types.KVStoreReversePrefixIterator(iavlStore, []byte("test"))
 	expected := []string{"test3", "test2", "test1"}
 	for i = 0; iter.Valid(); iter.Next() {
 		expectedKey := expected[i]
@@ -324,7 +324,7 @@ func TestIAVLReversePrefixIterator(t *testing.T) {
 	}
 	require.Equal(t, len(expected), i)
 
-	iter = types.KVStoreReversePrefixIterator(iavlStore, []byte{byte(55), byte(255), byte(255)})
+	iter, _ = types.KVStoreReversePrefixIterator(iavlStore, []byte{byte(55), byte(255), byte(255)})
 	expected2 := [][]byte{
 		{byte(55), byte(255), byte(255), byte(255)},
 		{byte(55), byte(255), byte(255), byte(1)},
@@ -339,7 +339,7 @@ func TestIAVLReversePrefixIterator(t *testing.T) {
 	}
 	require.Equal(t, len(expected), i)
 
-	iter = types.KVStoreReversePrefixIterator(iavlStore, []byte{byte(255), byte(255)})
+	iter, _ = types.KVStoreReversePrefixIterator(iavlStore, []byte{byte(255), byte(255)})
 	expected2 = [][]byte{
 		{byte(255), byte(255), byte(255)},
 		{byte(255), byte(255), byte(1)},

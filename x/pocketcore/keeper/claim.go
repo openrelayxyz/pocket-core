@@ -183,7 +183,7 @@ func (k Keeper) GetClaim(ctx sdk.Ctx, address sdk.Address, header pc.SessionHead
 		return pc.MsgClaim{}, false
 	}
 	// get the claim msg from the store
-	res := store.Get(key)
+	res, _ := store.Get(key)
 	if res == nil {
 		return pc.MsgClaim{}, false
 	}
@@ -215,7 +215,7 @@ func (k Keeper) GetClaims(ctx sdk.Ctx, address sdk.Address) (claims []pc.MsgClai
 		return nil, err
 	}
 	// iterate through all of the kv pairs and unmarshal into claim objects
-	iterator := sdk.KVStorePrefixIterator(store, key)
+	iterator, _ := sdk.KVStorePrefixIterator(store, key)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var claim pc.MsgClaim
@@ -230,7 +230,7 @@ func (k Keeper) GetAllClaims(ctx sdk.Ctx) (claims []pc.MsgClaim) {
 	// retrieve the store
 	store := ctx.KVStore(k.storeKey)
 	// iterate through the kv in the state and unmarshal into claim objects
-	iterator := sdk.KVStorePrefixIterator(store, pc.ClaimKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, pc.ClaimKey)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var claim pc.MsgClaim
@@ -264,7 +264,7 @@ func (k Keeper) GetMatureClaims(ctx sdk.Ctx, address sdk.Address) (matureProofs 
 		return nil, err
 	}
 	// iterate through all kv and see if the claim is mature for each
-	iterator := sdk.KVStorePrefixIterator(store, key)
+	iterator, _ := sdk.KVStorePrefixIterator(store, key)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var msg pc.MsgClaim
@@ -287,7 +287,7 @@ func (k Keeper) ClaimIsMature(ctx sdk.Ctx, sessionBlockHeight int64) bool {
 func (k Keeper) DeleteExpiredClaims(ctx sdk.Ctx) {
 	var msg = pc.MsgClaim{}
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, pc.ClaimKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, pc.ClaimKey)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		k.cdc.MustUnmarshalBinaryBare(iterator.Value(), &msg)

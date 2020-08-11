@@ -10,7 +10,7 @@ import (
 // GetSupply retrieves the Supply from store
 func (k Keeper) GetSupply(ctx sdk.Ctx) (supply exported.SupplyI) {
 	store := ctx.KVStore(k.storeKey)
-	b := store.Get(types.SupplyKeyPrefix)
+	b, _ := store.Get(types.SupplyKeyPrefix)
 	if b == nil {
 		ctx.Logger().Error(fmt.Sprintf("stored supply should not have been nil, at height: %d", ctx.BlockHeight()))
 		return

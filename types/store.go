@@ -24,12 +24,12 @@ type (
 )
 
 // Iterator over all the keys with a certain prefix in ascending order
-func KVStorePrefixIterator(kvs KVStore, prefix []byte) Iterator {
+func KVStorePrefixIterator(kvs KVStore, prefix []byte) (Iterator, error) {
 	return types.KVStorePrefixIterator(kvs, prefix)
 }
 
 // Iterator over all the keys with a certain prefix in descending order.
-func KVStoreReversePrefixIterator(kvs KVStore, prefix []byte) Iterator {
+func KVStoreReversePrefixIterator(kvs KVStore, prefix []byte) (Iterator, error) {
 	return types.KVStoreReversePrefixIterator(kvs, prefix)
 }
 

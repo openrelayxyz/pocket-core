@@ -83,7 +83,7 @@ func (k Keeper) NewAccount(ctx sdk.Ctx, acc exported.Account) exported.Account {
 // GetAccount implements sdk.Keeper.
 func (k Keeper) GetAccount(ctx sdk.Ctx, addr sdk.Address) exported.Account {
 	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(types.AddressStoreKey(addr))
+	bz, _ := store.Get(types.AddressStoreKey(addr))
 	if bz == nil {
 		return nil
 	}
@@ -145,7 +145,7 @@ func (k Keeper) RemoveAccount(ctx sdk.Ctx, acc exported.Account) {
 // IterateAccounts implements sdk.Keeper.
 func (k Keeper) IterateAccounts(ctx sdk.Ctx, process func(exported.Account) (stop bool)) {
 	store := ctx.KVStore(k.storeKey)
-	iter := sdk.KVStorePrefixIterator(store, types.AddressStoreKeyPrefix)
+	iter, _ := sdk.KVStorePrefixIterator(store, types.AddressStoreKeyPrefix)
 	defer iter.Close()
 	for {
 		if !iter.Valid() {

@@ -170,7 +170,7 @@ func TestGetValsIterator(t *testing.T) {
 				keeper.SetStakedApplication(context, application)
 			}
 
-			it := keeper.stakedAppsIterator(context)
+			it, _ := keeper.stakedAppsIterator(context)
 			assert.Implements(t, (*sdk.Iterator)(nil), it, "does not implement interface")
 		})
 	}

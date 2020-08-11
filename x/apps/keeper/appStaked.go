@@ -47,7 +47,7 @@ func (k Keeper) removeApplicationTokens(ctx sdk.Ctx, application types.Applicati
 // getStakedApplications - Retrieve the current staked applications sorted by power-rank
 func (k Keeper) getStakedApplications(ctx sdk.Ctx) types.Applications {
 	var applications = make(types.Applications, 0)
-	iterator := k.stakedAppsIterator(ctx)
+	iterator, _ := k.stakedAppsIterator(ctx)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		address := iterator.Value()
@@ -64,7 +64,7 @@ func (k Keeper) getStakedApplications(ctx sdk.Ctx) types.Applications {
 }
 
 // stakedAppsIterator - Retrieve an iterator for the current staked applications
-func (k Keeper) stakedAppsIterator(ctx sdk.Ctx) sdk.Iterator {
+func (k Keeper) stakedAppsIterator(ctx sdk.Ctx) (sdk.Iterator, error) {
 	store := ctx.KVStore(k.storeKey)
 	return sdk.KVStoreReversePrefixIterator(store, types.StakedAppsKey)
 }
@@ -73,7 +73,7 @@ func (k Keeper) stakedAppsIterator(ctx sdk.Ctx) sdk.Iterator {
 func (k Keeper) IterateAndExecuteOverStakedApps(
 	ctx sdk.Ctx, fn func(index int64, application exported.ApplicationI) (stop bool)) {
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStoreReversePrefixIterator(store, types.StakedAppsKey)
+	iterator, _ := sdk.KVStoreReversePrefixIterator(store, types.StakedAppsKey)
 	defer iterator.Close()
 	i := int64(0)
 	for ; iterator.Valid(); iterator.Next() {
