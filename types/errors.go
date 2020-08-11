@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/pokt-network/pocket-core/common"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -178,7 +179,7 @@ func ErrForbidden(msg string) Error {
 //----------------------------------------
 // Error & sdkError
 
-type cmnError = error
+type cmnError = common.Error
 
 // sdk Error type
 type Error interface {
@@ -218,7 +219,7 @@ func newError(codespace CodespaceType, code CodeType, format string, args ...int
 	return &sdkError{
 		codespace: codespace,
 		code:      code,
-		cmnError:  errors.Errorf(format, args...),
+		cmnError:  common.NewError(format, args...),
 	}
 }
 
