@@ -11,7 +11,7 @@ import (
 // PrevStateValidatorsPower - Load the prevState total validator power.
 func (k Keeper) PrevStateValidatorsPower(ctx sdk.Ctx) (power sdk.Int) {
 	store := ctx.KVStore(k.storeKey)
-	b := store.Get(types.PrevStateTotalPowerKey)
+	b, _ := store.Get(types.PrevStateTotalPowerKey)
 	if b == nil {
 		return sdk.ZeroInt()
 	}
@@ -29,7 +29,7 @@ func (k Keeper) SetPrevStateValidatorsPower(ctx sdk.Ctx, power sdk.Int) {
 // prevStateValidatorIterator - Retrieve an iterator for the consensus validators in the prevState block
 func (k Keeper) prevStateValidatorsIterator(ctx sdk.Ctx) (iterator sdk.Iterator) {
 	store := ctx.KVStore(k.storeKey)
-	iterator = sdk.KVStorePrefixIterator(store, types.PrevStateValidatorsPowerKey)
+	iterator, _ = sdk.KVStorePrefixIterator(store, types.PrevStateValidatorsPowerKey)
 	return iterator
 }
 
@@ -37,7 +37,7 @@ func (k Keeper) prevStateValidatorsIterator(ctx sdk.Ctx) (iterator sdk.Iterator)
 func (k Keeper) IterateAndExecuteOverPrevStateValsByPower(
 	ctx sdk.Ctx, handler func(address sdk.Address, power int64) (stop bool)) {
 	store := ctx.KVStore(k.storeKey)
-	iter := sdk.KVStorePrefixIterator(store, types.PrevStateValidatorsPowerKey)
+	iter, _ := sdk.KVStorePrefixIterator(store, types.PrevStateValidatorsPowerKey)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
 		addr := sdk.Address(iter.Key()[len(types.PrevStateValidatorsPowerKey):])

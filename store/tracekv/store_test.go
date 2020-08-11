@@ -72,7 +72,7 @@ func TestTraceKVStoreGet(t *testing.T) {
 
 		store := newTraceKVStore(&buf)
 		buf.Reset()
-		value := store.Get(tc.key)
+		value, _ := store.Get(tc.key)
 
 		require.Equal(t, tc.expectedValue, value)
 		require.Equal(t, tc.expectedOut, buf.String())
@@ -154,7 +154,7 @@ func TestTraceKVStoreHas(t *testing.T) {
 
 		store := newTraceKVStore(&buf)
 		buf.Reset()
-		ok := store.Has(tc.key)
+		ok, _ := store.Has(tc.key)
 
 		require.Equal(t, tc.expected, ok)
 	}
@@ -164,7 +164,7 @@ func TestTestTraceKVStoreIterator(t *testing.T) {
 	var buf bytes.Buffer
 
 	store := newTraceKVStore(&buf)
-	iterator := store.Iterator(nil, nil)
+	iterator, _ := store.Iterator(nil, nil)
 
 	s, e := iterator.Domain()
 	require.Equal(t, []byte(nil), s)
@@ -220,7 +220,7 @@ func TestTestTraceKVStoreReverseIterator(t *testing.T) {
 	var buf bytes.Buffer
 
 	store := newTraceKVStore(&buf)
-	iterator := store.ReverseIterator(nil, nil)
+	iterator, _ := store.ReverseIterator(nil, nil)
 
 	s, e := iterator.Domain()
 	require.Equal(t, []byte(nil), s)

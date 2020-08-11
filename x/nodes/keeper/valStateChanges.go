@@ -29,7 +29,7 @@ func (k Keeper) UpdateTendermintValidators(ctx sdk.Ctx) (updates []abci.Validato
 	// Retrieve the prevState validator set addresses mapped to their respective staking power
 	prevStatePowerMap := k.getPrevStatePowerMap(ctx)
 	// Iterate over staked validators, highest power to lowest.
-	iterator := sdk.KVStoreReversePrefixIterator(store, types.StakedValidatorsKey)
+	iterator, _ := sdk.KVStoreReversePrefixIterator(store, types.StakedValidatorsKey)
 	defer iterator.Close()
 	for count := 0; iterator.Valid() && count < int(maxValidators); iterator.Next() {
 		// get the validator address
@@ -364,7 +364,7 @@ func (k Keeper) JailValidator(ctx sdk.Ctx, addr sdk.Address) {
 
 func (k Keeper) IncrementJailedValidators(ctx sdk.Ctx) {
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		val := types.MustUnmarshalValidator(k.cdc, iterator.Value())

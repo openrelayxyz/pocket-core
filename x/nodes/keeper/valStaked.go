@@ -35,7 +35,7 @@ func (k Keeper) GetValidatorsByChain(ctx sdk.Ctx, networkID string) (validators 
 		ctx.Logger().Error(fmt.Errorf("could not hex decode chains when GetValidatorByChain: with network ID: %s, at height: %d", networkID, ctx.BlockHeight()).Error())
 		return
 	}
-	iterator := k.validatorByChainsIterator(ctx, cBz)
+	iterator, _ := k.validatorByChainsIterator(ctx, cBz)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		address := types.AddressForValidatorByNetworkIDKey(iterator.Key(), cBz)
@@ -62,7 +62,7 @@ func (k Keeper) deleteValidatorForChains(ctx sdk.Ctx, validator types.Validator)
 }
 
 // validatorByChainsIterator - returns an iterator for the current staked validators
-func (k Keeper) validatorByChainsIterator(ctx sdk.Ctx, networkIDBz []byte) sdk.Iterator {
+func (k Keeper) validatorByChainsIterator(ctx sdk.Ctx, networkIDBz []byte) (sdk.Iterator, error) {
 	store := ctx.KVStore(k.storeKey)
 	return sdk.KVStorePrefixIterator(store, types.KeyForValidatorsByNetworkID(networkIDBz))
 }
@@ -87,7 +87,7 @@ func (k Keeper) removeValidatorTokens(ctx sdk.Ctx, v types.Validator, tokensToRe
 // getStakedValidators - Retrieve the current staked validators sorted by power-rank
 func (k Keeper) getStakedValidators(ctx sdk.Ctx) types.Validators {
 	validators := make([]types.Validator, 0)
-	iterator := k.stakedValsIterator(ctx)
+	iterator, _ := k.stakedValsIterator(ctx)
 	defer iterator.Close()
 	i := 0
 	for ; iterator.Valid(); iterator.Next() {
@@ -106,7 +106,7 @@ func (k Keeper) getStakedValidators(ctx sdk.Ctx) types.Validators {
 }
 
 // stakedValsIterator - Retrieve an iterator for the current staked validators
-func (k Keeper) stakedValsIterator(ctx sdk.Ctx) sdk.Iterator {
+func (k Keeper) stakedValsIterator(ctx sdk.Ctx) (sdk.Iterator, error) {
 	store := ctx.KVStore(k.storeKey)
 	return sdk.KVStoreReversePrefixIterator(store, types.StakedValidatorsKey)
 }
@@ -115,7 +115,7 @@ func (k Keeper) stakedValsIterator(ctx sdk.Ctx) sdk.Iterator {
 func (k Keeper) IterateAndExecuteOverStakedVals(
 	ctx sdk.Ctx, fn func(index int64, validator exported.ValidatorI) (stop bool)) {
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStoreReversePrefixIterator(store, types.StakedValidatorsKey)
+	iterator, _ := sdk.KVStoreReversePrefixIterator(store, types.StakedValidatorsKey)
 	defer iterator.Close()
 	i := int64(0)
 	for ; iterator.Valid(); iterator.Next() {

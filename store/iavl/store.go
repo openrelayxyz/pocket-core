@@ -176,29 +176,31 @@ func (st *Store) CacheWrapWithTrace(w io.Writer, tc types.TraceContext) types.Ca
 }
 
 // Implements types.KVStore.
-func (st *Store) Set(key, value []byte) {
+func (st *Store) Set(key, value []byte) error {
 	types.AssertValidValue(value)
 	st.tree.Set(key, value)
+	return nil
 }
 
 // Implements types.KVStore.
-func (st *Store) Get(key []byte) (value []byte) {
+func (st *Store) Get(key []byte) (value []byte, err error) {
 	_, v := st.tree.Get(key)
-	return v
+	return v, nil
 }
 
 // Implements types.KVStore.
-func (st *Store) Has(key []byte) (exists bool) {
-	return st.tree.Has(key)
+func (st *Store) Has(key []byte) (exists bool, err error) {
+	return st.tree.Has(key), nil
 }
 
 // Implements types.KVStore.
-func (st *Store) Delete(key []byte) {
+func (st *Store) Delete(key []byte) error {
 	st.tree.Remove(key)
+	return nil
 }
 
 // Implements types.KVStore.
-func (st *Store) Iterator(start, end []byte) types.Iterator {
+func (st *Store) Iterator(start, end []byte) (types.Iterator, error) {
 	var iTree *iavl.ImmutableTree
 
 	switch tree := st.tree.(type) {
@@ -208,11 +210,11 @@ func (st *Store) Iterator(start, end []byte) types.Iterator {
 		iTree = tree.ImmutableTree
 	}
 
-	return newIAVLIterator(iTree, start, end, true)
+	return newIAVLIterator(iTree, start, end, true), nil
 }
 
 // Implements types.KVStore.
-func (st *Store) ReverseIterator(start, end []byte) types.Iterator {
+func (st *Store) ReverseIterator(start, end []byte) (types.Iterator, error) {
 	var iTree *iavl.ImmutableTree
 
 	switch tree := st.tree.(type) {
@@ -222,7 +224,7 @@ func (st *Store) ReverseIterator(start, end []byte) types.Iterator {
 		iTree = tree.ImmutableTree
 	}
 
-	return newIAVLIterator(iTree, start, end, false)
+	return newIAVLIterator(iTree, start, end, false), nil
 }
 
 // Handle gatest the latest height, if height is 0
@@ -299,7 +301,7 @@ func (st *Store) Query(req abci.RequestQuery) (res abci.ResponseQuery) {
 		subspace := req.Data
 		res.Key = subspace
 
-		iterator := types.KVStorePrefixIterator(st, subspace)
+		iterator, _ := types.KVStorePrefixIterator(st, subspace)
 		for ; iterator.Valid(); iterator.Next() {
 			KVs = append(KVs, types.KVPair{Key: iterator.Key(), Value: iterator.Value()})
 		}

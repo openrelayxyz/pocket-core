@@ -15,30 +15,6 @@ type Store struct {
 	dbm.DB
 }
 
-func (dsa Store) Get(key []byte) []byte {
-	panic("implement me")
-}
-
-func (dsa Store) Has(key []byte) bool {
-	panic("implement me")
-}
-
-func (dsa Store) Set(key, value []byte) {
-	panic("implement me")
-}
-
-func (dsa Store) Delete(key []byte) {
-	panic("implement me")
-}
-
-func (dsa Store) Iterator(start, end []byte) types.Iterator {
-	panic("implement me")
-}
-
-func (dsa Store) ReverseIterator(start, end []byte) types.Iterator {
-	panic("implement me")
-}
-
 // GetStoreType returns the type of the store.
 func (Store) GetStoreType() types.StoreType {
 	return types.StoreTypeDB

@@ -39,7 +39,7 @@ func NewList(cdc *codec.Codec, store types.KVStore) List {
 // List dosen't check if an index is in bounds
 // The user should check Len() before doing any actions
 func (m List) Len() (res uint64) {
-	bz := m.store.Get(LengthKey())
+	bz, _ := m.store.Get(LengthKey())
 	if bz == nil {
 		return 0
 	}
@@ -50,7 +50,7 @@ func (m List) Len() (res uint64) {
 
 // Get() returns the element by its index
 func (m List) Get(index uint64, ptr interface{}) error {
-	bz := m.store.Get(ElemKey(index))
+	bz, _ := m.store.Get(ElemKey(index))
 	return m.cdc.UnmarshalBinaryLengthPrefixed(bz, ptr)
 }
 
@@ -84,7 +84,7 @@ func (m List) Push(value interface{}) {
 
 // CONTRACT: No writes may happen within a domain while iterating over it.
 func (m List) Iterate(ptr interface{}, fn func(uint64) bool) {
-	iter := types.KVStorePrefixIterator(m.store, []byte{0x01})
+	iter, _ := types.KVStorePrefixIterator(m.store, []byte{0x01})
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
 		v := iter.Value()

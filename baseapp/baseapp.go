@@ -288,7 +288,7 @@ func (app *BaseApp) initFromMainStore(baseKey *sdk.KVStoreKey) error {
 	// nil, it will be saved later during InitChain.
 	//
 	// TODO: assert that InitChain hasn't yet been called.
-	consensusParamsBz := mainStore.Get(mainConsensusParamsKey)
+	consensusParamsBz, _ := mainStore.Get(mainConsensusParamsKey)
 	if consensusParamsBz != nil {
 		var consensusParams = &abci.ConsensusParams{}
 

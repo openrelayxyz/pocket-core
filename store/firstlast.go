@@ -9,7 +9,7 @@ import (
 
 // Gets the first item.
 func First(st KVStore, start, end []byte) (kp kv.Pair, ok bool) {
-	iter := st.Iterator(start, end)
+	iter, _ := st.Iterator(start, end)
 	if !iter.Valid() {
 		return kp, false
 	}
@@ -20,9 +20,9 @@ func First(st KVStore, start, end []byte) (kp kv.Pair, ok bool) {
 
 // Gets the last item.  `end` is exclusive.
 func Last(st KVStore, start, end []byte) (kp kv.Pair, ok bool) {
-	iter := st.ReverseIterator(end, start)
+	iter, _ := st.ReverseIterator(end, start)
 	if !iter.Valid() {
-		if v := st.Get(start); v != nil {
+		if v, _ := st.Get(start); v != nil {
 			return kv.Pair{Key: types.Cp(start), Value: types.Cp(v)}, true
 		}
 		return kp, false

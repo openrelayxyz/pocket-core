@@ -50,45 +50,47 @@ func (store *Store) GetStoreType() types.StoreType {
 }
 
 // Implements types.KVStore.
-func (store *Store) Get(key []byte) (value []byte) {
+func (store *Store) Get(key []byte) (value []byte, err error) {
 	store.mtx.Lock()
 	defer store.mtx.Unlock()
 	types.AssertValidKey(key)
 
 	cacheValue, ok := store.cache[string(key)]
 	if !ok {
-		value = store.parent.Get(key)
+		value, _ = store.parent.Get(key)
 		store.setCacheValue(key, value, false, false)
 	} else {
 		value = cacheValue.value
 	}
 
-	return value
+	return value, nil
 }
 
 // Implements types.KVStore.
-func (store *Store) Set(key []byte, value []byte) {
+func (store *Store) Set(key []byte, value []byte) error {
 	store.mtx.Lock()
 	defer store.mtx.Unlock()
 	types.AssertValidKey(key)
 	types.AssertValidValue(value)
 
 	store.setCacheValue(key, value, false, true)
+	return nil
 }
 
 // Implements types.KVStore.
-func (store *Store) Has(key []byte) bool {
-	value := store.Get(key)
-	return value != nil
+func (store *Store) Has(key []byte) (bool, error) {
+	value, _ := store.Get(key)
+	return value != nil, nil
 }
 
 // Implements types.KVStore.
-func (store *Store) Delete(key []byte) {
+func (store *Store) Delete(key []byte) error {
 	store.mtx.Lock()
 	defer store.mtx.Unlock()
 	types.AssertValidKey(key)
 
 	store.setCacheValue(key, nil, true, true)
+	return nil
 }
 
 // Implements Cachetypes.KVStore.
@@ -143,31 +145,31 @@ func (store *Store) CacheWrapWithTrace(w io.Writer, tc types.TraceContext) types
 // Iteration
 
 // Implements types.KVStore.
-func (store *Store) Iterator(start, end []byte) types.Iterator {
+func (store *Store) Iterator(start, end []byte) (types.Iterator, error) {
 	return store.iterator(start, end, true)
 }
 
 // Implements types.KVStore.
-func (store *Store) ReverseIterator(start, end []byte) types.Iterator {
+func (store *Store) ReverseIterator(start, end []byte) (types.Iterator, error) {
 	return store.iterator(start, end, false)
 }
 
-func (store *Store) iterator(start, end []byte, ascending bool) types.Iterator {
+func (store *Store) iterator(start, end []byte, ascending bool) (it types.Iterator, err error) {
 	store.mtx.Lock()
 	defer store.mtx.Unlock()
 
 	var parent, cache types.Iterator
 
 	if ascending {
-		parent = store.parent.Iterator(start, end)
+		parent, err = store.parent.Iterator(start, end)
 	} else {
-		parent = store.parent.ReverseIterator(start, end)
+		parent, err = store.parent.ReverseIterator(start, end)
 	}
 
 	store.dirtyItems(start, end)
 	cache = newMemIterator(start, end, store.sortedCache, ascending)
 
-	return newCacheMergeIterator(parent, cache, ascending)
+	return newCacheMergeIterator(parent, cache, ascending), err
 }
 
 // Constructs a slice of dirty items, to use w/ memIterator.
