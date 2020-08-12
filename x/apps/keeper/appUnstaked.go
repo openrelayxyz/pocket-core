@@ -73,13 +73,13 @@ func (k Keeper) getUnstakingApplications(ctx sdk.Ctx, unstakingTime time.Time) (
 func (k Keeper) setUnstakingApplications(ctx sdk.Ctx, unstakingTime time.Time, keys []sdk.Address) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshalBinaryLengthPrefixed(keys)
-	store.Set(types.KeyForUnstakingApps(unstakingTime), bz)
+	_ = store.Set(types.KeyForUnstakingApps(unstakingTime), bz)
 }
 
 // delteUnstakingApplications - Remove all the applications for a specific unstaking time
 func (k Keeper) deleteUnstakingApplications(ctx sdk.Ctx, unstakingTime time.Time) {
 	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.KeyForUnstakingApps(unstakingTime))
+	_ = store.Delete(types.KeyForUnstakingApps(unstakingTime))
 }
 
 // unstakingApplicationsIterator - Retrieve an iterator for all unstaking applications up to a certain time
@@ -128,6 +128,6 @@ func (k Keeper) unstakeAllMatureApplications(ctx sdk.Ctx) {
 				),
 			)
 		}
-		store.Delete(unstakingApplicationsIterator.Key())
+		_ = store.Delete(unstakingApplicationsIterator.Key())
 	}
 }

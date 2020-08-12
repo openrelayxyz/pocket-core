@@ -23,5 +23,5 @@ func (k Keeper) GetSupply(ctx sdk.Ctx) (supply exported.SupplyI) {
 func (k Keeper) SetSupply(ctx sdk.Ctx, supply exported.SupplyI) {
 	store := ctx.KVStore(k.storeKey)
 	b := k.cdc.MustMarshalBinaryLengthPrefixed(supply)
-	store.Set(types.SupplyKeyPrefix, b)
+	_ = store.Set(types.SupplyKeyPrefix, b)
 }

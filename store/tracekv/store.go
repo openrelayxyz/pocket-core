@@ -195,5 +195,5 @@ func writeOperation(w io.Writer, op operation, tc types.TraceContext, key, value
 		panic(fmt.Sprintf("failed to write trace operation: %v", err))
 	}
 
-	io.WriteString(w, "\n")
+	_, _ = io.WriteString(w, "\n")
 }

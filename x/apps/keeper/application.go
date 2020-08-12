@@ -32,7 +32,7 @@ func (k Keeper) SetApplication(ctx sdk.Ctx, application types.Application) {
 		k.Logger(ctx).Error("could not marshal application object")
 		os.Exit(1)
 	}
-	store.Set(types.KeyForAppByAllApps(application.Address), bz)
+	_ = store.Set(types.KeyForAppByAllApps(application.Address), bz)
 	ctx.Logger().Info("Setting App on Main Store " + application.Address.String())
 }
 

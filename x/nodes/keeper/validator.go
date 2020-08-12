@@ -21,7 +21,7 @@ func (k Keeper) GetValidator(ctx sdk.Ctx, addr sdk.Address) (validator types.Val
 func (k Keeper) SetValidator(ctx sdk.Ctx, validator types.Validator) {
 	store := ctx.KVStore(k.storeKey)
 	bz := types.MustMarshalValidator(k.cdc, validator)
-	store.Set(types.KeyForValByAllVals(validator.Address), bz)
+	_ = store.Set(types.KeyForValByAllVals(validator.Address), bz)
 
 	if validator.IsUnstaking() {
 		// Adds to unstaking validator queue
@@ -38,7 +38,7 @@ func (k Keeper) SetValidator(ctx sdk.Ctx, validator types.Validator) {
 // SetValidator - Store validator in the main store
 func (k Keeper) DeleteValidator(ctx sdk.Ctx, addr sdk.Address) {
 	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.KeyForValByAllVals(addr))
+	_ = store.Delete(types.KeyForValByAllVals(addr))
 	k.DeleteValidatorSigningInfo(ctx, addr)
 }
 
