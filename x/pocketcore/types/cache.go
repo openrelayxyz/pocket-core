@@ -284,7 +284,7 @@ func (ei *EvidenceIt) Value() (evidence Evidence) {
 
 // "EvidenceIterator" - Returns a globalEvidenceCache iterator instance
 func EvidenceIterator() EvidenceIt {
-	it, _ := globalSessionCache.Iterator()
+	it, _ := globalEvidenceCache.Iterator()
 
 	return EvidenceIt{
 		Iterator: it,
