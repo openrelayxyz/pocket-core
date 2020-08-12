@@ -168,7 +168,7 @@ func (k Keeper) SetClaim(ctx sdk.Ctx, msg pc.MsgClaim) error {
 	// marshal the message into amino
 	bz := k.cdc.MustMarshalBinaryBare(msg)
 	// set in the store
-	store.Set(key, bz)
+	_ = store.Set(key, bz)
 	return nil
 }
 
@@ -250,7 +250,7 @@ func (k Keeper) DeleteClaim(ctx sdk.Ctx, address sdk.Address, header pc.SessionH
 		return err
 	}
 	// delete it from the state storage
-	store.Delete(key)
+	_ = store.Delete(key)
 	return nil
 }
 
@@ -293,7 +293,7 @@ func (k Keeper) DeleteExpiredClaims(ctx sdk.Ctx) {
 		k.cdc.MustUnmarshalBinaryBare(iterator.Value(), &msg)
 		// if more sessions has passed than the expiration of the claim's genesis, delete it from the set
 		if msg.ExpirationHeight <= ctx.BlockHeight() {
-			store.Delete(iterator.Key())
+			_ = store.Delete(iterator.Key())
 		}
 	}
 }
