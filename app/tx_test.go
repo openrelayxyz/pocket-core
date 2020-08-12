@@ -279,8 +279,8 @@ func TestChangeParamsComplexTypeTx(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, tx)
 	select {
-	case res := <-evtChan:
-		fmt.Println(res)
+	case _ = <-evtChan:
+		//fmt.Println(res)
 		acl, err := PCA.QueryACL(0)
 		assert.Nil(t, err)
 		o := acl.GetOwner("gov/acl")
@@ -304,8 +304,8 @@ func TestChangeParamsSimpleTx(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, tx)
 	select {
-	case res := <-evtChan:
-		fmt.Println(res)
+	case _ = <-evtChan:
+		//fmt.Println(res)
 		assert.Nil(t, err)
 		o, _ := PCA.QueryParam(0, "application/StabilityAdjustment")
 		assert.Equal(t, "100", o.Value)

@@ -61,7 +61,7 @@ type BaseApp struct {
 	name         string               // application name from abci.Info
 	db           dbm.DB               // common DB backend
 	tmNode       *node.Node           // <---- todo updated here
-	txIndexer    *txindex.TxIndexer   // <---- todo updated here
+	txIndexer    txindex.TxIndexer    // <---- todo updated here
 	blockstore   *tmStore.BlockStore  // <---- todo updated here
 	evidencePool *evidence.Pool       // <---- todo updated here
 	cms          sdk.CommitMultiStore // Main (uncached) state
@@ -135,11 +135,11 @@ func (app *BaseApp) SetTendermintNode(node *node.Node) {
 	app.tmNode = node
 }
 
-func (app *BaseApp) SetTxIndexer(txindexer *txindex.TxIndexer) {
+func (app *BaseApp) SetTxIndexer(txindexer txindex.TxIndexer) {
 	app.txIndexer = txindexer
 }
 
-func (app *BaseApp) Txindexer() (txindexer *txindex.TxIndexer) {
+func (app *BaseApp) Txindexer() (txindexer txindex.TxIndexer) {
 	return app.txIndexer
 }
 

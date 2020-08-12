@@ -65,7 +65,7 @@ func NewClient(c config, creator AppCreator) (*node.Node, *PocketCoreApp, error)
 	if err != nil {
 		return nil, nil, err
 	}
-	// app.SetTxIndexer(txIndexer)
+	app.SetTxIndexer(tmNode.TxIndexer())
 	app.SetBlockstore(tmNode.BlockStore())
 	app.SetEvidencePool(tmNode.EvidencePool())
 	return tmNode, app, nil

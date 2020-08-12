@@ -200,7 +200,7 @@ func inMemTendermintNode(genesisState []byte) (*node.Node, keys.Keybase) {
 	if err != nil {
 		panic(err)
 	}
-	// baseapp.SetTxIndexer(txIndexer)
+	baseapp.SetTxIndexer(tmNode.TxIndexer())
 	baseapp.SetBlockstore(tmNode.BlockStore())
 	baseapp.SetEvidencePool(tmNode.EvidencePool())
 	baseapp.SetTendermintNode(tmNode)
