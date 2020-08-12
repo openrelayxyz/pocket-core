@@ -63,7 +63,7 @@ func TestGasKVStoreOutOfGasSet(t *testing.T) {
 	mem := dbadapter.Store{DB: dbm.NewMemDB()}
 	meter := types.NewGasMeter(0)
 	st := gaskv.NewStore(mem, meter, types.KVGasConfig())
-	require.Panics(t, func() { st.Set(keyFmt(1), valFmt(1)) }, "Expected out-of-gas")
+	require.Panics(t, func() { _ = st.Set(keyFmt(1), valFmt(1)) }, "Expected out-of-gas")
 }
 
 func TestGasKVStoreOutOfGasIterator(t *testing.T) {

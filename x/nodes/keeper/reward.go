@@ -88,5 +88,5 @@ func (k Keeper) GetPreviousProposer(ctx sdk.Ctx) (addr sdk.Address) {
 func (k Keeper) SetPreviousProposer(ctx sdk.Ctx, consAddr sdk.Address) {
 	store := ctx.KVStore(k.storeKey)
 	b := k.cdc.MustMarshalBinaryLengthPrefixed(consAddr)
-	store.Set(types.ProposerKey, b)
+	_ = store.Set(types.ProposerKey, b)
 }

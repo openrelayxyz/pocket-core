@@ -13,7 +13,7 @@ func (k Keeper) SetStakedApplication(ctx sdk.Ctx, application types.Application)
 		return // jailed applications are not kept in the staking set
 	}
 	store := ctx.KVStore(k.storeKey)
-	store.Set(types.KeyForAppInStakingSet(application), application.Address)
+	_ = store.Set(types.KeyForAppInStakingSet(application), application.Address)
 	ctx.Logger().Info("Setting App on Staking Set " + application.Address.String())
 }
 
@@ -25,7 +25,7 @@ func (k Keeper) StakeDenom(ctx sdk.Ctx) string {
 // deleteApplicationFromStakingSet - Remove application from staked set
 func (k Keeper) deleteApplicationFromStakingSet(ctx sdk.Ctx, application types.Application) {
 	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.KeyForAppInStakingSet(application))
+	_ = store.Delete(types.KeyForAppInStakingSet(application))
 	ctx.Logger().Info("Removing App From Staking Set " + application.Address.String())
 }
 

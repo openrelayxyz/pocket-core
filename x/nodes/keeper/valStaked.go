@@ -12,7 +12,7 @@ import (
 // SetStakedValidator - Store staked validator
 func (k Keeper) SetStakedValidator(ctx sdk.Ctx, validator types.Validator) {
 	store := ctx.KVStore(k.storeKey)
-	store.Set(types.KeyForValidatorInStakingSet(validator), validator.Address)
+	_ = store.Set(types.KeyForValidatorInStakingSet(validator), validator.Address)
 }
 
 // SetStakedValidatorByChains - Store staked validator using networkId
@@ -24,7 +24,7 @@ func (k Keeper) SetStakedValidatorByChains(ctx sdk.Ctx, validator types.Validato
 			ctx.Logger().Error(fmt.Errorf("could not hex decode chains for validator: %s with network ID: %s", validator.Address, c).Error())
 			continue
 		}
-		store.Set(types.KeyForValidatorByNetworkID(validator.Address, cBz), []byte{}) // use empty byte slice to save space
+		_ = store.Set(types.KeyForValidatorByNetworkID(validator.Address, cBz), []byte{}) // use empty byte slice to save space
 	}
 }
 
@@ -57,7 +57,7 @@ func (k Keeper) deleteValidatorForChains(ctx sdk.Ctx, validator types.Validator)
 			ctx.Logger().Error(fmt.Errorf("could not hex decode chains for validator: %s with network ID: %s, at height %d", validator.Address, c, ctx.BlockHeight()).Error())
 			continue
 		}
-		store.Delete(types.KeyForValidatorByNetworkID(validator.Address, cBz))
+		_ = store.Delete(types.KeyForValidatorByNetworkID(validator.Address, cBz))
 	}
 }
 
@@ -70,7 +70,7 @@ func (k Keeper) validatorByChainsIterator(ctx sdk.Ctx, networkIDBz []byte) (sdk.
 // deleteValidatorFromStakingSet - delete validator from staked set
 func (k Keeper) deleteValidatorFromStakingSet(ctx sdk.Ctx, validator types.Validator) {
 	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.KeyForValidatorInStakingSet(validator))
+	_ = store.Delete(types.KeyForValidatorInStakingSet(validator))
 }
 
 // removeValidatorTokens - Update the staked tokens of an existing validator, update the validators power index key

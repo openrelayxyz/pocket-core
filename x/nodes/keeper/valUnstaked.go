@@ -12,7 +12,7 @@ import (
 // SetWaitingValidator - Store validator on WaitingToBeginUnstaking store
 func (k Keeper) SetWaitingValidator(ctx sdk.Ctx, val types.Validator) {
 	store := ctx.KVStore(k.storeKey)
-	store.Set(types.KeyForValWaitingToBeginUnstaking(val.Address), val.Address)
+	_ = store.Set(types.KeyForValWaitingToBeginUnstaking(val.Address), val.Address)
 }
 
 // IsWaitingValidator - Check if validator is waiting
@@ -45,7 +45,7 @@ func (k Keeper) GetWaitingValidators(ctx sdk.Ctx) (validators []types.Validator)
 // DeleteWaitingValidator - Remove waiting validators
 func (k Keeper) DeleteWaitingValidator(ctx sdk.Ctx, valAddr sdk.Address) {
 	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.KeyForValWaitingToBeginUnstaking(valAddr))
+	_ = store.Delete(types.KeyForValWaitingToBeginUnstaking(valAddr))
 }
 
 // SetUnstakingValidator - Store a validator address to the appropriate position in the unstaking queue
@@ -108,13 +108,13 @@ func (k Keeper) getUnstakingValidators(ctx sdk.Ctx, unstakingTime time.Time) (va
 func (k Keeper) setUnstakingValidators(ctx sdk.Ctx, unstakingTime time.Time, keys []sdk.Address) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshalBinaryLengthPrefixed(keys)
-	store.Set(types.KeyForUnstakingValidators(unstakingTime), bz)
+	_ = store.Set(types.KeyForUnstakingValidators(unstakingTime), bz)
 }
 
 // deleteUnstakingValidators - Remove all the validators for a specific unstaking time
 func (k Keeper) deleteUnstakingValidators(ctx sdk.Ctx, unstakingTime time.Time) {
 	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.KeyForUnstakingValidators(unstakingTime))
+	_ = store.Delete(types.KeyForUnstakingValidators(unstakingTime))
 }
 
 // unstakingValidatorsIterator - Retrieve an iterator for all unstaking validators up to a certain time
@@ -158,6 +158,6 @@ func (k Keeper) unstakeAllMatureValidators(ctx sdk.Ctx) {
 			k.FinishUnstakingValidator(ctx, val)
 			k.DeleteValidator(ctx, valAddr)
 		}
-		store.Delete(unstakingValidatorsIterator.Key())
+		_ = store.Delete(unstakingValidatorsIterator.Key())
 	}
 }

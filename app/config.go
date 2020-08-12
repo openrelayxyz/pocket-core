@@ -742,9 +742,9 @@ func ResetAll(dbDir, addrBookFile, privValKeyFile, privValStateFile string, logg
 
 func resetFilePV(privValKeyFile, privValStateFile string, logger log.Logger) {
 	if _, err := os.Stat(privValKeyFile); err == nil {
-		os.Remove(privValKeyFile)
-		os.Remove(privValStateFile)
-		os.Remove(GlobalConfig.PocketConfig.DataDir + FS + GlobalConfig.TendermintConfig.NodeKey)
+		_ = os.Remove(privValKeyFile)
+		_ = os.Remove(privValStateFile)
+		_ = os.Remove(GlobalConfig.PocketConfig.DataDir + FS + GlobalConfig.TendermintConfig.NodeKey)
 	}
 	logger.Info("Reset private validator file", "keyFile", privValKeyFile,
 		"stateFile", privValStateFile)
