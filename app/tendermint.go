@@ -137,14 +137,14 @@ type config struct {
 //	return nil
 //}
 
-func modifyPrivValidatorsFile(config *cfg.Config, rollbackHeight int64) error {
-	var sig []byte
-	filePv := pvm.LoadOrGenFilePV(config.PrivValidatorKeyFile(), config.PrivValidatorStateFile())
-	filePv.LastSignState.Height = rollbackHeight
-	filePv.LastSignState.Round = 0
-	filePv.LastSignState.Step = 0
-	filePv.LastSignState.Signature = sig
-	filePv.LastSignState.SignBytes = nil
-	filePv.Save()
-	return nil
-}
+//func modifyPrivValidatorsFile(config *cfg.Config, rollbackHeight int64) error {
+//	var sig []byte
+//	filePv := pvm.LoadOrGenFilePV(config.PrivValidatorKeyFile(), config.PrivValidatorStateFile())
+//	filePv.LastSignState.Height = rollbackHeight
+//	filePv.LastSignState.Round = 0
+//	filePv.LastSignState.Step = 0
+//	filePv.LastSignState.Signature = sig
+//	filePv.LastSignState.SignBytes = nil
+//	filePv.Save()
+//	return nil
+//}

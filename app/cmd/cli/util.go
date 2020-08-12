@@ -105,9 +105,9 @@ func init() {
 	//unsafeRollbackCmd.Flags().BoolVar(&blocks, "blocks", false, "rollback blocks as well as the state")
 }
 
-var (
-	blocks bool
-)
+//var (
+//	blocks bool
+//)
 
 //var unsafeRollbackCmd = &cobra.Command{
 //	Use:   "unsafe-rollback <height",
