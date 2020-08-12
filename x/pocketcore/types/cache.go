@@ -88,7 +88,7 @@ func (cs *CacheStorage) Delete(key []byte) {
 	// remove from cache
 	cs.Cache.Remove(hex.EncodeToString(key))
 	// remove from db
-	cs.DB.Delete(key)
+	_ = cs.DB.Delete(key)
 }
 
 func (cs *CacheStorage) FlushToDB() error {
@@ -115,7 +115,7 @@ func (cs *CacheStorage) FlushToDB() error {
 			return fmt.Errorf("error flushing database, couldn't hex decode key: %s", err.Error())
 		}
 		// set to DB
-		cs.DB.Set(kBz, bz)
+		_ = cs.DB.Set(kBz, bz)
 	}
 	return nil
 }
@@ -130,7 +130,7 @@ func (cs *CacheStorage) Clear() {
 	iter, _ := cs.DB.Iterator(nil, nil)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
-		cs.DB.Delete(iter.Key())
+		_ = cs.DB.Delete(iter.Key())
 	}
 }
 

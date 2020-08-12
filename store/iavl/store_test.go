@@ -129,7 +129,7 @@ func TestIAVLStoreNoNilSet(t *testing.T) {
 	db := dbm.NewMemDB()
 	tree, _ := newAlohaTree(t, db)
 	iavlStore := UnsafeNewStore(tree, numRecent, storeEvery)
-	require.Panics(t, func() { iavlStore.Set([]byte("key"), nil) }, "setting a nil value should panic")
+	require.Panics(t, func() { _ = iavlStore.Set([]byte("key"), nil) }, "setting a nil value should panic")
 }
 
 func TestIAVLIterator(t *testing.T) {
@@ -241,15 +241,15 @@ func TestIAVLPrefixIterator(t *testing.T) {
 	tree, _ := iavl.NewMutableTree(db, cacheSize)
 	iavlStore := UnsafeNewStore(tree, numRecent, storeEvery)
 
-	iavlStore.Set([]byte("test1"), []byte("test1"))
-	iavlStore.Set([]byte("test2"), []byte("test2"))
-	iavlStore.Set([]byte("test3"), []byte("test3"))
-	iavlStore.Set([]byte{byte(55), byte(255), byte(255), byte(0)}, []byte("test4"))
-	iavlStore.Set([]byte{byte(55), byte(255), byte(255), byte(1)}, []byte("test4"))
-	iavlStore.Set([]byte{byte(55), byte(255), byte(255), byte(255)}, []byte("test4"))
-	iavlStore.Set([]byte{byte(255), byte(255), byte(0)}, []byte("test4"))
-	iavlStore.Set([]byte{byte(255), byte(255), byte(1)}, []byte("test4"))
-	iavlStore.Set([]byte{byte(255), byte(255), byte(255)}, []byte("test4"))
+	_ = iavlStore.Set([]byte("test1"), []byte("test1"))
+	_ = iavlStore.Set([]byte("test2"), []byte("test2"))
+	_ = iavlStore.Set([]byte("test3"), []byte("test3"))
+	_ = iavlStore.Set([]byte{byte(55), byte(255), byte(255), byte(0)}, []byte("test4"))
+	_ = iavlStore.Set([]byte{byte(55), byte(255), byte(255), byte(1)}, []byte("test4"))
+	_ = iavlStore.Set([]byte{byte(55), byte(255), byte(255), byte(255)}, []byte("test4"))
+	_ = iavlStore.Set([]byte{byte(255), byte(255), byte(0)}, []byte("test4"))
+	_ = iavlStore.Set([]byte{byte(255), byte(255), byte(1)}, []byte("test4"))
+	_ = iavlStore.Set([]byte{byte(255), byte(255), byte(255)}, []byte("test4"))
 
 	var i int
 
@@ -360,7 +360,7 @@ func TestIAVLReversePrefixIterator(t *testing.T) {
 func nextVersion(iavl *Store) {
 	key := []byte(fmt.Sprintf("Key for tree: %d", iavl.LastCommitID().Version))
 	value := []byte(fmt.Sprintf("Value for tree: %d", iavl.LastCommitID().Version))
-	iavl.Set(key, value)
+	_ = iavl.Set(key, value)
 	iavl.Commit()
 }
 
@@ -479,8 +479,8 @@ func TestIAVLStoreQuery(t *testing.T) {
 	require.Equal(t, valExpSubEmpty, qres.Value)
 
 	// set data
-	iavlStore.Set(k1, v1)
-	iavlStore.Set(k2, v2)
+	_ = iavlStore.Set(k1, v1)
+	_ = iavlStore.Set(k2, v2)
 
 	// set data without commit, doesn't show up
 	qres = iavlStore.Query(query)
@@ -505,7 +505,7 @@ func TestIAVLStoreQuery(t *testing.T) {
 	require.Equal(t, valExpSub1, qres.Value)
 
 	// modify
-	iavlStore.Set(k1, v3)
+	_ = iavlStore.Set(k1, v3)
 	cid = iavlStore.Commit()
 
 	// query will return old values, as height is fixed

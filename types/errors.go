@@ -245,8 +245,7 @@ func (err *sdkError) WithDefaultCodespace(cs CodespaceType) Error {
 // Implements ABCIError.
 // nolint: errcheck
 func (err *sdkError) TraceSDK(format string, args ...interface{}) Error {
-	//TODO CHECK THIS
-	err.cmnError.Error()
+	_ = err.Trace(1, format, args...)
 	return err
 }
 

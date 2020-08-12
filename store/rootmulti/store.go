@@ -191,7 +191,7 @@ func (rs *Store) RollbackVersion(height int64) error {
 		b.Delete([]byte(cInfoKey))
 	}
 	// write to db
-	b.Write()
+	_ = b.Write()
 	return nil
 }
 
@@ -296,7 +296,7 @@ func (rs *Store) Commit() types.CommitID {
 	defer batch.Close()
 	setCommitInfo(batch, version, commitInfo)
 	setLatestVersion(batch, version)
-	batch.Write()
+	_ = batch.Write()
 
 	// Prepare for next version.
 	commitID := types.CommitID{

@@ -24,7 +24,7 @@ func benchmarkCacheKVStoreIterator(numKVs int, b *testing.B) {
 		_, _ = rand.Read(value)
 
 		keys[i] = string(key)
-		cstore.Set(key, value)
+		_ = cstore.Set(key, value)
 	}
 
 	sort.Strings(keys)

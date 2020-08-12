@@ -95,7 +95,7 @@ func (kb dbKeybase) Delete(address types.Address, passphrase string) error {
 		return err
 	}
 
-	kb.db.DeleteSync(addrKey(kp.GetAddress()))
+	_ = kb.db.DeleteSync(addrKey(kp.GetAddress()))
 	return nil
 }
 
@@ -222,7 +222,7 @@ func (kb dbKeybase) ExportPrivateKeyObject(address types.Address, passphrase str
 
 // CloseDB releases the lock and closes the storage backend.
 func (kb dbKeybase) CloseDB() {
-	kb.db.Close()
+	_ = kb.db.Close()
 }
 
 // Private interface
@@ -245,7 +245,7 @@ func (kb dbKeybase) writeKeyPair(kp KeyPair) {
 	// write the info by key
 	key := addrKey(kp.GetAddress())
 	serializedInfo := writeKeyPair(kp)
-	kb.db.SetSync(key, serializedInfo)
+	_ = kb.db.SetSync(key, serializedInfo)
 }
 
 func addrKey(address types.Address) []byte {
