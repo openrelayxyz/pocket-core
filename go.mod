@@ -1,6 +1,6 @@
 module github.com/pokt-network/pocket-core
 
-go 1.13
+go 1.14
 
 require (
 	github.com/go-kit/kit v0.10.0
@@ -23,4 +23,4 @@ require (
 	gopkg.in/yaml.v2 v2.2.5
 )
 
-replace github.com/tendermint/tendermint => github.com/pokt-network/tendermint v0.32.11-0.20200810223919-f30923a27a1b
+replace github.com/tendermint/tendermint => github.com/pokt-network/tendermint v0.32.11-0.20200812144926-1d5defbb3840

@@ -203,7 +203,7 @@ func inMemTendermintNode(genesisState []byte) (*node.Node, keys.Keybase) {
 		panic(err)
 	}
 	PCA = app
-	//app.SetTxIndexer(txIndexer)
+	app.SetTxIndexer(tmNode.TxIndexer())
 	app.SetBlockstore(tmNode.BlockStore())
 	app.SetEvidencePool(tmNode.EvidencePool())
 	app.SetTendermintNode(tmNode)
