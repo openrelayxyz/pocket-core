@@ -7,6 +7,7 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	rand2 "github.com/tendermint/tendermint/libs/rand"
 	"math/rand"
+	"os"
 	"strings"
 	"testing"
 
@@ -22,7 +23,6 @@ import (
 	nodeTypes "github.com/pokt-network/pocket-core/x/nodes/types"
 	pocketTypes "github.com/pokt-network/pocket-core/x/pocketcore/types"
 	"github.com/stretchr/testify/assert"
-	"github.com/tendermint/tendermint/libs/os"
 	tmTypes "github.com/tendermint/tendermint/types"
 	db "github.com/tendermint/tm-db"
 )
@@ -36,7 +36,7 @@ func TestMain(m *testing.M) {
 		M: make(map[string]pocketTypes.HostedBlockchain),
 	}, logger, "26660", 3, 3000)
 	m.Run()
-	os.Exit("0")
+	os.Exit(0)
 }
 
 func TestUnstakeApp(t *testing.T) {
