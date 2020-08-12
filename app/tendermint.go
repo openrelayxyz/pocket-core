@@ -1,6 +1,10 @@
 package app
 
 import (
+	"io"
+	"os"
+	"path/filepath"
+
 	sdk "github.com/pokt-network/pocket-core/types"
 	cfg "github.com/tendermint/tendermint/config"
 	"github.com/tendermint/tendermint/libs/log"
@@ -9,9 +13,6 @@ import (
 	pvm "github.com/tendermint/tendermint/privval"
 	"github.com/tendermint/tendermint/proxy"
 	dbm "github.com/tendermint/tm-db"
-	"io"
-	"os"
-	"path/filepath"
 )
 
 type AppCreator func(log.Logger, dbm.DB, io.Writer) *PocketCoreApp
@@ -50,9 +51,6 @@ func NewClient(c config, creator AppCreator) (*node.Node, *PocketCoreApp, error)
 	//	return nil, nil, err
 	//}
 
-	//app.SetTxIndexer(txIndexer)
-	//app.SetBlockstore(blockStore)
-	//app.SetEvidencePool(evidencePool)
 	// create & start tendermint node
 	tmNode, err := node.NewNode(
 		c.TmConfig,
@@ -67,6 +65,9 @@ func NewClient(c config, creator AppCreator) (*node.Node, *PocketCoreApp, error)
 	if err != nil {
 		return nil, nil, err
 	}
+	// app.SetTxIndexer(txIndexer)
+	app.SetBlockstore(tmNode.BlockStore())
+	app.SetEvidencePool(tmNode.EvidencePool())
 	return tmNode, app, nil
 }
 
