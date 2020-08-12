@@ -2,11 +2,12 @@ package app
 
 import (
 	"context"
-	"github.com/tendermint/tendermint/rpc/client/http"
 	"io"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/tendermint/tendermint/rpc/client/http"
 
 	bam "github.com/pokt-network/pocket-core/baseapp"
 	"github.com/pokt-network/pocket-core/codec"
@@ -188,9 +189,6 @@ func inMemTendermintNode(genesisState []byte) (*node.Node, keys.Keybase) {
 	//	fmt.Println(err.Error())
 	//	return nil, nil
 	//}
-	//app.SetTxIndexer(txIndexer)
-	//app.SetBlockstore(blockStore)
-	//app.SetEvidencePool(evidencePool)
 	tmNode, err := node.NewNode(
 		c.TmConfig,
 		privVal,
@@ -205,6 +203,9 @@ func inMemTendermintNode(genesisState []byte) (*node.Node, keys.Keybase) {
 		panic(err)
 	}
 	PCA = app
+	//app.SetTxIndexer(txIndexer)
+	app.SetBlockstore(tmNode.BlockStore())
+	app.SetEvidencePool(tmNode.EvidencePool())
 	app.SetTendermintNode(tmNode)
 	return tmNode, kb
 }
