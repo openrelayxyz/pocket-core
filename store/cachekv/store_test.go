@@ -80,7 +80,7 @@ func TestCacheKVStore(t *testing.T) {
 func TestCacheKVStoreNoNilSet(t *testing.T) {
 	mem := dbadapter.Store{DB: dbm.NewMemDB()}
 	st := cachekv.NewStore(mem)
-	require.Panics(t, func() { st.Set([]byte("key"), nil) }, "setting a nil value should panic")
+	require.Panics(t, func() { _ = st.Set([]byte("key"), nil) }, "setting a nil value should panic")
 }
 
 func TestCacheKVStoreNested(t *testing.T) {
@@ -127,7 +127,7 @@ func TestCacheKVIteratorBounds(t *testing.T) {
 	// set some items
 	nItems := 5
 	for i := 0; i < nItems; i++ {
-		st.Set(keyFmt(i), valFmt(i))
+		_ = st.Set(keyFmt(i), valFmt(i))
 	}
 
 	// iterate over all of them
@@ -348,16 +348,16 @@ func doOp(st types.CacheKVStore, truth dbm.DB, op int, args ...int) {
 	switch op {
 	case opSet:
 		k := args[0]
-		st.Set(keyFmt(k), valFmt(k))
-		truth.Set(keyFmt(k), valFmt(k))
+		_ = st.Set(keyFmt(k), valFmt(k))
+		_ = truth.Set(keyFmt(k), valFmt(k))
 	case opSetRange:
 		start := args[0]
 		end := args[1]
 		setRange(st, truth, start, end)
 	case opDel:
 		k := args[0]
-		st.Delete(keyFmt(k))
-		truth.Delete(keyFmt(k))
+		_ = st.Delete(keyFmt(k))
+		_ = truth.Delete(keyFmt(k))
 	case opDelRange:
 		start := args[0]
 		end := args[1]
@@ -372,16 +372,16 @@ func doRandomOp(st types.CacheKVStore, truth dbm.DB, maxKey int) {
 	switch r {
 	case opSet:
 		k := randInt(maxKey)
-		st.Set(keyFmt(k), valFmt(k))
-		truth.Set(keyFmt(k), valFmt(k))
+		_ = st.Set(keyFmt(k), valFmt(k))
+		_ = truth.Set(keyFmt(k), valFmt(k))
 	case opSetRange:
 		start := randInt(maxKey - 2)
 		end := randInt(maxKey-start) + start
 		setRange(st, truth, start, end)
 	case opDel:
 		k := randInt(maxKey)
-		st.Delete(keyFmt(k))
-		truth.Delete(keyFmt(k))
+		_ = st.Delete(keyFmt(k))
+		_ = truth.Delete(keyFmt(k))
 	case opDelRange:
 		start := randInt(maxKey - 2)
 		end := randInt(maxKey-start) + start
@@ -532,7 +532,7 @@ func BenchmarkCacheKVStoreGetNoKeyFound(b *testing.B) {
 	b.ResetTimer()
 	// assumes b.N < 2**24
 	for i := 0; i < b.N; i++ {
-		st.Get([]byte{byte((i & 0xFF0000) >> 16), byte((i & 0xFF00) >> 8), byte(i & 0xFF)})
+		_, _ = st.Get([]byte{byte((i & 0xFF0000) >> 16), byte((i & 0xFF00) >> 8), byte(i & 0xFF)})
 	}
 }
 
@@ -540,11 +540,11 @@ func BenchmarkCacheKVStoreGetKeyFound(b *testing.B) {
 	st := newCacheKVStore()
 	for i := 0; i < b.N; i++ {
 		arr := []byte{byte((i & 0xFF0000) >> 16), byte((i & 0xFF00) >> 8), byte(i & 0xFF)}
-		st.Set(arr, arr)
+		_ = st.Set(arr, arr)
 	}
 	b.ResetTimer()
 	// assumes b.N < 2**24
 	for i := 0; i < b.N; i++ {
-		st.Get([]byte{byte((i & 0xFF0000) >> 16), byte((i & 0xFF00) >> 8), byte(i & 0xFF)})
+		_, _ = st.Get([]byte{byte((i & 0xFF0000) >> 16), byte((i & 0xFF00) >> 8), byte(i & 0xFF)})
 	}
 }

@@ -131,7 +131,7 @@ func (k Keeper) SetAccount(ctx sdk.Ctx, acc exported.Account) {
 		ctx.Logger().Error(fmt.Errorf("error marshalling account %v at height: %d, err: %s", acc, ctx.BlockHeight(), err.Error()).Error())
 		os.Exit(1)
 	}
-	store.Set(types.AddressStoreKey(addr), bz)
+	_ = store.Set(types.AddressStoreKey(addr), bz)
 }
 
 // RemoveAccount removes an account for the account mapper store.
@@ -139,7 +139,7 @@ func (k Keeper) SetAccount(ctx sdk.Ctx, acc exported.Account) {
 func (k Keeper) RemoveAccount(ctx sdk.Ctx, acc exported.Account) {
 	addr := acc.GetAddress()
 	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.AddressStoreKey(addr))
+	_ = store.Delete(types.AddressStoreKey(addr))
 }
 
 // IterateAccounts implements sdk.Keeper.

@@ -367,7 +367,7 @@ func (app *BaseApp) storeConsensusParams(consensusParams *abci.ConsensusParams) 
 		return
 	}
 	mainStore := app.cms.GetKVStore(app.baseKey)
-	mainStore.Set(mainConsensusParamsKey, consensusParamsBz)
+	_ = mainStore.Set(mainConsensusParamsKey, consensusParamsBz)
 }
 
 // getMaximumBlockGas gets the maximum gas from the consensus params. It panics
@@ -395,7 +395,7 @@ func (app *BaseApp) getMaximumBlockGas() uint64 {
 // ABCI
 
 // Info implements the ABCI interface.
-func (app *BaseApp) Info(req abci.RequestInfo) abci.ResponseInfo {
+func (app *BaseApp) Info(_ abci.RequestInfo) abci.ResponseInfo {
 	lastCommitID := app.cms.LastCommitID()
 
 	return abci.ResponseInfo{
@@ -406,7 +406,7 @@ func (app *BaseApp) Info(req abci.RequestInfo) abci.ResponseInfo {
 }
 
 // SetOption implements the ABCI interface.
-func (app *BaseApp) SetOption(req abci.RequestSetOption) (res abci.ResponseSetOption) {
+func (app *BaseApp) SetOption(_ abci.RequestSetOption) (res abci.ResponseSetOption) {
 	// TODO: Implement!
 	return
 }

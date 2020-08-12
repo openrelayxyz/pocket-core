@@ -193,9 +193,9 @@ func (s Subspace) Set(ctx Ctx, key []byte, param interface{}) {
 	if err != nil {
 		panic(err)
 	}
-	store.Set(key, bz)
+	_ = store.Set(key, bz)
 	tstore := s.transientStore(ctx)
-	tstore.Set(key, []byte{})
+	_ = tstore.Set(key, []byte{})
 }
 
 // Update stores raw parameter bytes. It returns error if the stored parameter
@@ -217,7 +217,7 @@ func (s Subspace) Update(ctx Ctx, key []byte, param []byte) error {
 
 	s.Set(ctx, key, dest)
 	tStore := s.transientStore(ctx)
-	tStore.Set(key, []byte{})
+	_ = tStore.Set(key, []byte{})
 
 	return nil
 }
@@ -235,10 +235,10 @@ func (s Subspace) SetWithSubkey(ctx Ctx, key []byte, subkey []byte, param interf
 	if err != nil {
 		panic(err)
 	}
-	store.Set(newkey, bz)
+	_ = store.Set(newkey, bz)
 
 	tstore := s.transientStore(ctx)
-	tstore.Set(newkey, []byte{})
+	_ = tstore.Set(newkey, []byte{})
 }
 
 // UpdateWithSubkey stores raw parameter bytes  with a key and subkey. It checks
@@ -261,7 +261,7 @@ func (s Subspace) UpdateWithSubkey(ctx Ctx, key []byte, subkey []byte, param []b
 
 	s.SetWithSubkey(ctx, key, subkey, dest)
 	tStore := s.transientStore(ctx)
-	tStore.Set(concatkey, []byte{})
+	_ = tStore.Set(concatkey, []byte{})
 
 	return nil
 }

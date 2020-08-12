@@ -31,7 +31,7 @@ func newTraceKVStore(w io.Writer) *tracekv.Store {
 	store := newEmptyTraceKVStore(w)
 
 	for _, kvPair := range kvPairs {
-		store.Set(kvPair.Key, kvPair.Value)
+		_ = store.Set(kvPair.Key, kvPair.Value)
 	}
 
 	return store
@@ -102,7 +102,7 @@ func TestTraceKVStoreSet(t *testing.T) {
 
 		store := newEmptyTraceKVStore(&buf)
 		buf.Reset()
-		store.Set(tc.key, tc.value)
+		_ = store.Set(tc.key, tc.value)
 
 		require.Equal(t, tc.expectedOut, buf.String())
 	}
@@ -128,7 +128,7 @@ func TestTraceKVStoreDelete(t *testing.T) {
 
 		store := newTraceKVStore(&buf)
 		buf.Reset()
-		store.Delete(tc.key)
+		_ = store.Delete(tc.key)
 
 		require.Equal(t, tc.expectedOut, buf.String())
 	}

@@ -59,14 +59,14 @@ func (m List) Get(index uint64, ptr interface{}) error {
 // Use Push() instead of Set() to append a new element
 func (m List) Set(index uint64, value interface{}) {
 	bz := m.cdc.MustMarshalBinaryLengthPrefixed(value)
-	m.store.Set(ElemKey(index), bz)
+	_ = m.store.Set(ElemKey(index), bz)
 }
 
 // Delete() deletes the element in the given position
 // Other elements' indices are preserved after deletion
 // Panics when the index is out of range
 func (m List) Delete(index uint64) {
-	m.store.Delete(ElemKey(index))
+	_ = m.store.Delete(ElemKey(index))
 }
 
 // Push() inserts the element to the end of the list
@@ -74,7 +74,7 @@ func (m List) Delete(index uint64) {
 func (m List) Push(value interface{}) {
 	length := m.Len()
 	m.Set(length, value)
-	m.store.Set(LengthKey(), m.cdc.MustMarshalBinaryLengthPrefixed(length+1))
+	_ = m.store.Set(LengthKey(), m.cdc.MustMarshalBinaryLengthPrefixed(length+1))
 }
 
 // Iterate() is used to iterate over all existing elements in the list

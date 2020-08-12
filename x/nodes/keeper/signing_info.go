@@ -23,12 +23,12 @@ func (k Keeper) GetValidatorSigningInfo(ctx sdk.Ctx, addr sdk.Address) (info typ
 func (k Keeper) SetValidatorSigningInfo(ctx sdk.Ctx, addr sdk.Address, info types.ValidatorSigningInfo) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshalBinaryLengthPrefixed(info)
-	store.Set(types.KeyForValidatorSigningInfo(addr), bz)
+	_ = store.Set(types.KeyForValidatorSigningInfo(addr), bz)
 }
 
 func (k Keeper) DeleteValidatorSigningInfo(ctx sdk.Ctx, addr sdk.Address) {
 	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.KeyForValidatorSigningInfo(addr))
+	_ = store.Delete(types.KeyForValidatorSigningInfo(addr))
 }
 
 func (k Keeper) ResetValidatorSigningInfo(ctx sdk.Ctx, addr sdk.Address) {
@@ -79,7 +79,7 @@ func (k Keeper) valMissedAt(ctx sdk.Ctx, addr sdk.Address, index int64) (missed 
 func (k Keeper) SetValidatorMissedAt(ctx sdk.Ctx, addr sdk.Address, index int64, missed bool) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshalBinaryLengthPrefixed(missed)
-	store.Set(types.GetValMissedBlockKey(addr, index), bz)
+	_ = store.Set(types.GetValMissedBlockKey(addr, index), bz)
 }
 
 // clearValidatorMissed - Remove all missed validators from store
@@ -88,7 +88,7 @@ func (k Keeper) clearValidatorMissed(ctx sdk.Ctx, addr sdk.Address) {
 	iter, _ := sdk.KVStorePrefixIterator(store, types.GetValMissedBlockPrefixKey(addr))
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
-		store.Delete(iter.Key())
+		_ = store.Delete(iter.Key())
 	}
 }
 

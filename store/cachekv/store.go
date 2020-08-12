@@ -114,11 +114,11 @@ func (store *Store) Write() {
 	for _, key := range keys {
 		cacheValue := store.cache[key]
 		if cacheValue.deleted {
-			store.parent.Delete([]byte(key))
+			_ = store.parent.Delete([]byte(key))
 		} else if cacheValue.value == nil {
 			// Skip, it already doesn't exist in parent.
 		} else {
-			store.parent.Set([]byte(key), cacheValue.value)
+			_ = store.parent.Set([]byte(key), cacheValue.value)
 		}
 	}
 
