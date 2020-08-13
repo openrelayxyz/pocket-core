@@ -1,19 +1,18 @@
 package crypto
 
 import (
-	"github.com/tendermint/go-amino"
-	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
+	"github.com/pokt-network/pocket-core/codec"
 )
 
-var cdc = amino.NewCodec()
+var amino *codec.LegacyAmino
 
 func init() {
-	RegisterAmino(cdc)
-	cryptoAmino.RegisterAmino(cdc)
+	amino = codec.New()
+	RegisterAmino(amino)
 }
 
 // RegisterAmino registers all go-crypto related types in the given (amino) codec.
-func RegisterAmino(cdc *amino.Codec) {
+func RegisterAmino(cdc *codec.LegacyAmino) {
 	cdc.RegisterInterface((*PublicKey)(nil), nil)
 	cdc.RegisterInterface((*PrivateKey)(nil), nil)
 	cdc.RegisterConcrete(Ed25519PublicKey{}, "crypto/ed25519_public_key", nil)

@@ -1,18 +1,22 @@
 package keys
 
 import (
-	"github.com/pokt-network/pocket-core/crypto"
-	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
 
 	"github.com/pokt-network/pocket-core/codec"
+	"github.com/pokt-network/pocket-core/crypto"
 )
 
-var cdc *codec.Codec
+// CryptoCdc defines the codec required for keys and info
+var CryptoCdc *codec.LegacyAmino
 
 func init() {
-	cdc = codec.New()
-	cryptoAmino.RegisterAmino(cdc)
-	crypto.RegisterAmino(cdc)
+	CryptoCdc = codec.New()
+	crypto.RegisterAmino(CryptoCdc)
+	RegisterCodec(CryptoCdc)
+	CryptoCdc.Seal()
+}
+
+// RegisterCodec registers concrete types and interfaces on the given codec.
+func RegisterCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(KeyPair{}, "crypto/keys/keypair", nil)
-	cdc.Seal()
 }
