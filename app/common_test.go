@@ -130,8 +130,7 @@ func inMemTendermintNode(genesisState []byte) (*node.Node, keys.Keybase) {
 					TimeIotaMs: 1,
 				},
 				Evidence: types.EvidenceParams{
-					MaxAgeNumBlocks: 10000,
-					MaxAgeDuration:  48 * time.Hour,
+					MaxAge: 1000000,
 				},
 				Validator: types.ValidatorParams{
 					PubKeyTypes: []string{"ed25519"},
