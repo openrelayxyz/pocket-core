@@ -25,4 +25,4 @@ require (
 	gopkg.in/yaml.v2 v2.3.0
 )
 
-replace github.com/tendermint/tendermint => github.com/pokt-network/tendermint v0.32.11-0.20200813033140-389b7bbdf1d9
+replace github.com/tendermint/tendermint => github.com/pokt-network/tendermint v0.32.11-0.20200813034113-4ddf26228926
