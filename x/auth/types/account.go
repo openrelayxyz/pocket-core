@@ -17,7 +17,7 @@ import (
 // BaseAccount
 var _ exported.Account = (*BaseAccount)(nil)
 
-// BaseAccount - a base account structure.
+//BaseAccount - a base account structure.
 type BaseAccount struct {
 	Address sdk.Address      `json:"address" yaml:"address"`
 	Coins   sdk.Coins        `json:"coins" yaml:"coins"`

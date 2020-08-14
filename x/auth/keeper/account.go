@@ -87,7 +87,7 @@ func (k Keeper) GetAccount(ctx sdk.Ctx, addr sdk.Address) exported.Account {
 	if bz == nil {
 		return nil
 	}
-	acc, err := k.decodeAccount(bz)
+	acc, err := k.DecodeAccount(bz)
 	if err != nil {
 		return nil // Could not decode account
 	}
@@ -126,7 +126,7 @@ func (k Keeper) GetAllAccountsExport(ctx sdk.Ctx) []exported.Account {
 func (k Keeper) SetAccount(ctx sdk.Ctx, acc exported.Account) {
 	addr := acc.GetAddress()
 	store := ctx.KVStore(k.storeKey)
-	bz, err := k.cdc.MarshalBinaryBare(acc)
+	bz, err := k.EncodeAccount(acc)
 	if err != nil {
 		ctx.Logger().Error(fmt.Errorf("error marshalling account %v at height: %d, err: %s", acc, ctx.BlockHeight(), err.Error()).Error())
 		os.Exit(1)
@@ -152,7 +152,7 @@ func (k Keeper) IterateAccounts(ctx sdk.Ctx, process func(exported.Account) (sto
 			return
 		}
 		val := iter.Value()
-		acc, err := k.decodeAccount(val)
+		acc, err := k.DecodeAccount(val)
 		if err != nil {
 			ctx.Logger().Error(fmt.Errorf("error while iterating accounts: unmarshalling account %v at height: %d, err: %s", val, ctx.BlockHeight(), err.Error()).Error())
 			continue
@@ -162,11 +162,6 @@ func (k Keeper) IterateAccounts(ctx sdk.Ctx, process func(exported.Account) (sto
 		}
 		iter.Next()
 	}
-}
-
-func (k Keeper) decodeAccount(bz []byte) (acc exported.Account, err error) {
-	err = k.cdc.UnmarshalBinaryBare(bz, &acc)
-	return
 }
 
 // NewAccountWithAddress implements sdk.AuthKeeper.
@@ -186,4 +181,86 @@ func (k Keeper) GetPubKey(ctx sdk.Ctx, addr sdk.Address) (crypto.PublicKey, sdk.
 		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))
 	}
 	return acc.GetPubKey(), nil
+}
+
+// "EncodeAccount" - encodes account interface into protobuf
+// custom logic is needed to convert public key (bytes) into interface type
+func (k Keeper) EncodeAccount(acc exported.Account) ([]byte, error) {
+	switch acc.(type) {
+	case *types.BaseAccount:
+		ba := &types.BaseAccountEncodable{
+			Address: acc.GetAddress(),
+			PubKey:  acc.GetPubKey().RawString(),
+			Coins:   acc.GetCoins(),
+		}
+		return k.cdc.MarshalBinaryBare(ba)
+	default:
+		return nil, fmt.Errorf("unrecognized account type: %v", acc)
+	}
+}
+
+// "EncodeModuleAccount" - encodes account interface into protobuf
+// custom logic is needed to convert public key (bytes) into interface type
+func (k Keeper) EncodeModuleAccount(acc exported.ModuleAccountI) ([]byte, error) {
+	switch acc.(type) {
+	case *types.ModuleAccount:
+		ba := types.BaseAccountEncodable{
+			Address: acc.GetAddress(),
+			PubKey:  acc.GetPubKey().RawString(),
+			Coins:   acc.GetCoins(),
+		}
+		ma := &types.ModuleAccountEncodable{
+			BaseAccountEncodable: &ba,
+			Name:                 acc.GetName(),
+			Permissions:          acc.GetPermissions(),
+		}
+		return k.cdc.MarshalBinaryBare(ma)
+	default:
+		return nil, fmt.Errorf("unrecognized module account type: %v", acc)
+	}
+}
+
+// "DecodeAccount" - decodes into account interface from protobuf
+// custom logic is needed to convert public key (bytes) into interface type
+// TODO can use proto "one of" for interface
+func (k Keeper) DecodeAccount(bz []byte) (exported.Account, error) {
+	ba := &types.BaseAccountEncodable{}
+	err := k.cdc.UnmarshalBinaryBare(bz, ba)
+	if err != nil {
+		return nil, err
+	}
+	pk, err := crypto.NewPublicKey(ba.PubKey)
+	if err != nil {
+		return nil, err
+	}
+	return &types.BaseAccount{
+		Address: ba.Address,
+		Coins:   ba.Coins,
+		PubKey:  pk,
+	}, nil
+}
+
+// "DecodeModuleAccount" - encodes account interface into protobuf
+// custom logic is needed to convert public key (bytes) into interface type
+// TODO can use proto "one of" for interface
+func (k Keeper) DecodeModuleAccount(bz []byte) (exported.ModuleAccountI, error) {
+	ma := &types.ModuleAccountEncodable{}
+	err := k.cdc.UnmarshalBinaryBare(bz, ma)
+	if err != nil {
+		return nil, err
+	}
+	pk, err := crypto.NewPublicKey(ma.PubKey)
+	if err != nil {
+		return nil, err
+	}
+	ba := types.BaseAccount{
+		Address: ma.Address,
+		Coins:   ma.Coins,
+		PubKey:  pk,
+	}
+	return types.ModuleAccount{
+		BaseAccount: &ba,
+		Name:        ma.Name,
+		Permissions: ma.Permissions,
+	}, nil
 }

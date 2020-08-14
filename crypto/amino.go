@@ -4,14 +4,14 @@ import (
 	"github.com/pokt-network/pocket-core/codec"
 )
 
-var amino *codec.LegacyAmino
+var cdc *codec.LegacyAmino
 
 func init() {
-	amino = codec.New()
-	RegisterAmino(amino)
+	cdc = codec.New()
+	RegisterAmino(cdc)
 }
 
-// RegisterAmino registers all go-crypto related types in the given (amino) codec.
+// RegisterAmino registers all go-crypto related types in the given (cdc) codec.
 func RegisterAmino(cdc *codec.LegacyAmino) {
 	cdc.RegisterInterface((*PublicKey)(nil), nil)
 	cdc.RegisterInterface((*PrivateKey)(nil), nil)

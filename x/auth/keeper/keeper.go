@@ -10,14 +10,14 @@ import (
 
 // Keeper of the supply store
 type Keeper struct {
-	cdc       *codec.Codec
+	cdc       *codec.ProtoCodec
 	storeKey  sdk.StoreKey
 	subspace  sdk.Subspace
 	permAddrs map[string]types.PermissionsForAddress
 }
 
 // NewKeeper creates a new Keeper instance
-func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, subspace sdk.Subspace, maccPerms map[string][]string) Keeper {
+func NewKeeper(cdc *codec.ProtoCodec, key sdk.StoreKey, subspace sdk.Subspace, maccPerms map[string][]string) Keeper {
 	// set the addresses
 	permAddrs := make(map[string]types.PermissionsForAddress)
 	for name, perms := range maccPerms {

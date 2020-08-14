@@ -17,21 +17,20 @@ func RegisterCodec(cdc *codec.ProtoCodec) {
 	cdc.RegisterConcrete(&Supply{}, "posmint/Supply", nil)
 }
 
-
 // RegisterInterface associates protoName with AccountI interface
 // and creates a registry of it's concrete implementations
 func RegisterInterfaces(registry types.InterfaceRegistry) {
 	registry.RegisterInterface(
 		"pocket.auth.Account",
 		(*exported.Account)(nil),
-		&BaseAccount{},
-		&ModuleAccount{},
+		&BaseAccountEncodable{},
+		&ModuleAccountEncodable{},
 	)
 
 	registry.RegisterInterface(
 		"pocket.auth.ModuleAccountI",
 		(*exported.ModuleAccountI)(nil),
-		&ModuleAccount{},
+		&ModuleAccountEncodable{},
 	)
 
 	registry.RegisterInterface(
@@ -42,10 +41,10 @@ func RegisterInterfaces(registry types.InterfaceRegistry) {
 }
 
 // module wide codec
-var ModuleCdc *codec.Codec
+var ModuleCdc *codec.ProtoCodec
 
 func init() {
-	ModuleCdc = codec.New()
+	ModuleCdc = codec.NewProtoCodec(types.NewInterfaceRegistry())
 	RegisterCodec(ModuleCdc)
 	codec.RegisterCrypto(ModuleCdc)
 	ModuleCdc.Seal()
