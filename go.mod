@@ -5,12 +5,12 @@ go 1.13
 require (
 	github.com/go-kit/kit v0.10.0
 	github.com/gogo/protobuf v1.3.1
-	github.com/golang/protobuf v1.4.1
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/magiconair/properties v1.8.1
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.5.1
+	github.com/regen-network/cosmos-proto v0.3.0 // indirect
 	github.com/spf13/cobra v1.0.0
 	github.com/stretchr/testify v1.6.1
 	github.com/tendermint/go-amino v0.15.0
