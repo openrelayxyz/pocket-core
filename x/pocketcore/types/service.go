@@ -57,7 +57,7 @@ func (r *Relay) Validate(ctx sdk.Ctx, keeper PosKeeper, node nodeexported.Valida
 	maxPossibleRelays = MaxPossibleRelays(app, int64(sessionNodeCount))
 	// validate unique relay
 	evidence, totalRelays := GetTotalProofs(evidenceHeader, RelayEvidence, maxPossibleRelays)
-	// get evidence key by proof
+	// get EvidenceEncodable key by proof
 	if !IsUniqueProof(r.Proof, evidence) {
 		return sdk.ZeroInt(), NewDuplicateProofError(ModuleName)
 	}
@@ -224,11 +224,11 @@ func InitClientBlockAllowance(allowance int) {
 }
 
 // response structure for the relay
-type RelayResponse struct {
-	Signature string     `json:"signature"` // signature from the node in hex
-	Response  string     `json:"payload"`   // response to relay
-	Proof     RelayProof `json:"proof"`     // to be signed by the client
-}
+//type RelayResponse struct {
+//	Signature string     `json:"signature"` // signature from the node in hex
+//	Response  string     `json:"payload"`   // response to relay
+//	Proof     RelayProof `json:"proof"`     // to be signed by the client
+//}
 
 // "Validate" - The node validates the response after signing
 func (rr RelayResponse) Validate() sdk.Error {

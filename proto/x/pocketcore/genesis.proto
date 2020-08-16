@@ -1,0 +1,23 @@
+syntax = "proto3";
+package x.pocketcore;
+
+import "gogoproto/gogo.proto";
+import "x/pocketcore/pocket.proto";
+
+option go_package = "github.com/pokt-network/pocket-core/x/pocketcore/types";
+
+// GenesisState defines the auth module's genesis state.
+message GenesisState {
+	Params params = 1 [(gogoproto.jsontag) = "params"];
+	repeated MsgClaim claims = 2 [(gogoproto.jsontag) = "claims", (gogoproto.castrepeated) = "github.com/pokt-network/pocket-core/x/pocketcore/types.Claims"];
+}
+
+message Params {
+	option (gogoproto.goproto_stringer) = false;
+	int64 sessionNodeCount = 1 [(gogoproto.jsontag) = "session_node_count"];
+	int64 claimSubmissionWindow = 2 [(gogoproto.jsontag) = "proof_waiting_period"];
+	repeated string supportedBlockchains = 3 [(gogoproto.jsontag) = "supported_blockchains"];
+	int64 claimExpiration = 4 [(gogoproto.jsontag) = "claim_expiration"];
+	int64 replayAttackBurnMultiplier = 5 [(gogoproto.jsontag) = "replay_attack_burn_multiplier"];
+	int64 minimumNumberOfProofs = 6 [(gogoproto.jsontag) = "minimum_number_of_proofs"];
+}

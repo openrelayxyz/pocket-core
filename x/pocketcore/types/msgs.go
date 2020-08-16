@@ -13,14 +13,16 @@ const (
 )
 
 // "MsgClaim" - claims that you completed `NumOfProofs` for relay or challenge and provides the merkle root for data integrity
-type MsgClaim struct {
-	SessionHeader    `json:"header"` // header information for identification
-	MerkleRoot       HashRange       `json:"merkle_root"`   // merkle root for data integrity
-	TotalProofs      int64           `json:"total_proofs"`  // total number of relays
-	FromAddress      sdk.Address     `json:"from_address"`  // claimant's address
-	EvidenceType     EvidenceType    `json:"evidence_type"` // relay or challenge?
-	ExpirationHeight int64           `json:"expiration_height"`
-}
+//type MsgClaim struct {
+//	SessionHeader    `json:"header"` // header information for identification
+//	MerkleRoot       HashRange       `json:"merkle_root"`   // merkle root for data integrity
+//	TotalProofs      int64           `json:"total_proofs"`  // total number of relays
+//	FromAddress      sdk.Address     `json:"from_address"`  // claimant's address
+//	EvidenceType     EvidenceType    `json:"evidence_type"` // relay or challenge?
+//	ExpirationHeight int64           `json:"expiration_height"`
+//}
+
+type Claims []MsgClaim
 
 // "GetFee" - Returns the fee (sdk.Int) of the messgae type
 func (msg MsgClaim) GetFee() sdk.Int {
@@ -36,11 +38,11 @@ func (msg MsgClaim) Type() string { return MsgClaimName }
 // "ValidateBasic" - Storeless validity check for claim message
 func (msg MsgClaim) ValidateBasic() sdk.Error {
 	// validate a non empty chain
-	if msg.Chain == "" {
+	if msg.SessionHeader.Chain == "" {
 		return NewEmptyChainError(ModuleName)
 	}
 	// basic validation on the session block height
-	if msg.SessionBlockHeight < 1 {
+	if msg.SessionHeader.SessionBlockHeight < 1 {
 		return NewEmptyBlockIDError(ModuleName)
 	}
 	// validate greater than 5 relays (need 5 for the tree structure)
@@ -48,7 +50,7 @@ func (msg MsgClaim) ValidateBasic() sdk.Error {
 		return NewEmptyProofsError(ModuleName)
 	}
 	// validate the public key format
-	if err := PubKeyVerification(msg.ApplicationPubKey); err != nil {
+	if err := PubKeyVerification(msg.SessionHeader.ApplicationPubKey); err != nil {
 		return NewPubKeyError(ModuleName, err)
 	}
 	// validate the address format
@@ -67,7 +69,7 @@ func (msg MsgClaim) ValidateBasic() sdk.Error {
 	if msg.MerkleRoot.Range.Lower != 0 {
 		return NewInvalidRootError(ModuleName)
 	}
-	// ensure non zero evidence
+	// ensure non zero EvidenceEncodable
 	if msg.EvidenceType == 0 {
 		return NewNoEvidenceTypeErr(ModuleName)
 	}
@@ -98,11 +100,11 @@ func (msg MsgClaim) IsEmpty() bool {
 // ---------------------------------------------------------------------------------------------------------------------
 
 // "MsgProof" - Proves the previous claim by providing the merkle Proof and the leaf node
-type MsgProof struct {
-	MerkleProof  MerkleProof  `json:"merkle_proofs"` // the merkleProof needed to verify the proofs
-	Leaf         Proof        `json:"leaf"`          // the needed to verify the Proof
-	EvidenceType EvidenceType `json:"evidence_type"` // the type of evidence
-}
+//type MsgProof struct {
+//	MerkleProof  MerkleProof  `json:"merkle_proofs"` // the merkleProof needed to verify the proofs
+//	Leaf         Proof        `json:"leaf"`          // the needed to verify the Proof
+//	EvidenceType EvidenceType `json:"evidence_type"` // the type of EvidenceEncodable
+//}
 
 // "GetFee" - Returns the fee (sdk.Int) of the messgae type
 func (msg MsgProof) GetFee() sdk.Int {
@@ -126,7 +128,7 @@ func (msg MsgProof) ValidateBasic() sdk.Error {
 		return NewInvalidMerkleRangeError(ModuleName)
 	}
 	// validate the leaf
-	if err := msg.Leaf.ValidateBasic(); err != nil {
+	if err := (*msg.Leaf).ValidateBasic(); err != nil {
 		return err
 	}
 	if _, err := msg.EvidenceType.Byte(); err != nil {
@@ -142,5 +144,5 @@ func (msg MsgProof) GetSignBytes() []byte {
 
 // GetSigners defines whose signature is required
 func (msg MsgProof) GetSigner() sdk.Address {
-	return msg.Leaf.GetSigner()
+	return (*msg.Leaf).GetSigner()
 }

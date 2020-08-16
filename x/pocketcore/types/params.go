@@ -33,14 +33,14 @@ var (
 var _ types.ParamSet = (*Params)(nil)
 
 // "Params" - defines the governance set, high level settings for pocketcore module
-type Params struct {
-	SessionNodeCount           int64    `json:"session_node_count"`
-	ClaimSubmissionWindow      int64    `json:"proof_waiting_period"`
-	SupportedBlockchains       []string `json:"supported_blockchains"`
-	ClaimExpiration            int64    `json:"claim_expiration"` // per session
-	ReplayAttackBurnMultiplier int64    `json:"replay_attack_burn_multiplier"`
-	MinimumNumberOfProofs      int64    `json:"minimum_number_of_proofs"`
-}
+//type Params struct {
+//	SessionNodeCount           int64    `json:"session_node_count"`
+//	ClaimSubmissionWindow      int64    `json:"proof_waiting_period"`
+//	SupportedBlockchains       []string `json:"supported_blockchains"`
+//	ClaimExpiration            int64    `json:"claim_expiration"` // per session
+//	ReplayAttackBurnMultiplier int64    `json:"replay_attack_burn_multiplier"`
+//	MinimumNumberOfProofs      int64    `json:"minimum_number_of_proofs"`
+//}
 
 // "ParamSetPairs" - returns an kv params object
 // Note: Implements params.ParamSet

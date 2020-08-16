@@ -11,10 +11,10 @@ import (
 	"golang.org/x/crypto/blake2b"
 )
 
-type Range struct {
-	Lower uint64 `json:"lower"`
-	Upper uint64 `json:"upper"`
-}
+//type Range struct {
+//	Lower uint64 `json:"lower"`
+//	Upper uint64 `json:"upper"`
+//}
 
 func (r Range) Bytes() []byte {
 	return append(uint64ToBytes(r.Lower), uint64ToBytes(r.Upper)...)
@@ -41,10 +41,10 @@ func uint64ToBytes(a uint64) (bz []byte) {
 }
 
 // "HashRange" - A structure to represent the merkleHash and the range at an index in the merkle sum tree
-type HashRange struct {
-	Hash  []byte `json:"merkleHash"`
-	Range Range  `json:"range"`
-}
+//type HashRange struct {
+//	Hash  []byte `json:"merkleHash"`
+//	Range Range  `json:"range"`
+//}
 
 func (hr HashRange) isValidRange() bool {
 	if hr.Range.Upper == 0 {
@@ -57,11 +57,11 @@ func (hr HashRange) isValidRange() bool {
 }
 
 // "MerkleProof" - A structure used to verify a leaf of the tree.
-type MerkleProof struct {
-	TargetIndex int         `json:"index"`
-	HashRanges  []HashRange `json:"hash_ranges"`
-	Target      HashRange   `json:"target_range"`
-}
+//type MerkleProof struct {
+//	TargetIndex int         `json:"index"`
+//	HashRanges  []HashRange `json:"hash_ranges"`
+//	Target      HashRange   `json:"target_range"`
+//}
 
 // "Validate" - Verifies the Proof from the leaf/cousin node data, the merkle root, and the Proof object
 func (mp MerkleProof) Validate(root HashRange, leaf Proof, totalRelays int64) (isValid bool) {
@@ -103,7 +103,7 @@ func (mp MerkleProof) Validate(root HashRange, leaf Proof, totalRelays int64) (i
 			mp.Target.Range.Lower = sibling.Range.Lower
 			// **upper stays the same**
 			// generate the parent merkleHash and store it where the child used to be
-			mp.Target.Hash = parentHash(sibling.Hash, mp.Target.Hash, mp.Target.Range)
+			mp.Target.Hash = parentHash(sibling.Hash, mp.Target.Hash, *mp.Target.Range)
 		} else { // even index
 			// target upper should be LTE sibling lower
 			if mp.Target.Range.Upper != sibling.Range.Lower {
@@ -113,7 +113,7 @@ func (mp MerkleProof) Validate(root HashRange, leaf Proof, totalRelays int64) (i
 			mp.Target.Range.Upper = sibling.Range.Upper
 			// **lower stays the same**
 			// generate the parent merkleHash and store it where the child used to be
-			mp.Target.Hash = parentHash(mp.Target.Hash, sibling.Hash, mp.Target.Range)
+			mp.Target.Hash = parentHash(mp.Target.Hash, sibling.Hash, *mp.Target.Range)
 		}
 		// half the indices as we are going up one level
 		mp.TargetIndex /= 2
@@ -156,11 +156,11 @@ func GenerateProofs(p []Proof, index int) (mProof MerkleProof, leaf Proof) {
 	// generate Proof for leaf
 	mProof = merkleProof(data, index, &MerkleProof{})
 	// reset leaf index
-	mProof.TargetIndex = index
+	mProof.TargetIndex = int64(index)
 	// get the leaf
 	leaf = proofs[index]
 	// get the targetHashRange
-	mProof.Target = dataCopy[index]
+	mProof.Target = &dataCopy[index]
 	// return merkleProofs object
 	return
 }
@@ -168,9 +168,9 @@ func GenerateProofs(p []Proof, index int) (mProof MerkleProof, leaf Proof) {
 // "merkleProof" - recursive Proof function that generates the Proof object one level at a time
 func merkleProof(data []HashRange, index int, p *MerkleProof) MerkleProof {
 	if index%2 == 1 { // odd index so sibling to the left
-		p.HashRanges = append(p.HashRanges, data[index-1])
+		p.HashRanges = append(p.HashRanges, &data[index-1])
 	} else { // even index so sibling to the right
-		p.HashRanges = append(p.HashRanges, data[index+1])
+		p.HashRanges = append(p.HashRanges, &data[index+1])
 	}
 	data, atRoot := levelUp(data)
 	if !atRoot {
@@ -223,7 +223,7 @@ func levelUp(data []HashRange) (nextLevelData []HashRange, atRoot bool) {
 		// the left child lower is new lower
 		data[i/2].Range.Lower = data[i].Range.Lower
 		// calculate the parent merkleHash
-		data[i/2].Hash = parentHash(d.Hash, data[i+1].Hash, data[i/2].Range)
+		data[i/2].Hash = parentHash(d.Hash, data[i+1].Hash, *data[i/2].Range)
 	}
 	// check to see if at root
 	dataLen := len(data) / 2
@@ -270,7 +270,7 @@ func sortAndStructure(proofs []Proof) (d []HashRange, sortedProofs []Proof) {
 	for i := numberOfProofs; i < int(properLength); i++ {
 		hashRanges[i] = HashRange{
 			Hash:  merkleHash([]byte(strconv.Itoa(i))),
-			Range: Range{Lower: lower, Upper: lower + 1},
+			Range: &Range{Lower: lower, Upper: lower + 1},
 		}
 		lower = hashRanges[i].Range.Upper
 	}
@@ -309,7 +309,7 @@ func structureProofs(proofs []Proof) (d []HashRange, sortedProofs []Proof) {
 	for i := numberOfProofs; i < int(properLength); i++ {
 		hashRanges[i] = HashRange{
 			Hash:  merkleHash([]byte(strconv.Itoa(i))),
-			Range: Range{Lower: lower, Upper: lower + 1},
+			Range: &Range{Lower: lower, Upper: lower + 1},
 		}
 		lower = hashRanges[i].Range.Upper
 	}
