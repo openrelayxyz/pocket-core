@@ -56,7 +56,7 @@ func checkJSONMarshalUnMarshal(t *testing.T, src interface{}, dst interface{}) {
 func TestKeyEncodings(t *testing.T) {
 	cases := []struct {
 		privKey           PrivateKey
-		privSize, pubSize int // binary sizes with the amino overhead
+		privSize, pubSize int // binary sizes with the cdc overhead
 	}{
 		{
 			privKey:  PrivateKey(Ed25519PrivateKey{}).GenPrivateKey(),

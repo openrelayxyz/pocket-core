@@ -12,6 +12,7 @@ require (
 	github.com/prometheus/client_golang v1.5.1
 	github.com/regen-network/cosmos-proto v0.3.0 // indirect
 	github.com/spf13/cobra v1.0.0
+	github.com/src-d/proteus v1.3.3 // indirect
 	github.com/stretchr/testify v1.6.1
 	github.com/tendermint/go-amino v0.15.0
 	github.com/tendermint/iavl v0.14.0
@@ -23,6 +24,8 @@ require (
 	google.golang.org/grpc v1.30.0 // indirect
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/h2non/gock.v1 v1.0.15
+	gopkg.in/src-d/go-parse-utils.v1 v1.1.2 // indirect
+	gopkg.in/src-d/proteus.v1 v1.3.3 // indirect
 	gopkg.in/yaml.v2 v2.3.0
 )
 

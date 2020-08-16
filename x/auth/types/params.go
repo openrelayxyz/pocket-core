@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	sdk "github.com/pokt-network/pocket-core/types"
+	"reflect"
 	"strings"
 )
 
@@ -51,9 +52,7 @@ func (p *Params) ParamSetPairs() sdk.ParamSetPairs {
 
 // Equal returns a boolean determining if two Params types are identical.
 func (p Params) Equal(p2 Params) bool {
-	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
-	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
-	return bytes.Equal(bz1, bz2)
+	return reflect.DeepEqual(p, p2)
 }
 
 // DefaultParams returns a default set of parameters.
@@ -69,7 +68,7 @@ func DefaultParams() Params {
 func (p Params) String() string {
 	var sb strings.Builder
 	sb.WriteString("Params: \n")
-	sb.WriteString(fmt.Sprintf("ACLKey: %d\n", p.MaxMemoCharacters))
+	sb.WriteString(fmt.Sprintf("MaxMemoCharacters: %d\n", p.MaxMemoCharacters))
 	sb.WriteString(fmt.Sprintf("TxSigLimit: %d\n", p.TxSigLimit))
 	sb.WriteString(fmt.Sprintf("FeeMultiplier: %v\n", p.FeeMultiplier))
 	return sb.String()
