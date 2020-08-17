@@ -21,18 +21,20 @@ type Proof interface {
 	Store(max sdk.Int)                                                                                   // handle the proof after validation
 }
 
+type Proofs []Proof
+
 var _ Proof = RelayProof{} // ensure implements interface at compile time
 
 // "RelayProof" - A proof object that represetns one relay finished
-type RelayProof struct {
-	RequestHash        string `json:"request_hash"`         // the merkleHash of the request used for response comparison
-	Entropy            int64  `json:"entropy"`              // a random int64 used for replay prevention on the node verification (merkle) side
-	SessionBlockHeight int64  `json:"session_block_height"` // The height of the session block
-	ServicerPubKey     string `json:"servicer_pub_key"`     // the public key of the servicer in hex
-	Blockchain         string `json:"blockchain"`           // the non-native chain net id in hex
-	Token              AAT    `json:"aat"`                  // the app auth token object
-	Signature          string `json:"signature"`            // the signature in hex
-}
+//type RelayProof struct {
+//	RequestHash        string `json:"request_hash"`         // the merkleHash of the request used for response comparison
+//	Entropy            int64  `json:"entropy"`              // a random int64 used for replay prevention on the node verification (merkle) side
+//	SessionBlockHeight int64  `json:"session_block_height"` // The height of the session block
+//	ServicerPubKey     string `json:"servicer_pub_key"`     // the public key of the servicer in hex
+//	Blockchain         string `json:"blockchain"`           // the non-native chain net id in hex
+//	Token              AAT    `json:"aat"`                  // the app auth token object
+//	Signature          string `json:"signature"`            // the signature in hex
+//}
 
 // "ValidateLocal" - Validates the proof object, where the owner of the proof is the local node
 func (rp RelayProof) ValidateLocal(appSupportedBlockchains []string, sessionNodeCount int, sessionBlockHeight int64, verifyPubKey string) sdk.Error {
@@ -201,11 +203,11 @@ func (rp RelayProof) GetSigner() sdk.Address {
 // ---------------------------------------------------------------------------------------------------------------------
 
 // "ChallengeProofInvalidData" - Is a challenge of response data using a majority consensus
-type ChallengeProofInvalidData struct {
-	MajorityResponses [2]RelayResponse `json:"majority_responses"` // the majority who agreed
-	MinorityResponse  RelayResponse    `json:"minority_response"`  // the minority who disagreed
-	ReporterAddress   sdk.Address      `json:"address"`            // the address of the reporter
-}
+//type ChallengeProofInvalidData struct {
+//	MajorityResponses [2]RelayResponse `json:"majority_responses"` // the majority who agreed
+//	MinorityResponse  RelayResponse    `json:"minority_response"`  // the minority who disagreed
+//	ReporterAddress   sdk.Address      `json:"address"`            // the address of the reporter
+//}
 
 var _ Proof = ChallengeProofInvalidData{} // compile time interface implementation
 
@@ -238,8 +240,8 @@ func (c ChallengeProofInvalidData) Validate(appSupportedBlockchains []string, se
 	majResponse := c.MajorityResponses[0]
 	majResponse2 := c.MajorityResponses[1]
 	// check for duplicates
-	if majResponse.Proof.ServicerPubKey == majResponse2.Proof.ServicerPubKey ||
-		majResponse2.Proof.ServicerPubKey == c.MinorityResponse.Proof.ServicerPubKey ||
+	if majResponse.Proof.ServicerPubKey == (*majResponse2.Proof).ServicerPubKey ||
+		majResponse2.Proof.ServicerPubKey == (*c.MinorityResponse.Proof).ServicerPubKey ||
 		c.MinorityResponse.Proof.ServicerPubKey == majResponse.Proof.ServicerPubKey {
 		return NewDuplicatePublicKeyError(ModuleName)
 	}

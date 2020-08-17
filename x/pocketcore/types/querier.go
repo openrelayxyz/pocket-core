@@ -6,8 +6,6 @@ import (
 
 // query endpoints supported by the staking Querier
 const (
-	QueryReceipt              = "receipt"
-	QueryReceipts             = "receipts"
 	QuerySupportedBlockchains = "supportedBlockchains"
 	QueryRelay                = "relay"
 	QueryDispatch             = "dispatch"

@@ -1,10 +1,10 @@
 package types
 
 // "GenesisState" - The state of the module from the beginning
-type GenesisState struct {
-	Params Params     `json:"params" yaml:"params"` // governance params
-	Claims []MsgClaim `json:"claims"`               // outstanding claims
-}
+//type GenesisState struct {
+//	Params Params     `json:"params" yaml:"params"` // governance params
+//	Claims []MsgClaim `json:"claims"`               // outstanding claims
+//}
 
 // "ValidateGenesis" - Returns an error on an invalid genesis object
 func ValidateGenesis(gs GenesisState) error {
@@ -24,7 +24,8 @@ func ValidateGenesis(gs GenesisState) error {
 
 // "DefaultGenesisState" - Returns the default genesis state for pocketcore module
 func DefaultGenesisState() GenesisState {
+	dp := DefaultParams()
 	return GenesisState{
-		Params: DefaultParams(),
+		Params: &dp,
 	}
 }

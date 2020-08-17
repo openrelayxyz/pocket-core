@@ -238,11 +238,11 @@ func (sk SessionKey) Validate() sdk.Error {
 }
 
 // "Sessionheader" - The header of the session
-type SessionHeader struct {
-	ApplicationPubKey  string `json:"app_public_key"` // the application public key
-	Chain              string `json:"chain"`          // the nonnative chain in the session
-	SessionBlockHeight int64  `json:"session_height"` // the session block height
-}
+//type SessionHeader struct {
+//	ApplicationPubKey  string `json:"app_public_key"` // the application public key
+//	Chain              string `json:"chain"`          // the nonnative chain in the session
+//	SessionBlockHeight int64  `json:"session_height"` // the session block height
+//}
 
 // "ValidateHeader" - Validates the header of the session
 func (sh SessionHeader) ValidateHeader() sdk.Error {
