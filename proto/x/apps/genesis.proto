@@ -1,0 +1,51 @@
+syntax = "proto3";
+package x.apps;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/duration.proto";
+import "x/apps/apps.proto";
+
+option go_package = "github.com/pokt-network/pocket-core/x/apps/types";
+
+// Params defines the parameters for the staking module.
+message Params {
+  option (gogoproto.equal)            = true;
+  option (gogoproto.goproto_stringer) = false;
+
+  google.protobuf.Duration unstaking_time = 1 [
+    (gogoproto.nullable)    = false,
+    (gogoproto.stdduration) = true,
+    (gogoproto.jsontag) = "unstaking_time",
+    (gogoproto.moretags)    = "yaml:\"unstaking_time\""
+  ];
+  int64 max_applications     = 2 [
+    (gogoproto.jsontag) = "max_applications",
+    (gogoproto.moretags) = "yaml:\"max_applications\""];
+  int64 app_stake_min     = 3 [
+    (gogoproto.jsontag) = "app_stake_minimum",
+    (gogoproto.moretags) = "yaml:\"app_stake_minimum\""];
+  int64 base_relays_per_POKT     = 4 [
+    (gogoproto.jsontag) = "base_relays_per_pokt",
+    (gogoproto.moretags) = "yaml:\"base_relays_per_pokt\""];
+  int64 stability_adjustment     = 5 [
+    (gogoproto.jsontag) = "stability_adjustment",
+    (gogoproto.moretags) = "yaml:\"stability_adjustment\""];
+  bool participation_rate_on     = 6 [
+    (gogoproto.jsontag) = "participation_rate_on",
+    (gogoproto.moretags) = "yaml:\"participation_rate_on\""];
+  int64 max_chains     = 7 [
+    (gogoproto.jsontag) = "maximum_chains",
+    (gogoproto.moretags) = "yaml:\"maximum_chains\""];
+}
+
+message GenesisState {
+    Params params  = 1 [
+    (gogoproto.jsontag) = "params",
+    (gogoproto.moretags) = "yaml:\"params\""];
+    repeated ApplicationEncodable applications = 2 [
+    (gogoproto.jsontag) = "applications",
+    (gogoproto.moretags) = "yaml:\"applications\""];
+    bool exported = 3 [
+    (gogoproto.jsontag) = "exported",
+    (gogoproto.moretags) = "yaml:\"exported\""];
+}
