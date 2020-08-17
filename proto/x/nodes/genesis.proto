@@ -31,7 +31,7 @@ message Params {
 		(gogoproto.jsontag) = "stake_denom",
 		(gogoproto.moretags) = "yaml:\"stake_denom\""];
 
-	int64 StakeMinimun     = 5 [
+	int64 StakeMinimum     = 5 [
 		(gogoproto.jsontag) = "stake_minimum",
 		(gogoproto.moretags) = "yaml:\"stake_minimum\""];
 
@@ -39,7 +39,7 @@ message Params {
 		(gogoproto.jsontag) = "session_block_frequency",
 		(gogoproto.moretags) = "yaml:\"session_block_frequency\""];
 
-	int64 DaoAlocation     = 7 [
+	int64 DaoAllocation     = 7 [
 		(gogoproto.jsontag) = "dao_allocation",
 		(gogoproto.moretags) = "yaml:\"dao_allocation\""];
 
