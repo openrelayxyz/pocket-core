@@ -54,14 +54,6 @@ message ApplicationEncodable {
 }
 
 
-// ValAddresses defines a repeated set of validator addresses.
-message ValAddresses {
-  option (gogoproto.goproto_stringer) = false;
-  option (gogoproto.stringer)         = true;
-
-  repeated bytes addresses = 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.ValAddress"];
-}
-
 
 
 // Pool - tracking bonded and not-bonded token supply of the bond denomination
