@@ -126,7 +126,7 @@ message GenesisState{
 		(gogoproto.moretags) = "yaml:\"prevState_total_power\""];
 	repeated PrevStatePowerMapping PrevStateValidatorPowers = 3 [(gogoproto.jsontag) = "prevState_validator_powers"];
 	repeated ValidatorProto Validators = 4 [(gogoproto.jsontag) = "validators"];
-	bool Exporte = 5 [(gogoproto.jsontag) = "exported"];
+	bool Exported = 5 [(gogoproto.jsontag) = "exported"];
 	map<string,ValidatorSigningInfo> SigningInfos = 6 [(gogoproto.jsontag)="signing_infos"];
 	map<string,MissedBlockArray> MissedBlocks = 7 [(gogoproto.jsontag)= "missed_blocks"];
 	bytes PreviousProposer = 8 [(gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.Address"];

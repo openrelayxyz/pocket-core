@@ -172,3 +172,40 @@ func ValidateNetworkIdentifier(chain string) sdk.Error {
 	}
 	return nil
 }
+
+func (v ValidatorProto) IsStaked() bool             { return v.GetStatus().Equal(sdk.Staked) }
+func (v ValidatorProto) IsUnstaked() bool           { return v.GetStatus().Equal(sdk.Unstaked) }
+func (v ValidatorProto) IsUnstaking() bool          { return v.GetStatus().Equal(sdk.Unstaking) }
+func (v ValidatorProto) IsJailed() bool             { return v.Jailed }
+func (v ValidatorProto) GetStatus() sdk.StakeStatus { return v.Status }
+func (v ValidatorProto) GetAddress() sdk.Address    { return v.Address }
+func (v ValidatorProto) GetTokens() sdk.Int         { return v.StakedTokens }
+
+// MarshalJSON marshals the validator to JSON using Hex
+func (v ValidatorProto) FromProto() Validator {
+	pubkey, _ := crypto.NewPublicKey(v.PublicKey)
+	return Validator{
+		Address:                 v.Address,
+		PublicKey:               pubkey,
+		Jailed:                  v.Jailed,
+		Status:                  v.Status,
+		ServiceURL:              v.ServiceUrl,
+		Chains:                  v.Chains,
+		StakedTokens:            v.StakedTokens,
+		UnstakingCompletionTime: v.UnstakingCompletionTime,
+	}
+}
+
+// MarshalJSON marshals the validator to JSON using Hex
+func (v Validator) ToProto() ValidatorProto {
+	return ValidatorProto{
+		Address:                 v.Address,
+		PublicKey:               v.PublicKey.RawString(),
+		Jailed:                  v.Jailed,
+		Status:                  v.Status,
+		ServiceUrl:              v.ServiceURL,
+		Chains:                  v.Chains,
+		StakedTokens:            v.StakedTokens,
+		UnstakingCompletionTime: v.UnstakingCompletionTime,
+	}
+}

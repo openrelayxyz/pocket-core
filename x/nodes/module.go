@@ -26,7 +26,7 @@ func (AppModuleBasic) Name() string {
 }
 
 // RegisterCodec registers the staking module's types for the given codec.
-func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
+func (AppModuleBasic) RegisterCodec(cdc *codec.ProtoCodec) {
 	types.RegisterCodec(cdc)
 }
 

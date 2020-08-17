@@ -21,7 +21,7 @@ func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, supplyKeeper types.AuthKeepe
 	// set the context
 	ctx = ctx.WithBlockHeight(1 - sdk.ValidatorUpdateDelay)
 	// set the parameters from the data
-	keeper.SetParams(ctx, data.Params)
+	keeper.SetParams(ctx, *data.Params)
 	// set the 'previous state total power' from the data
 	keeper.SetPrevStateValidatorsPower(ctx, data.PrevStateTotalPower)
 	// for each validator in validators, setup based on genesis file
@@ -32,8 +32,8 @@ func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, supplyKeeper types.AuthKeepe
 			os.Exit(1)
 		}
 		// set the validators from the data
-		keeper.SetValidator(ctx, validator)
-		keeper.SetStakedValidatorByChains(ctx, validator)
+		keeper.SetValidator(ctx, validator.FromProto())
+		keeper.SetStakedValidatorByChains(ctx, validator.FromProto())
 		// ensure there's a signing info entry for the validator (used in slashing)
 		_, found := keeper.GetValidatorSigningInfo(ctx, validator.GetAddress())
 		if !found {
@@ -42,7 +42,7 @@ func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, supplyKeeper types.AuthKeepe
 				StartHeight: ctx.BlockHeight(),
 				JailedUntil: time.Unix(0, 0),
 			}
-			keeper.SetValidatorSigningInfo(ctx, validator.GetAddress(), signingInfo)
+			keeper.SetValidatorSigningInfo(ctx, validator.GetAddress(), &signingInfo)
 		}
 		// if the validator is staked then add their tokens to the staked pool
 		if validator.IsStaked() {
@@ -108,12 +108,12 @@ func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, supplyKeeper types.AuthKeepe
 			keeper.Logger(ctx).Error(fmt.Sprintf("unable to convert address from hex in genesis missed blocks for addr: %s err: %v", addr, err))
 			os.Exit(1)
 		}
-		for _, missed := range array {
+		for _, missed := range array.MissedBlocks {
 			keeper.SetValidatorMissedAt(ctx, address, missed.Index, missed.Missed)
 		}
 	}
 	// set the params set in the keeper
-	keeper.Paramstore.SetParamSet(ctx, &data.Params)
+	keeper.Paramstore.SetParamSet(ctx, data.Params)
 	if data.PreviousProposer != nil {
 		keeper.SetPreviousProposer(ctx, data.PreviousProposer)
 	}
@@ -124,24 +124,24 @@ func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, supplyKeeper types.AuthKeepe
 func ExportGenesis(ctx sdk.Ctx, keeper keeper.Keeper) types.GenesisState {
 	params := keeper.GetParams(ctx)
 	prevStateTotalPower := keeper.PrevStateValidatorsPower(ctx)
-	validators := keeper.GetAllValidators(ctx)
-	var prevStateValidatorPowers []types.PrevStatePowerMapping
+	validators := keeper.GetAllValidatorsProto(ctx)
+	var prevStateValidatorPowers []*types.PrevStatePowerMapping
 	keeper.IterateAndExecuteOverPrevStateValsByPower(ctx, func(addr sdk.Address, power int64) (stop bool) {
-		prevStateValidatorPowers = append(prevStateValidatorPowers, types.PrevStatePowerMapping{Address: addr, Power: power})
+		prevStateValidatorPowers = append(prevStateValidatorPowers, &types.PrevStatePowerMapping{Address: addr, Power: power})
 		return false
 	})
-	signingInfos := make(map[string]types.ValidatorSigningInfo)
-	missedBlocks := make(map[string][]types.MissedBlock)
+	signingInfos := make(map[string]*types.ValidatorSigningInfo)
+	missedBlocks := make(map[string]*types.MissedBlockArray)
 	keeper.IterateAndExecuteOverValSigningInfo(ctx, func(address sdk.Address, info types.ValidatorSigningInfo) (stop bool) {
 		addrstring := address.String()
 		info.Index = 0 // reset the index offset
-		signingInfos[addrstring] = info
+		signingInfos[addrstring] = &info
 		return false
 	})
 	prevProposer := keeper.GetPreviousProposer(ctx)
 
 	return types.GenesisState{
-		Params:                   params,
+		Params:                   &params,
 		PrevStateTotalPower:      prevStateTotalPower,
 		PrevStateValidatorPowers: prevStateValidatorPowers,
 		Validators:               validators,
@@ -155,7 +155,7 @@ func ExportGenesis(ctx sdk.Ctx, keeper keeper.Keeper) types.GenesisState {
 // ValidateGenesis validates the provided staking genesis state to ensure the
 // expected invariants holds. (i.e. params in correct bounds, no duplicate validators)
 func ValidateGenesis(data types.GenesisState) error {
-	err := validateGenesisStateValidators(data.Validators, sdk.NewInt(data.Params.StakeMinimum))
+	err := validateGenesisStateValidators(data.Validators, sdk.NewInt(data.Params.StakeMinimun))
 	if err != nil {
 		return err
 	}
@@ -195,13 +195,13 @@ func ValidateGenesis(data types.GenesisState) error {
 	return nil
 }
 
-func validateGenesisStateValidators(validators []types.Validator, minimumStake sdk.Int) (err error) {
+func validateGenesisStateValidators(validators []*types.ValidatorProto, minimumStake sdk.Int) (err error) {
 	addrMap := make(map[string]bool, len(validators))
 	for i := 0; i < len(validators); i++ {
 		val := validators[i]
-		strKey := val.PublicKey.RawString()
+		strKey := val.PublicKey
 		if _, ok := addrMap[strKey]; ok {
-			return fmt.Errorf("duplicate validator in genesis state: address %v", val.GetAddress())
+			return fmt.Errorf("duplicate validator in genesis state: address %v", val.Address)
 		}
 		if val.StakedTokens.IsZero() && !val.IsUnstaked() {
 			return fmt.Errorf("staked/unstaked genesis validator cannot have zero stake, validator: %v", val)
@@ -210,7 +210,7 @@ func validateGenesisStateValidators(validators []types.Validator, minimumStake s
 		if !val.IsUnstaked() && val.StakedTokens.LT(minimumStake) {
 			return fmt.Errorf("validator has less than minimum stake: %v", val)
 		}
-		if err := types.ValidateServiceURL(val.ServiceURL); err != nil {
+		if err := types.ValidateServiceURL(val.ServiceUrl); err != nil {
 			return types.ErrInvalidServiceURL(types.ModuleName, err)
 		}
 		for _, chain := range val.Chains {
