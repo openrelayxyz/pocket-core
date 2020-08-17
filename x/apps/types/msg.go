@@ -21,11 +21,11 @@ const (
 //----------------------------------------------------------------------------------------------------------------------
 
 // MsgAppStake - struct for staking transactions
-type MsgAppStake struct {
-	PubKey crypto.PublicKey `json:"pubkey" yaml:"pubkey"`
-	Chains []string         `json:"chains" yaml:"chains"`
-	Value  sdk.Int          `json:"value" yaml:"value"`
-}
+// type MsgAppStake struct {
+// 	PubKey crypto.PublicKey `json:"pubkey" yaml:"pubkey"`
+// 	Chains []string         `json:"chains" yaml:"chains"`
+// 	Value  sdk.Int          `json:"value" yaml:"value"`
+// }
 
 // GetSigners return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgAppStake) GetSigner() sdk.Address {
@@ -71,9 +71,9 @@ func (msg MsgAppStake) GetFee() sdk.Int {
 //----------------------------------------------------------------------------------------------------------------------
 
 // MsgBeginAppUnstake - struct for unstaking transaciton
-type MsgBeginAppUnstake struct {
-	Address sdk.Address `json:"application_address" yaml:"application_address"`
-}
+// type MsgBeginAppUnstake struct {
+// 	Address sdk.Address `json:"application_address" yaml:"application_address"`
+// }
 
 // GetSigners address(es) that must sign over msg.GetSignBytes()
 func (msg MsgBeginAppUnstake) GetSigner() sdk.Address {
@@ -108,9 +108,9 @@ func (msg MsgBeginAppUnstake) GetFee() sdk.Int {
 //----------------------------------------------------------------------------------------------------------------------
 
 // MsgAppUnjail - struct for unjailing jailed application
-type MsgAppUnjail struct {
-	AppAddr sdk.Address `json:"address" yaml:"address"` // address of the application operator
-}
+// type MsgAppUnjail struct {
+// 	AppAddr sdk.Address `json:"address" yaml:"address"` // address of the application operator
+// }
 
 // Route provides router key for msg
 func (msg MsgAppUnjail) Route() string { return RouterKey }
