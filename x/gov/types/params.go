@@ -23,11 +23,11 @@ var (
 var _ sdk.ParamSet = &Params{}
 
 // Params defines the parameters for the auth module.
-type Params struct {
-	ACL      ACL         `json:"acl"`
-	DAOOwner sdk.Address `json:"dao_owner"`
-	Upgrade  Upgrade     `json:"upgrade"`
-}
+//type Params struct {
+//	ACL      ACL         `json:"acl"`
+//	DAOOwner sdk.Address `json:"dao_owner"`
+//	Upgrade  Upgrade     `json:"upgrade"`
+//}
 
 // NewParams creates a new Params object
 func NewParams(acl ACL, daoOwner sdk.Address) Params {
@@ -63,10 +63,11 @@ func (p Params) Equal(p2 Params) bool {
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	acl := ACL(make([]ACLPair, 0))
+	u := NewUpgrade(0, "")
 	return Params{
 		ACL:      acl,
 		DAOOwner: sdk.Address{},
-		Upgrade:  NewUpgrade(0, ""),
+		Upgrade:  &u,
 	}
 }
 

@@ -18,9 +18,10 @@ func (k Keeper) GetACL(ctx sdk.Ctx) (res types.ACL) {
 
 // Get all parameteras as types.Params
 func (k Keeper) GetParams(ctx sdk.Ctx) types.Params {
+	u := k.GetUpgrade(ctx)
 	return types.Params{
 		ACL:      k.GetACL(ctx),
-		Upgrade:  k.GetUpgrade(ctx),
+		Upgrade:  &u,
 		DAOOwner: k.GetDAOOwner(ctx),
 	}
 }

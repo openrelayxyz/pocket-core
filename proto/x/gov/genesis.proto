@@ -1,0 +1,21 @@
+syntax = "proto3";
+package x.gov;
+
+import "gogoproto/gogo.proto";
+import "x/gov/gov.proto";
+
+option go_package = "github.com/pokt-network/pocket-core/x/gov/types";
+
+// GenesisState defines the auth module's genesis state.
+message GenesisState {
+	Params params = 1 [(gogoproto.jsontag) = "params"];
+	string dAOTokens = 2 [(gogoproto.jsontag) = "dao_tokens", (gogoproto.customtype) = "github.com/pokt-network/pocket-core/types.Int"];
+}
+
+message Params {
+	option (gogoproto.goproto_stringer) = false;
+
+	repeated ACLPair ACL =1 [(gogoproto.jsontag) = "acl", (gogoproto.castrepeated) = "github.com/pokt-network/pocket-core/x/gov/types.ACL"];
+	bytes dAOOwner = 2 [(gogoproto.jsontag) = "address,omitempty", (gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.Address"];
+	Upgrade upgrade =3 [(gogoproto.jsontag) = "upgrade", (gogoproto.casttype) = "github.com/pokt-network/pocket-core/x/gov/types.Upgrade"];
+}
