@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+
 	"github.com/pokt-network/pocket-core/app"
 	"github.com/pokt-network/pocket-core/app/cmd/rpc"
 	"github.com/pokt-network/pocket-core/codec"
@@ -181,7 +182,7 @@ func StakeApp(chains []string, fromAddr, passphrase, chainID string, amount sdk.
 		return nil, sdk.ErrInternal("must stake above zero")
 	}
 	msg := appsType.MsgAppStake{
-		PubKey: kp.PublicKey,
+		PubKey: kp.PublicKey.String(),
 		Chains: chains,
 		Value:  amount,
 	}

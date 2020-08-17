@@ -3,13 +3,14 @@ package types
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+
 	"github.com/pokt-network/pocket-core/codec"
 	posCrypto "github.com/pokt-network/pocket-core/crypto"
 	sdk "github.com/pokt-network/pocket-core/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/multisig"
 	"gopkg.in/yaml.v2"
-	"os"
 )
 
 var (
