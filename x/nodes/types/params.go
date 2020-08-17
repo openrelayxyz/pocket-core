@@ -1,7 +1,6 @@
 package types
 
 import (
-	"bytes"
 	"fmt"
 	"time"
 
@@ -54,25 +53,25 @@ var (
 var _ sdk.ParamSet = (*Params)(nil)
 
 // Params defines the high level settings for pos module
-type Params struct {
-	RelaysToTokensMultiplier int64         `json:"relays_to_tokens_multiplier" yaml:"relays_to_tokens_multiplier"`
-	UnstakingTime            time.Duration `json:"unstaking_time" yaml:"unstaking_time"`                   // how much time must pass between the begin_unstaking_tx and the node going to -> unstaked status
-	MaxValidators            int64         `json:"max_validators" yaml:"max_validators"`                   // maximum number of validators in the network at any given block
-	StakeDenom               string        `json:"stake_denom" yaml:"stake_denom"`                         // the monetary denomination of the coins in the network `uPOKT` or `uAtom` or `Wei`
-	StakeMinimum             int64         `json:"stake_minimum" yaml:"stake_minimum"`                     // minimum amount of `uPOKT` needed to stake in the network as a node
-	SessionBlockFrequency    int64         `json:"session_block_frequency" yaml:"session_block_frequency"` // how many blocks are in a session (pocket network unit)
-	DAOAllocation            int64         `json:"dao_allocation" yaml:"dao_allocation"`
-	ProposerAllocation       int64         `json:"proposer_allocation" yaml:"proposer_allocation"`
-	MaximumChains            int64         `json:"maximum_chains" yaml:"maximum_chains"`
-	// slashing params
-	MaxJailedBlocks         int64         `json:"max_jailed_blocks" yaml:"max_jailed_blocks"`
-	MaxEvidenceAge          time.Duration `json:"max_evidence_age" yaml:"max_evidence_age"`                     // maximum age of tendermint evidence that is still valid (currently not implemented in Cosmos or Pocket-Core)
-	SignedBlocksWindow      int64         `json:"signed_blocks_window" yaml:"signed_blocks_window"`             // window of time in blocks (unit) used for signature verification -> specifically in not signing (missing) blocks
-	MinSignedPerWindow      sdk.Dec       `json:"min_signed_per_window" yaml:"min_signed_per_window"`           // minimum number of blocks the node must sign per window
-	DowntimeJailDuration    time.Duration `json:"downtime_jail_duration" yaml:"downtime_jail_duration"`         // minimum amount of time node must spend in jail after missing blocks
-	SlashFractionDoubleSign sdk.Dec       `json:"slash_fraction_double_sign" yaml:"slash_fraction_double_sign"` // the factor of which a node is slashed for a double sign
-	SlashFractionDowntime   sdk.Dec       `json:"slash_fraction_downtime" yaml:"slash_fraction_downtime"`       // the factor of which a node is slashed for missing blocks
-}
+//type Params struct {
+//	RelaysToTokensMultiplier int64         `json:"relays_to_tokens_multiplier" yaml:"relays_to_tokens_multiplier"`
+//	UnstakingTime            time.Duration `json:"unstaking_time" yaml:"unstaking_time"`                   // how much time must pass between the begin_unstaking_tx and the node going to -> unstaked status
+//	MaxValidators            int64         `json:"max_validators" yaml:"max_validators"`                   // maximum number of validators in the network at any given block
+//	StakeDenom               string        `json:"stake_denom" yaml:"stake_denom"`                         // the monetary denomination of the coins in the network `uPOKT` or `uAtom` or `Wei`
+//	StakeMinimum             int64         `json:"stake_minimum" yaml:"stake_minimum"`                     // minimum amount of `uPOKT` needed to stake in the network as a node
+//	SessionBlockFrequency    int64         `json:"session_block_frequency" yaml:"session_block_frequency"` // how many blocks are in a session (pocket network unit)
+//	DAOAllocation            int64         `json:"dao_allocation" yaml:"dao_allocation"`
+//	ProposerAllocation       int64         `json:"proposer_allocation" yaml:"proposer_allocation"`
+//	MaximumChains            int64         `json:"maximum_chains" yaml:"maximum_chains"`
+//	// slashing params
+//	MaxJailedBlocks         int64         `json:"max_jailed_blocks" yaml:"max_jailed_blocks"`
+//	MaxEvidenceAge          time.Duration `json:"max_evidence_age" yaml:"max_evidence_age"`                     // maximum age of tendermint evidence that is still valid (currently not implemented in Cosmos or Pocket-Core)
+//	SignedBlocksWindow      int64         `json:"signed_blocks_window" yaml:"signed_blocks_window"`             // window of time in blocks (unit) used for signature verification -> specifically in not signing (missing) blocks
+//	MinSignedPerWindow      sdk.Dec       `json:"min_signed_per_window" yaml:"min_signed_per_window"`           // minimum number of blocks the node must sign per window
+//	DowntimeJailDuration    time.Duration `json:"downtime_jail_duration" yaml:"downtime_jail_duration"`         // minimum amount of time node must spend in jail after missing blocks
+//	SlashFractionDoubleSign sdk.Dec       `json:"slash_fraction_double_sign" yaml:"slash_fraction_double_sign"` // the factor of which a node is slashed for a double sign
+//	SlashFractionDowntime   sdk.Dec       `json:"slash_fraction_downtime" yaml:"slash_fraction_downtime"`       // the factor of which a node is slashed for missing blocks
+//}
 
 // Implements sdk.ParamSet
 func (p *Params) ParamSetPairs() sdk.ParamSetPairs {
@@ -80,7 +79,7 @@ func (p *Params) ParamSetPairs() sdk.ParamSetPairs {
 		{Key: KeyUnstakingTime, Value: &p.UnstakingTime},
 		{Key: KeyMaxValidators, Value: &p.MaxValidators},
 		{Key: KeyStakeDenom, Value: &p.StakeDenom},
-		{Key: KeyStakeMinimum, Value: &p.StakeMinimum},
+		{Key: KeyStakeMinimum, Value: &p.StakeMinimun},
 		{Key: KeyMaxEvidenceAge, Value: &p.MaxEvidenceAge},
 		{Key: KeySignedBlocksWindow, Value: &p.SignedBlocksWindow},
 		{Key: KeyMinSignedPerWindow, Value: &p.MinSignedPerWindow},
@@ -88,33 +87,33 @@ func (p *Params) ParamSetPairs() sdk.ParamSetPairs {
 		{Key: KeySlashFractionDoubleSign, Value: &p.SlashFractionDoubleSign},
 		{Key: KeySlashFractionDowntime, Value: &p.SlashFractionDowntime},
 		{Key: KeySessionBlock, Value: &p.SessionBlockFrequency},
-		{Key: KeyDAOAllocation, Value: &p.DAOAllocation},
+		{Key: KeyDAOAllocation, Value: &p.DaoAlocation},
 		{Key: KeyProposerAllocation, Value: &p.ProposerAllocation},
-		{Key: KeyRelaysToTokensMultiplier, Value: &p.RelaysToTokensMultiplier},
+		{Key: KeyRelaysToTokensMultiplier, Value: &p.RelaysToTokenMultiplier},
 		{Key: KeyMaxChains, Value: &p.MaximumChains},
 		{Key: KeyMaxJailedBlocks, Value: &p.MaxJailedBlocks},
 	}
 }
 
 // DefaultParams returns a default set of parameters.
-func DefaultParams() Params {
-	return Params{
-		UnstakingTime:            DefaultUnstakingTime,
-		MaxValidators:            DefaultMaxValidators,
-		StakeMinimum:             DefaultMinStake,
-		StakeDenom:               sdk.DefaultStakeDenom,
-		MaxEvidenceAge:           DefaultMaxEvidenceAge,
-		SignedBlocksWindow:       DefaultSignedBlocksWindow,
-		MinSignedPerWindow:       DefaultMinSignedPerWindow,
-		DowntimeJailDuration:     DefaultDowntimeJailDuration,
-		SlashFractionDoubleSign:  DefaultSlashFractionDoubleSign,
-		SlashFractionDowntime:    DefaultSlashFractionDowntime,
-		SessionBlockFrequency:    DefaultSessionBlocktime,
-		DAOAllocation:            DefaultDAOAllocation,
-		ProposerAllocation:       DefaultProposerAllocation,
-		RelaysToTokensMultiplier: DefaultRelaysToTokensMultiplier,
-		MaximumChains:            DefaultMaxChains,
-		MaxJailedBlocks:          DefaultMaxJailedBlocks,
+func DefaultParams() *Params {
+	return &Params{
+		UnstakingTime:           DefaultUnstakingTime,
+		MaxValidators:           DefaultMaxValidators,
+		StakeMinimun:            DefaultMinStake,
+		StakeDenom:              sdk.DefaultStakeDenom,
+		MaxEvidenceAge:          DefaultMaxEvidenceAge,
+		SignedBlocksWindow:      DefaultSignedBlocksWindow,
+		MinSignedPerWindow:      DefaultMinSignedPerWindow,
+		DowntimeJailDuration:    DefaultDowntimeJailDuration,
+		SlashFractionDoubleSign: DefaultSlashFractionDoubleSign,
+		SlashFractionDowntime:   DefaultSlashFractionDowntime,
+		SessionBlockFrequency:   DefaultSessionBlocktime,
+		DaoAlocation:            DefaultDAOAllocation,
+		ProposerAllocation:      DefaultProposerAllocation,
+		RelaysToTokenMultiplier: DefaultRelaysToTokensMultiplier,
+		MaximumChains:           DefaultMaxChains,
+		MaxJailedBlocks:         DefaultMaxJailedBlocks,
 	}
 }
 
@@ -126,30 +125,30 @@ func (p Params) Validate() error {
 	if p.MaxValidators == 0 {
 		return fmt.Errorf("staking parameter MaxValidators must be a positive integer")
 	}
-	if p.StakeMinimum < DefaultMinStake {
+	if p.StakeMinimun < DefaultMinStake {
 		return fmt.Errorf("staking parameter StakeMimimum must be a positive integer")
 	}
 	if p.SessionBlockFrequency < 2 {
 		return fmt.Errorf("session block must be greater than 1")
 	}
-	if p.DAOAllocation < 0 {
+	if p.DaoAlocation < 0 {
 		return fmt.Errorf("the dao allocation must not be negative")
 	}
 	if p.ProposerAllocation < 0 {
 		return fmt.Errorf("the proposer allication must not be negative")
 	}
-	if p.ProposerAllocation+p.DAOAllocation > 100 {
+	if p.ProposerAllocation+p.DaoAlocation > 100 {
 		return fmt.Errorf("the combo of proposer allocation and dao allocation mnust not be greater than 100")
 	}
 	return nil
 }
 
 // Checks the equality of two param objects
-func (p Params) Equal(p2 Params) bool {
-	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
-	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
-	return bytes.Equal(bz1, bz2)
-}
+//func (p Params) Equal(p2 Params) bool {
+//	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
+//	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
+//	return bytes.Equal(bz1, bz2)
+//}
 
 // String returns a human readable string representation of the parameters.
 func (p Params) String() string {
@@ -172,7 +171,7 @@ func (p Params) String() string {
 		p.UnstakingTime,
 		p.MaxValidators,
 		p.StakeDenom,
-		p.StakeMinimum,
+		p.StakeMinimun,
 		p.MaxEvidenceAge,
 		p.SignedBlocksWindow,
 		p.MinSignedPerWindow,
@@ -181,13 +180,13 @@ func (p Params) String() string {
 		p.SlashFractionDowntime,
 		p.SessionBlockFrequency,
 		p.ProposerAllocation,
-		p.DAOAllocation,
+		p.DaoAlocation,
 		p.MaximumChains,
 		p.MaxJailedBlocks)
 }
 
 // unmarshal the current pos params value from store key
-func UnmarshalParams(cdc *codec.Codec, value []byte) (params Params, err error) {
+func UnmarshalParams(cdc *codec.ProtoCodec, value []byte) (params Params, err error) {
 	err = cdc.UnmarshalBinaryLengthPrefixed(value, &params)
 	if err != nil {
 		return

@@ -13,12 +13,12 @@ import (
 	"github.com/tendermint/tendermint/rpc/client"
 )
 
-func StakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, chains []string, serviceURL string, amount sdk.Int, kp keys.KeyPair, passphrase string) (*sdk.TxResponse, error) {
+func StakeTx(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase, chains []string, serviceURL string, amount sdk.Int, kp keys.KeyPair, passphrase string) (*sdk.TxResponse, error) {
 	fromAddr := kp.GetAddress()
 	msg := types.MsgStake{
-		PublicKey:  kp.PublicKey,
+		Publickey:  kp.PublicKey.RawString(),
 		Value:      amount,
-		ServiceURL: serviceURL, // url where pocket service api is hosted
+		ServiceUrl: serviceURL, // url where pocket service api is hosted
 		Chains:     chains,     // non native blockchains
 	}
 	txBuilder, cliCtx, err := newTx(cdc, msg, fromAddr, tmNode, keybase, passphrase)
@@ -32,8 +32,8 @@ func StakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, chain
 	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, msg)
 }
 
-func UnstakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, address sdk.Address, passphrase string) (*sdk.TxResponse, error) {
-	msg := types.MsgBeginUnstake{Address: address}
+func UnstakeTx(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase, address sdk.Address, passphrase string) (*sdk.TxResponse, error) {
+	msg := types.MsgBeginUnstake{ValidatorAddress: address}
 	txBuilder, cliCtx, err := newTx(cdc, msg, address, tmNode, keybase, passphrase)
 	if err != nil {
 		return nil, err
@@ -45,8 +45,8 @@ func UnstakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, add
 	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, msg)
 }
 
-func UnjailTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, address sdk.Address, passphrase string) (*sdk.TxResponse, error) {
-	msg := types.MsgUnjail{ValidatorAddr: address}
+func UnjailTx(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase, address sdk.Address, passphrase string) (*sdk.TxResponse, error) {
+	msg := types.MsgUnjail{Address: address}
 	txBuilder, cliCtx, err := newTx(cdc, msg, address, tmNode, keybase, passphrase)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func UnjailTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, addr
 	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, msg)
 }
 
-func Send(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, fromAddr, toAddr sdk.Address, passphrase string, amount sdk.Int) (*sdk.TxResponse, error) {
+func Send(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase, fromAddr, toAddr sdk.Address, passphrase string, amount sdk.Int) (*sdk.TxResponse, error) {
 	msg := types.MsgSend{
 		FromAddress: fromAddr,
 		ToAddress:   toAddr,
@@ -75,7 +75,7 @@ func Send(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, fromAddr
 	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, msg)
 }
 
-func RawTx(cdc *codec.Codec, tmNode client.Client, fromAddr sdk.Address, txBytes []byte) (sdk.TxResponse, error) {
+func RawTx(cdc *codec.ProtoCodec, tmNode client.Client, fromAddr sdk.Address, txBytes []byte) (sdk.TxResponse, error) {
 	cliCtx := util.CLIContext{
 		Codec:       cdc,
 		Client:      tmNode,
@@ -84,7 +84,7 @@ func RawTx(cdc *codec.Codec, tmNode client.Client, fromAddr sdk.Address, txBytes
 	cliCtx.BroadcastMode = util.BroadcastSync
 	return cliCtx.BroadcastTx(txBytes)
 }
-func newTx(cdc *codec.Codec, msg sdk.Msg, fromAddr sdk.Address, tmNode client.Client, keybase keys.Keybase, passphrase string) (txBuilder auth.TxBuilder, cliCtx util.CLIContext, err error) {
+func newTx(cdc *codec.ProtoCodec, msg sdk.Msg, fromAddr sdk.Address, tmNode client.Client, keybase keys.Keybase, passphrase string) (txBuilder auth.TxBuilder, cliCtx util.CLIContext, err error) {
 	genDoc, err := tmNode.Genesis()
 	if err != nil {
 		return

@@ -4,16 +4,14 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"log"
-	"os"
-	"strings"
-	"time"
-
 	"github.com/pokt-network/pocket-core/codec"
 	"github.com/pokt-network/pocket-core/crypto"
 	sdk "github.com/pokt-network/pocket-core/types"
+	"log"
 	"net/url"
+	"os"
 	"strconv"
+	"strings"
 )
 
 // Validators is a collection of Validator
@@ -36,36 +34,44 @@ func (v Validator) String() string {
 }
 
 // MUST return the amino encoded version of this validator
-func MustMarshalValidator(cdc *codec.Codec, validator Validator) []byte {
-	return cdc.MustMarshalBinaryLengthPrefixed(validator)
+func MustMarshalValidator(cdc *codec.ProtoCodec, validator Validator) []byte {
+
+	return cdc.MustMarshalBinaryLengthPrefixed(&ValidatorProto{
+		Address:                 validator.Address,
+		PublicKey:               validator.PublicKey.RawString(),
+		Jailed:                  validator.Jailed,
+		Status:                  validator.Status,
+		Chains:                  validator.Chains,
+		ServiceUrl:              validator.ServiceURL,
+		StakedTokens:            validator.StakedTokens,
+		UnstakingCompletionTime: validator.UnstakingCompletionTime,
+	})
 }
 
 // MUST decode the validator from the bytes
-func MustUnmarshalValidator(cdc *codec.Codec, valBytes []byte) Validator {
+func MustUnmarshalValidator(cdc *codec.ProtoCodec, valBytes []byte) Validator {
 	validator, err := UnmarshalValidator(cdc, valBytes)
 	if err != nil {
 		log.Fatal("Cannot unmarshal validator with bytes: ", hex.EncodeToString(valBytes))
 		os.Exit(1)
 	}
-	return validator
+	pubkey, _ := crypto.NewPublicKey(validator.PublicKey)
+	return Validator{
+		Address:                 validator.Address,
+		PublicKey:               pubkey,
+		Jailed:                  validator.Jailed,
+		Status:                  validator.Status,
+		Chains:                  validator.Chains,
+		ServiceURL:              validator.ServiceUrl,
+		StakedTokens:            validator.StakedTokens,
+		UnstakingCompletionTime: validator.UnstakingCompletionTime,
+	}
 }
 
 // unmarshal the validator
-func UnmarshalValidator(cdc *codec.Codec, valBytes []byte) (validator Validator, err error) {
+func UnmarshalValidator(cdc *codec.ProtoCodec, valBytes []byte) (validator ValidatorProto, err error) {
 	err = cdc.UnmarshalBinaryLengthPrefixed(valBytes, &validator)
 	return validator, err
-}
-
-// this is a helper struct used for JSON de- and encoding only
-type hexValidator struct {
-	Address                 sdk.Address     `json:"address" yaml:"address"`               // the hex address of the validator
-	PublicKey               string          `json:"public_key" yaml:"public_key"`         // the hex consensus public key of the validator
-	Jailed                  bool            `json:"jailed" yaml:"jailed"`                 // has the validator been jailed from staked status?
-	Status                  sdk.StakeStatus `json:"status" yaml:"status"`                 // validator status (staked/unstaking/unstaked)
-	StakedTokens            sdk.Int         `json:"tokens" yaml:"tokens"`                 // how many staked tokens
-	ServiceURL              string          `json:"service_url" yaml:"service_url"`       // the url of the pocket-api
-	Chains                  []string        `json:"chains" yaml:"chains"`                 // the non-native (external) chains hosted
-	UnstakingCompletionTime time.Time       `json:"unstaking_time" yaml:"unstaking_time"` // if unstaking, min time for the validator to complete unstaking
 }
 
 // Marshals struct into JSON
@@ -76,12 +82,12 @@ func (v Validators) JSON() (out []byte, err error) {
 
 // MarshalJSON marshals the validator to JSON using Hex
 func (v Validator) MarshalJSON() ([]byte, error) {
-	return codec.Cdc.MarshalJSON(hexValidator{
+	return ModuleCdc.MarshalJSON(ValidatorProto{
 		Address:                 v.Address,
 		PublicKey:               v.PublicKey.RawString(),
 		Jailed:                  v.Jailed,
 		Status:                  v.Status,
-		ServiceURL:              v.ServiceURL,
+		ServiceUrl:              v.ServiceURL,
 		Chains:                  v.Chains,
 		StakedTokens:            v.StakedTokens,
 		UnstakingCompletionTime: v.UnstakingCompletionTime,
@@ -90,8 +96,8 @@ func (v Validator) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON unmarshals the validator from JSON using Hex
 func (v *Validator) UnmarshalJSON(data []byte) error {
-	bv := &hexValidator{}
-	if err := codec.Cdc.UnmarshalJSON(data, bv); err != nil {
+	bv := &ValidatorProto{}
+	if err := ModuleCdc.UnmarshalJSON(data, bv); err != nil {
 		return err
 	}
 	publicKey, err := crypto.NewPublicKey(bv.PublicKey)
@@ -103,7 +109,7 @@ func (v *Validator) UnmarshalJSON(data []byte) error {
 		PublicKey:               publicKey,
 		Jailed:                  bv.Jailed,
 		Chains:                  bv.Chains,
-		ServiceURL:              bv.ServiceURL,
+		ServiceURL:              bv.ServiceUrl,
 		StakedTokens:            bv.StakedTokens,
 		Status:                  bv.Status,
 		UnstakingCompletionTime: bv.UnstakingCompletionTime,

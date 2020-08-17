@@ -22,7 +22,7 @@ func (k Keeper) GetValidatorSigningInfo(ctx sdk.Ctx, addr sdk.Address) (info typ
 // SetValidatorSigningInfo - Store signing information for the validator by address
 func (k Keeper) SetValidatorSigningInfo(ctx sdk.Ctx, addr sdk.Address, info types.ValidatorSigningInfo) {
 	store := ctx.KVStore(k.storeKey)
-	bz := k.cdc.MustMarshalBinaryLengthPrefixed(info)
+	bz := k.cdc.MustMarshalBinaryLengthPrefixed(&info)
 	_ = store.Set(types.KeyForValidatorSigningInfo(addr), bz)
 }
 
@@ -40,7 +40,7 @@ func (k Keeper) ResetValidatorSigningInfo(ctx sdk.Ctx, addr sdk.Address) {
 			StartHeight: ctx.BlockHeight(),
 		}
 	}
-	signInfo.Reset()
+	signInfo.ResetSigningInfo()
 	k.SetValidatorSigningInfo(ctx, addr, signInfo)
 	k.clearValidatorMissed(ctx, addr)
 }
