@@ -83,9 +83,9 @@ message Result {
   option (gogoproto.goproto_getters) = false;
   option (gogoproto.stringer) = true;
 
-  uint32 code = 1 [(gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.CodeType"];
+  uint32 code = 1 [(gogoproto.casttype) = "CodeType"];
 
-  uint32 codespace = 2 [(gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.CodespaceType"];
+  uint32 codespace = 2 [(gogoproto.casttype) = "CodespaceType"];
 
   // Data is any data returned from message or handler execution. It MUST be length
   // prefixed in order to separate data from multiple message executions.
@@ -100,7 +100,7 @@ message Result {
 
   // Events contains a slice of Event objects that were emitted during message or
   // handler execution.
-  repeated tendermint.abci.types.Event events = 7 [(gogoproto.nullable) = false,(gogoproto.castrepeated) = "github.com/pokt-network/pocket-core/types.Events"];
+  repeated tendermint.abci.types.Event events = 7 [(gogoproto.nullable) = false,(gogoproto.castrepeated) = "Events"];
 }
 
 // SimulationResponse defines the response generated when a transaction is

@@ -12,8 +12,8 @@ import (
 var Cdc *codec.LegacyAmino
 
 func init() {
-	Cdc = codec.New()
-	crypto.RegisterAmino(Cdc)
-	codec.RegisterEvidences(Cdc)
+	Cdc = codec.NewLegacyAminoCodec()
+	crypto.RegisterCrypto(Cdc, nil)
+	codec.RegisterEvidences(Cdc, nil)
 	Cdc.Seal()
 }

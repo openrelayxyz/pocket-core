@@ -26,8 +26,8 @@ func (AppModuleBasic) Name() string {
 }
 
 // RegisterCodec registers the staking module's types for the given codec.
-func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
-	types.RegisterCodec(cdc)
+func (AppModuleBasic) RegisterCodec(amino *codec.LegacyAmino, proto *codec.ProtoCodec) {
+	types.RegisterCodec(amino, proto)
 }
 
 // DefaultGenesis returns default genesis state as raw bytes for the staking

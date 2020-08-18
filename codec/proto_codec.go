@@ -3,6 +3,7 @@ package codec
 import (
 	"encoding/binary"
 	"fmt"
+	"github.com/gogo/protobuf/proto"
 	"github.com/pokt-network/pocket-core/codec/types"
 	"strings"
 
@@ -19,6 +20,14 @@ var _ Marshaler = &ProtoCodec{}
 
 func NewProtoCodec(anyUnpacker types.AnyUnpacker) *ProtoCodec {
 	return &ProtoCodec{anyUnpacker: anyUnpacker}
+}
+
+func (pc *ProtoCodec) Register(protoName string, iface interface{}, impls ...proto.Message) {
+	res, ok := pc.anyUnpacker.(types.InterfaceRegistry)
+	if !ok {
+		panic("unable to convert protocodec.anyUnpacker into types.InterfaceRegistry")
+	}
+	res.RegisterInterface(protoName, iface, impls...)
 }
 
 func (pc *ProtoCodec) MarshalBinaryBare(o ProtoMarshaler) ([]byte, error) {

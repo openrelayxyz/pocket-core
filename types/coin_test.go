@@ -644,7 +644,7 @@ func TestFindDup(t *testing.T) {
 }
 
 func TestMarshalJSONCoins(t *testing.T) {
-	cdc := codec.New()
+	cdc := codec.NewLegacyAminoCodec()
 	RegisterCodec(cdc)
 
 	testCases := []struct {

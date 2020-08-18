@@ -3,6 +3,7 @@ package keeper
 // DONTCOVER
 
 import (
+	"github.com/pokt-network/pocket-core/crypto"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
@@ -24,9 +25,9 @@ type testInput struct {
 func setupTestInput() testInput {
 	db := dbm.NewMemDB()
 
-	cdc := codec.New()
+	cdc := codec.NewLegacyAminoCodec()
 	authTypes.RegisterCodec(cdc)
-	codec.RegisterCrypto(cdc)
+	crypto.RegisterCrypto(cdc, nil)
 
 	authCapKey := sdk.NewKVStoreKey("auth")
 	keyParams := sdk.ParamsKey

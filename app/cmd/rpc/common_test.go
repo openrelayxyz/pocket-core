@@ -209,7 +209,7 @@ func inMemTendermintNode(genesisState []byte) (*node.Node, keys.Keybase) {
 
 func memCodec() *codec.Codec {
 	if memCDC == nil {
-		memCDC = codec.New()
+		memCDC = codec.NewLegacyAminoCodec()
 		module.NewBasicManager(
 			apps.AppModuleBasic{},
 			auth.AppModuleBasic{},
@@ -218,7 +218,7 @@ func memCodec() *codec.Codec {
 			pocket.AppModuleBasic{},
 		).RegisterCodec(memCDC)
 		sdk.RegisterCodec(memCDC)
-		codec.RegisterCrypto(memCDC)
+		crypto.RegisterCrypto(memCDC)
 	}
 	return memCDC
 }

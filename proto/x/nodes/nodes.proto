@@ -1,5 +1,5 @@
 syntax = "proto3";
-package x.apps;
+package x.nodes;
 
 import "gogoproto/gogo.proto";
 import "google/protobuf/timestamp.proto";

@@ -509,7 +509,7 @@ func TestUnmarshalParams(t *testing.T) {
 		wantErr    bool
 	}{
 		{"Unmarshall Test", args{
-			cdc:   codec.New(),
+			cdc:   codec.NewLegacyAminoCodec(),
 			value: value,
 		}, defaultParams, false},
 	}

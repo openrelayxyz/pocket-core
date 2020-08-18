@@ -81,7 +81,7 @@ const (
 )
 
 var (
-	cdc *codec.Codec
+	legacyAminoCodec *codec.Codec
 	// the default fileseparator based on OS
 	FS = string(fp.Separator)
 	// app instance currently running
@@ -430,7 +430,7 @@ func loadPKFromFile(path string) (privval.FilePVKey, string) {
 		cmn.Exit(err.Error())
 	}
 	pvKey := privval.FilePVKey{}
-	err = cdc.UnmarshalJSON(keyJSONBytes, &pvKey)
+	err = legacyAminoCodec.UnmarshalJSON(keyJSONBytes, &pvKey)
 	if err != nil {
 		cmn.Exit(fmt.Sprintf("Error reading PrivValidator key from %v: %v\n", path, err))
 	}
@@ -444,7 +444,7 @@ func privValKey(res crypto.PrivateKey) {
 		PubKey:  res.PubKey(),
 		PrivKey: res.PrivKey(),
 	}
-	pvkBz, err := cdc.MarshalJSONIndent(privValKey, "", "  ")
+	pvkBz, err := legacyAminoCodec.MarshalJSONIndent(privValKey, "", "  ")
 	if err != nil {
 		log2.Fatal(err)
 	}
@@ -463,7 +463,7 @@ func nodeKey(res crypto.PrivateKey) {
 	nodeKey := p2p.NodeKey{
 		PrivKey: res.PrivKey(),
 	}
-	pvkBz, err := cdc.MarshalJSONIndent(nodeKey, "", "  ")
+	pvkBz, err := legacyAminoCodec.MarshalJSONIndent(nodeKey, "", "  ")
 	if err != nil {
 		log2.Fatal(err)
 	}
@@ -478,7 +478,7 @@ func nodeKey(res crypto.PrivateKey) {
 }
 
 func privValState() {
-	pvkBz, err := cdc.MarshalJSONIndent(privval.FilePVLastSignState{}, "", "  ")
+	pvkBz, err := legacyAminoCodec.MarshalJSONIndent(privval.FilePVLastSignState{}, "", "  ")
 	if err != nil {
 		log2.Fatal(err)
 	}
@@ -652,15 +652,16 @@ func DeleteHostedChains() {
 }
 
 func Codec() *codec.Codec {
-	if cdc == nil {
+	if legacyAminoCodec == nil {
 		MakeCodec()
 	}
-	return cdc
+	return legacyAminoCodec
 }
 
 func MakeCodec() {
 	// create a new codec
-	cdc = codec.New()
+	legacyAminoCodec = codec.NewLegacyAminoCodec()
+	protoCodec = codec.NewProtoCodec()
 	// register all of the app module types
 	module.NewBasicManager(
 		apps.AppModuleBasic{},
@@ -668,11 +669,11 @@ func MakeCodec() {
 		gov.AppModuleBasic{},
 		nodes.AppModuleBasic{},
 		pocket.AppModuleBasic{},
-	).RegisterCodec(cdc)
+	).RegisterCodec(legacyAminoCodec)
 	// register the sdk types
-	sdk.RegisterCodec(cdc)
+	sdk.RegisterCodec(legacyAminoCodec)
 	// register the crypto types
-	codec.RegisterCrypto(cdc)
+	crypto.RegisterCrypto(legacyAminoCodec, nil)
 }
 
 func Credentials() string {

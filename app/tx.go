@@ -14,7 +14,7 @@ func (app PocketCoreApp) SendRawTx(fromAddr string, txBytes []byte) (sdk.TxRespo
 	tmClient := getTMClient()
 	defer func() { _ = tmClient.Stop() }()
 	cliCtx := util.CLIContext{
-		Codec:       cdc,
+		Codec:       legacyAminoCodec,
 		Client:      tmClient,
 		FromAddress: fa,
 	}

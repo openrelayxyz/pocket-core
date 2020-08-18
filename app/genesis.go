@@ -15416,7 +15416,7 @@ func GenesisStateFromJson(json string) posConfig.GenesisState {
 		fmt.Println("unable to read genesis from json (internal)")
 		os.Exit(1)
 	}
-	return posConfig.GenesisStateFromGenDoc(cdc, *genDoc)
+	return posConfig.GenesisStateFromGenDoc(legacyAminoCodec, *genDoc)
 }
 
 func newDefaultGenesisState() []byte {

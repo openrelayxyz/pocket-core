@@ -21,9 +21,9 @@ func init() {
 		_ = err
 	}
 
-	moduleCdc = codec.New()
+	moduleCdc = codec.NewLegacyAminoCodec()
 	RegisterCodec(moduleCdc)
-	codec.RegisterCrypto(moduleCdc)
+	crypto.RegisterCrypto(moduleCdc, nil)
 	moduleCdc.Seal()
 
 	msgAppStake = MsgAppStake{

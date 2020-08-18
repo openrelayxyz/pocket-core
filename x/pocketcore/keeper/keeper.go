@@ -16,7 +16,7 @@ type Keeper struct {
 	TmNode            client.Client
 	hostedBlockchains *types.HostedBlockchains
 	Paramstore        sdk.Subspace
-	storeKey          sdk.StoreKey // Unexposed key to access store from sdk.Context
+	storeKey          sdk.StoreKey      // Unexposed key to access store from sdk.Context
 	cdc               *codec.ProtoCodec // The wire codec for binary encoding/decoding.
 }
 

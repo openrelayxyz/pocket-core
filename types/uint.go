@@ -148,7 +148,7 @@ func (u *Uint) UnmarshalJSON(bz []byte) error {
 	return unmarshalJSON(u.i, bz)
 }
 
-// Marshal implements the gogo proto custom type interface.
+// MarshalObject implements the gogo proto custom type interface.
 func (u Uint) Marshal() ([]byte, error) {
 	if u.i == nil {
 		u.i = new(big.Int)
@@ -175,7 +175,7 @@ func (u *Uint) MarshalTo(data []byte) (n int, err error) {
 	return len(bz), nil
 }
 
-// Unmarshal implements the gogo proto custom type interface.
+// UnmarshalObject implements the gogo proto custom type interface.
 func (u *Uint) Unmarshal(data []byte) error {
 	if len(data) == 0 {
 		u = nil

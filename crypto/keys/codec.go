@@ -1,19 +1,21 @@
 package keys
 
 import (
-
 	"github.com/pokt-network/pocket-core/codec"
+	"github.com/pokt-network/pocket-core/codec/types"
 	"github.com/pokt-network/pocket-core/crypto"
 )
 
-// CryptoCdc defines the codec required for keys and info
-var CryptoCdc *codec.LegacyAmino
+// LegacyCodec defines the codec required for keys and info
+var LegacyCodec *codec.LegacyAmino
+
+var cdc = codec.NewProtoCodec(types.NewInterfaceRegistry())
 
 func init() {
-	CryptoCdc = codec.New()
-	crypto.RegisterAmino(CryptoCdc)
-	RegisterCodec(CryptoCdc)
-	CryptoCdc.Seal()
+	LegacyCodec = codec.NewLegacyAminoCodec()
+	crypto.RegisterCrypto(LegacyCodec, nil)
+	RegisterCodec(LegacyCodec)
+	LegacyCodec.Seal()
 }
 
 // RegisterCodec registers concrete types and interfaces on the given codec.
