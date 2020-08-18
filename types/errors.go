@@ -179,12 +179,10 @@ func ErrForbidden(msg string) Error {
 //----------------------------------------
 // sdk Error type
 type Error interface {
-	//Implements cmn.Error
-	//Error() string
-	//Stacktrace() error
-	//Trace(offset int, format string, args ...interface{}) error
-	//Data() interface{}
-	cmnError
+	Error() string
+	Stacktrace() error
+	Trace(offset int, format string, args ...interface{}) error
+	Data() interface{}
 
 	// convenience
 	TraceSDK(format string, args ...interface{}) Error
@@ -212,22 +210,22 @@ func newError(codespace CodespaceType, code CodeType, format string, args ...int
 	if format == "" {
 		format = CodeToDefaultMsg(code)
 	}
-	tmError := NewTMError(format, args...)
-	c, ok := tmError.(*cmnError)
-	if !ok {
-		return nil
-	}
 	return &sdkError{
 		codespace: codespace,
 		code:      code,
-		cmnError:  *c,
+		data: FmtError{
+			format: format,
+			args:   args,
+		},
 	}
 }
 
 type sdkError struct {
-	codespace CodespaceType
-	code      CodeType
-	cmnError
+	codespace  CodespaceType
+	code       CodeType
+	data       interface{}    // associated data
+	stacktrace []uintptr      // first stack trace
+	msgtraces  []msgtraceItem // all messages traced
 }
 
 // Implements Error.
@@ -239,14 +237,41 @@ func (err *sdkError) WithDefaultCodespace(cs CodespaceType) Error {
 	return &sdkError{
 		codespace: cs,
 		code:      err.code,
-		cmnError:  err.cmnError,
 	}
+}
+
+// Captures a stacktrace if one was not already captured.
+func (err *sdkError) Stacktrace() error {
+	if err.stacktrace == nil {
+		var offset = 3
+		var depth = 32
+		err.stacktrace = captureStacktrace(offset, depth)
+	}
+	return err
+}
+
+// Implements ABCIError.
+// nolint: errcheck
+func (err *sdkError) Trace(offset int, format string, args ...interface{}) error {
+	msg := fmt.Sprintf(format, args...)
+	return err.doTrace(msg, 0)
 }
 
 // Implements ABCIError.
 // nolint: errcheck
 func (err *sdkError) TraceSDK(format string, args ...interface{}) Error {
-	_ = err.Trace(1, format, args...)
+	msg := fmt.Sprintf(format, args...)
+	return err.doTrace(msg, 0)
+}
+
+func (err *sdkError) doTrace(msg string, n int) *sdkError {
+	pc, _, _, _ := runtime.Caller(n + 2) // +1 for doTrace().  +1 for the caller.
+	// Include file & line number & msg.
+	// Do not include the whole stack trace.
+	err.msgtraces = append(err.msgtraces, msgtraceItem{
+		pc:  pc,
+		msg: msg,
+	})
 	return err
 }
 
@@ -256,12 +281,19 @@ func (err *sdkError) Error() string {
 Codespace: %s
 Code: %d
 Message: %#v
-`, err.codespace, err.code, err.cmnError.Error())
+`, err.codespace, err.code, fmt.Sprintf("%v", err))
 }
 
 // Implements Error.
 func (err *sdkError) Codespace() CodespaceType {
 	return err.codespace
+}
+
+// Return the "data" of this error.
+// Data could be used for error handling/switching,
+// or for holding general error/debug information.
+func (err *sdkError) Data() interface{} {
+	return err.data
 }
 
 // Implements Error.
@@ -271,7 +303,7 @@ func (err *sdkError) Code() CodeType {
 
 // Implements ABCIError.
 func (err *sdkError) ABCILog() string {
-	errMsg := err.cmnError.Error()
+	errMsg := err.Error()
 	jsonErr := humanReadableError{
 		Codespace: err.codespace,
 		Code:      err.code,
@@ -303,6 +335,37 @@ func (err *sdkError) QueryResult() abci.ResponseQuery {
 		Code:      uint32(err.Code()),
 		Codespace: string(err.Codespace()),
 		Log:       err.ABCILog(),
+	}
+}
+
+func (err *sdkError) Format(s fmt.State, verb rune) {
+	switch verb {
+	case 'p':
+		_, _ = s.Write([]byte(fmt.Sprintf("%p", &err)))
+	default:
+		if s.Flag('#') {
+			_, _ = s.Write([]byte("--= Error =--\n"))
+			// Write data.
+			_, _ = s.Write([]byte(fmt.Sprintf("Data: %#v\n", err.data)))
+			// Write msg trace items.
+			_, _ = s.Write([]byte(fmt.Sprintf("Msg Traces:\n")))
+			for i, msgtrace := range err.msgtraces {
+				_, _ = s.Write([]byte(fmt.Sprintf(" %4d  %s\n", i, msgtrace.String())))
+			}
+			// Write stack trace.
+			if err.stacktrace != nil {
+				_, _ = s.Write([]byte(fmt.Sprintf("Stack Trace:\n")))
+				for i, pc := range err.stacktrace {
+					fnc := runtime.FuncForPC(pc)
+					file, line := fnc.FileLine(pc)
+					_, _ = s.Write([]byte(fmt.Sprintf(" %4d  %s:%d\n", i, file, line)))
+				}
+			}
+			_, _ = s.Write([]byte("--= /Error =--\n"))
+		} else {
+			// Write msg.
+			_, _ = s.Write([]byte(fmt.Sprintf("%v", err.data)))
+		}
 	}
 }
 
@@ -341,138 +404,6 @@ type humanReadableError struct {
 	Message   string        `json:"message"`
 }
 
-//----------------------------------------
-// Convenience method.
-
-func ErrorWrap(cause interface{}, format string, args ...interface{}) TMError {
-	if causeCmnError, ok := cause.(*cmnError); ok { //nolint:gocritic
-		msg := fmt.Sprintf(format, args...)
-		return causeCmnError.Stacktrace().Trace(1, msg)
-	} else if cause == nil {
-		return newCmnError(FmtError{format, args}).Stacktrace()
-	} else {
-		// NOTE: causeCmnError is a typed nil here.
-		msg := fmt.Sprintf(format, args...)
-		return newCmnError(cause).Stacktrace().Trace(1, msg)
-	}
-}
-
-type TMError interface {
-	Error() string
-	Stacktrace() TMError
-	Trace(offset int, format string, args ...interface{}) TMError
-	Data() interface{}
-}
-
-// New Error with formatted message.
-// The Error's Data will be a FmtError type.
-func NewTMError(format string, args ...interface{}) TMError {
-	err := FmtError{format, args}
-	return newCmnError(err)
-}
-
-// New Error with specified data.
-func NewErrorWithData(data interface{}) TMError {
-	return newCmnError(data)
-}
-
-type cmnError struct {
-	data       interface{}    // associated data
-	msgtraces  []msgtraceItem // all messages traced
-	stacktrace []uintptr      // first stack trace
-}
-
-var _ TMError = &cmnError{}
-
-// NOTE: do not expose.
-func newCmnError(data interface{}) *cmnError {
-	return &cmnError{
-		data:       data,
-		msgtraces:  nil,
-		stacktrace: nil,
-	}
-}
-
-// Implements error.
-func (err *cmnError) Error() string {
-	return fmt.Sprintf("%v", err)
-}
-
-// Captures a stacktrace if one was not already captured.
-func (err *cmnError) Stacktrace() TMError {
-	if err.stacktrace == nil {
-		var offset = 3
-		var depth = 32
-		err.stacktrace = captureStacktrace(offset, depth)
-	}
-	return err
-}
-
-// Add tracing information with msg.
-// Set n=0 unless wrapped with some function, then n > 0.
-func (err *cmnError) Trace(offset int, format string, args ...interface{}) TMError {
-	msg := fmt.Sprintf(format, args...)
-	return err.doTrace(msg, offset)
-}
-
-// Return the "data" of this error.
-// Data could be used for error handling/switching,
-// or for holding general error/debug information.
-func (err *cmnError) Data() interface{} {
-	return err.data
-}
-
-func (err *cmnError) doTrace(msg string, n int) TMError {
-	pc, _, _, _ := runtime.Caller(n + 2) // +1 for doTrace().  +1 for the caller.
-	// Include file & line number & msg.
-	// Do not include the whole stack trace.
-	err.msgtraces = append(err.msgtraces, msgtraceItem{
-		pc:  pc,
-		msg: msg,
-	})
-	return err
-}
-
-func (err *cmnError) Format(s fmt.State, verb rune) {
-	switch verb {
-	case 'p':
-		_, _ = s.Write([]byte(fmt.Sprintf("%p", &err)))
-	default:
-		if s.Flag('#') {
-			_, _ = s.Write([]byte("--= Error =--\n"))
-			// Write data.
-			_, _ = s.Write([]byte(fmt.Sprintf("Data: %#v\n", err.data)))
-			// Write msg trace items.
-			_, _ = s.Write([]byte(fmt.Sprintf("Msg Traces:\n")))
-			for i, msgtrace := range err.msgtraces {
-				_, _ = s.Write([]byte(fmt.Sprintf(" %4d  %s\n", i, msgtrace.String())))
-			}
-			// Write stack trace.
-			if err.stacktrace != nil {
-				_, _ = s.Write([]byte(fmt.Sprintf("Stack Trace:\n")))
-				for i, pc := range err.stacktrace {
-					fnc := runtime.FuncForPC(pc)
-					file, line := fnc.FileLine(pc)
-					_, _ = s.Write([]byte(fmt.Sprintf(" %4d  %s:%d\n", i, file, line)))
-				}
-			}
-			_, _ = s.Write([]byte("--= /Error =--\n"))
-		} else {
-			// Write msg.
-			_, _ = s.Write([]byte(fmt.Sprintf("%v", err.data)))
-		}
-	}
-}
-
-//----------------------------------------
-// stacktrace & msgtraceItem
-
-func captureStacktrace(offset int, depth int) []uintptr {
-	var pcs = make([]uintptr, depth)
-	n := runtime.Callers(offset, pcs)
-	return pcs[0:n]
-}
-
 type msgtraceItem struct {
 	pc  uintptr
 	msg string
@@ -488,26 +419,14 @@ func (mti msgtraceItem) String() string {
 }
 
 //----------------------------------------
-// fmt error
+// stacktrace & msgtraceItem
 
-/*
+func captureStacktrace(offset int, depth int) []uintptr {
+	var pcs = make([]uintptr, depth)
+	n := runtime.Callers(offset, pcs)
+	return pcs[0:n]
+}
 
-FmtError is the data type for NewError() (e.g. NewError().Data().(FmtError))
-Theoretically it could be used to switch on the format string.
-
-```go
-	// Error construction
-	var err1 error = NewError("invalid username %v", "BOB")
-	var err2 error = NewError("another kind of error")
-	...
-	// Error handling
-	switch err1.Data().(cmn.FmtError).Format() {
-		case "invalid username %v": ...
-		case "another kind of error": ...
-	    default: ...
-	}
-```
-*/
 type FmtError struct {
 	format string
 	args   []interface{}

@@ -84,13 +84,13 @@ func (aa Address) Empty() bool {
 	return bytes.Equal(aa.Bytes(), aa2.Bytes())
 }
 
-// Marshal returns the raw address bytes. It is needed for protobuf
+// MarshalObject returns the raw address bytes. It is needed for protobuf
 // compatibility.
 func (aa Address) Marshal() ([]byte, error) {
 	return aa, nil
 }
 
-// Unmarshal sets the address to the given data. It is needed for protobuf
+// UnmarshalObject sets the address to the given data. It is needed for protobuf
 // compatibility.
 func (aa *Address) Unmarshal(data []byte) error {
 	*aa = data

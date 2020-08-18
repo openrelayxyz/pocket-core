@@ -26,9 +26,9 @@ func init() {
 		return
 	}
 
-	moduleCdc = codec.New()
+	moduleCdc = codec.NewLegacyAminoCodec()
 	RegisterCodec(moduleCdc)
-	codec.RegisterCrypto(moduleCdc)
+	crypto.RegisterCrypto(moduleCdc, nil)
 	moduleCdc.Seal()
 
 	application = Application{
@@ -154,7 +154,7 @@ func TestApplicationUtil_UnmarshalJSON(t *testing.T) {
 				t.Fatalf("Cannot marshal application")
 			}
 			if err = tt.args.application.UnmarshalJSON(marshaled); err != nil {
-				t.Fatalf("Unmarshal(): returns %v but want %v", err, tt.want)
+				t.Fatalf("UnmarshalObject(): returns %v but want %v", err, tt.want)
 			}
 			// NOTE CANNOT PERFORM DEEP EQUAL
 			// Unmarshalling causes StakedTokens & MaxRelays to be

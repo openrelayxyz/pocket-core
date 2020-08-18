@@ -27,7 +27,7 @@ func defaultComponents(key sdk.StoreKey) (sdk.Context, *codec.Codec) {
 	cms.MountStoreWithDB(key, sdk.StoreTypeIAVL, db)
 	_ = cms.LoadLatestVersion()
 	ctx := sdk.NewContext(cms, abci.Header{}, false, log.NewNopLogger())
-	cdc := codec.New()
+	cdc := codec.NewLegacyAminoCodec()
 	return ctx, cdc
 }
 func TestList(t *testing.T) {

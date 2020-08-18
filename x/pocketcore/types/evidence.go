@@ -57,7 +57,7 @@ func (e *Evidence) GenerateMerkleProof(index int) (proof MerkleProof, leaf Proof
 
 var _ CacheObject = Evidence{} // satisfies the cache object interface
 
-func (e Evidence) Marshal() ([]byte, error) {
+func (e Evidence) MarshalObject() ([]byte, error) {
 	encodedBloom, err := e.Bloom.GobEncode()
 	if err != nil {
 		return nil, err
@@ -72,7 +72,7 @@ func (e Evidence) Marshal() ([]byte, error) {
 	return ModuleCdc.MarshalBinaryBare(ep)
 }
 
-func (e Evidence) Unmarshal(b []byte) (CacheObject, error) {
+func (e Evidence) UnmarshalObject(b []byte) (CacheObject, error) {
 	ep := EvidenceEncodable{}
 	err := ModuleCdc.UnmarshalBinaryBare(b, &ep)
 	if err != nil {

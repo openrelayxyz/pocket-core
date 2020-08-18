@@ -11,11 +11,11 @@ import (
 )
 
 // "Session" - The relationship between an application and the pocket network
-type Session struct {
-	SessionHeader `json:"header"`
-	SessionKey    `json:"key"`
-	SessionNodes  `json:"nodes"`
-}
+//type Session struct {
+//	SessionHeader `json:"header"`
+//	SessionKey    `json:"key"`
+//	SessionNodes  `json:"nodes"`
+//}
 
 // "NewSession" - create a new session from seed data
 func NewSession(sessionCtx, ctx sdk.Ctx, keeper PosKeeper, sessionHeader SessionHeader, blockHash string, sessionNodesCount int) (Session, sdk.Error) {
@@ -32,7 +32,7 @@ func NewSession(sessionCtx, ctx sdk.Ctx, keeper PosKeeper, sessionHeader Session
 	// then populate the structure and return
 	return Session{
 		SessionKey:    sessionKey,
-		SessionHeader: sessionHeader,
+		SessionHeader: &sessionHeader,
 		SessionNodes:  sessionNodes,
 	}, nil
 }
@@ -40,26 +40,26 @@ func NewSession(sessionCtx, ctx sdk.Ctx, keeper PosKeeper, sessionHeader Session
 // "Validate" - Validates a session object
 func (s Session) Validate(node nodeexported.ValidatorI, app appexported.ApplicationI, sessionNodeCount int) sdk.Error {
 	// validate chain
-	if len(s.Chain) == 0 {
+	if len(s.SessionHeader.Chain) == 0 {
 		return NewEmptyNonNativeChainError(ModuleName)
 	}
 	// validate sessionBlockHeight
-	if s.SessionBlockHeight < 1 {
+	if s.SessionHeader.SessionBlockHeight < 1 {
 		return NewInvalidBlockHeightError(ModuleName)
 	}
 	// validate the app public key
-	if err := PubKeyVerification(s.ApplicationPubKey); err != nil {
+	if err := PubKeyVerification(s.SessionHeader.ApplicationPubKey); err != nil {
 		return err
 	}
 	// validate app corresponds to appPubKey
-	if app.GetPublicKey().RawString() != s.ApplicationPubKey {
+	if app.GetPublicKey().RawString() != s.SessionHeader.ApplicationPubKey {
 		return NewInvalidAppPubKeyError(ModuleName)
 	}
 	// validate app chains
 	chains := app.GetChains()
 	found := false
 	for _, c := range chains {
-		if c == s.Chain {
+		if c == s.SessionHeader.Chain {
 			found = true
 			break
 		}
@@ -81,11 +81,11 @@ func (s Session) Validate(node nodeexported.ValidatorI, app appexported.Applicat
 
 var _ CacheObject = Session{} // satisfies the cache object interface
 
-func (s Session) Marshal() ([]byte, error) {
+func (s Session) MarshalObject() ([]byte, error) {
 	return ModuleCdc.MarshalBinaryBare(s)
 }
 
-func (s Session) Unmarshal(b []byte) (CacheObject, error) {
+func (s Session) UnmarshalObject(b []byte) (CacheObject, error) {
 	err := ModuleCdc.UnmarshalBinaryBare(b, &s)
 	if err != nil {
 		return s, fmt.Errorf("error unmarshalling session object: %s", err.Error())

@@ -5,7 +5,6 @@ import (
 	"github.com/pokt-network/pocket-core/codec/types"
 
 	"github.com/gogo/protobuf/proto"
-
 )
 
 // MarshalAny is a convenience function for packing the provided value in an

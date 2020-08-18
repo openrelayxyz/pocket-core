@@ -28,8 +28,8 @@ func (AppModuleBasic) Name() string {
 }
 
 // "RegisterCodec" - Registers the codec for the module
-func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
-	types.RegisterCodec(cdc)
+func (AppModuleBasic) RegisterCodec(amino *codec.LegacyAmino, proto *codec.ProtoCodec) {
+	types.RegisterCodec(amino, proto)
 }
 
 // "DefaultGenesis" - Returns the default genesis for the module

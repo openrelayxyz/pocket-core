@@ -267,7 +267,7 @@ func TestTruncate(t *testing.T) {
 	}
 }
 
-var cdc = codec.New()
+var cdc = codec.NewLegacyAminoCodec()
 
 func TestDecMarshalJSON(t *testing.T) {
 	decimal := func(i int64) Dec {

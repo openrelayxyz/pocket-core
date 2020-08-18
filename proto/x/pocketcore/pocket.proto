@@ -2,6 +2,7 @@ syntax = "proto3";
 package x.pocketcore;
 
 import "gogoproto/gogo.proto";
+import "x/nodes/nodes.proto";
 
 option go_package = "github.com/pokt-network/pocket-core/x/pocketcore/types";
 
@@ -14,6 +15,14 @@ message SessionHeader {
 	int64 sessionBlockHeight = 3 [(gogoproto.jsontag) = "session_height"];
 }
 
+message Session {
+	option (gogoproto.goproto_getters) = false;
+
+	SessionHeader sessionHeader = 1 [(gogoproto.jsontag)="header"];
+	bytes sessionKey = 2 [(gogoproto.jsontag)="key", (gogoproto.casttype)="SessionKey"];
+	repeated x.nodes.ValidatorProto sessionNodes = 3 [(gogoproto.jsontag)="key", (gogoproto.castrepeated)="SessionNodes"];
+}
+
 message MsgClaim {
 	option (gogoproto.goproto_getters) = false;
 
@@ -21,7 +30,7 @@ message MsgClaim {
 	HashRange merkleRoot = 2 [(gogoproto.jsontag) = "merkle_root"];
 	int64 totalProofs = 3 [(gogoproto.jsontag) = "total_proofs"];
 	bytes fromAddress = 4 [(gogoproto.jsontag) = "header", (gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.Address"];
-	int32 evidenceType = 5 [(gogoproto.jsontag) = "evidence_type", (gogoproto.casttype) = "github.com/pokt-network/pocket-core/x/pocketcore/types.EvidenceType"];
+	int32 evidenceType = 5 [(gogoproto.jsontag) = "evidence_type", (gogoproto.casttype) = "EvidenceType"];
 	int64 expirationHeight = 6 [(gogoproto.jsontag) = "expiration_height"];
 }
 
@@ -29,8 +38,8 @@ message MsgProof {
 	option (gogoproto.goproto_getters) = false;
 
 	MerkleProof merkleProof = 1 [(gogoproto.jsontag) = "merkle_proofs"];
-	ProofI leaf = 2 [(gogoproto.jsontag) = "leaf", (gogoproto.casttype) = "github.com/pokt-network/pocket-core/x/pocketcore/types.Proof"];
-	int32 evidenceType = 3 [(gogoproto.jsontag) = "evidence_type", (gogoproto.casttype) = "github.com/pokt-network/pocket-core/x/pocketcore/types.EvidenceType"];
+	ProofI leaf = 2 [(gogoproto.jsontag) = "leaf", (gogoproto.casttype) = "Proof"];
+	int32 evidenceType = 3 [(gogoproto.jsontag) = "evidence_type", (gogoproto.casttype) = "EvidenceType"];
 }
 
 message ProofI {
@@ -48,8 +57,8 @@ message EvidenceEncodable {
 	bytes bloomBytes = 1 [(gogoproto.jsontag) = "bloom_bytes"];
 	SessionHeader sessionHeader = 2 [(gogoproto.jsontag) = "evidence_header"];
 	int64 numOfProofs = 3  [(gogoproto.jsontag) = "num_of_proofs"];
-	repeated ProofI proofs= 4 [(gogoproto.jsontag) = "proofs", (gogoproto.castrepeated) = "github.com/pokt-network/pocket-core/x/pocketcore/types.Proofs"];
-	int32 evidenceType = 5 [(gogoproto.jsontag) = "evidence_type", (gogoproto.casttype) = "github.com/pokt-network/pocket-core/x/pocketcore/types.EvidenceType"];
+	repeated ProofI proofs= 4 [(gogoproto.jsontag) = "proofs", (gogoproto.castrepeated) = "Proofs"];
+	int32 evidenceType = 5 [(gogoproto.jsontag) = "evidence_type", (gogoproto.casttype) = "EvidenceType"];
 }
 
 message RelayProof {

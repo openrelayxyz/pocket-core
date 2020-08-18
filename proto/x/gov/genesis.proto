@@ -15,7 +15,7 @@ message GenesisState {
 message Params {
 	option (gogoproto.goproto_stringer) = false;
 
-	repeated ACLPair ACL =1 [(gogoproto.jsontag) = "acl", (gogoproto.castrepeated) = "github.com/pokt-network/pocket-core/x/gov/types.ACL"];
+	repeated ACLPair ACL =1 [(gogoproto.jsontag) = "acl", (gogoproto.castrepeated) = "ACL"];
 	bytes dAOOwner = 2 [(gogoproto.jsontag) = "address,omitempty", (gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.Address"];
-	Upgrade upgrade =3 [(gogoproto.jsontag) = "upgrade", (gogoproto.casttype) = "github.com/pokt-network/pocket-core/x/gov/types.Upgrade"];
+	Upgrade upgrade =3 [(gogoproto.jsontag) = "upgrade", (gogoproto.casttype) = "Upgrade"];
 }

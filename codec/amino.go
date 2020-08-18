@@ -6,10 +6,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/pokt-network/pocket-core/codec/types"
+	tmTypes "github.com/tendermint/tendermint/types"
 	"io"
 
-	amino "github.com/tendermint/go-amino"
-	tmtypes "github.com/tendermint/tendermint/types"
+	"github.com/tendermint/go-amino"
 )
 
 // deprecated: Codec defines a wrapper for an Amino codec that properly handles protobuf
@@ -24,14 +24,8 @@ func (cdc *LegacyAmino) Seal() {
 	cdc.Amino.Seal()
 }
 
-func New() *LegacyAmino {
+func NewLegacyAminoCodec() *LegacyAmino {
 	return &LegacyAmino{amino.NewCodec()}
-}
-
-// RegisterEvidences registers Tendermint evidence types with the provided Amino
-// codec.
-func RegisterEvidences(cdc *LegacyAmino) {
-	tmtypes.RegisterEvidences(cdc.Amino)
 }
 
 // MarshalJSONIndent provides a utility for indented JSON encoding of an object
@@ -192,4 +186,10 @@ func (cdc *LegacyAmino) MarshalJSONIndent(o interface{}, prefix, indent string) 
 
 func (cdc *LegacyAmino) PrintTypes(out io.Writer) error {
 	return cdc.Amino.PrintTypes(out)
+}
+
+// RegisterEvidences registers Tendermint evidence types with the provided Amino
+// codec.
+func RegisterEvidences(legacy *LegacyAmino, _ *ProtoCodec) {
+	tmTypes.RegisterEvidences(legacy.Amino)
 }

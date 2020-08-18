@@ -33,8 +33,8 @@ func BuildMultisig(fromAddr, jsonMessage, passphrase, chainID string, pk crypto.
 		return nil, err
 	}
 	txBuilder := auth.NewTxBuilder(
-		auth.DefaultTxEncoder(cdc),
-		auth.DefaultTxDecoder(cdc),
+		auth.DefaultTxEncoder(legacyAminoCodec),
+		auth.DefaultTxDecoder(legacyAminoCodec),
 		chainID,
 		"", nil).WithKeybase(kb)
 	return txBuilder.BuildAndSignMultisigTransaction(fa, pk, m, passphrase, fees)
@@ -54,8 +54,8 @@ func SignMultisigNext(fromAddr, txHex, passphrase, chainID string) ([]byte, erro
 		return nil, err
 	}
 	txBuilder := auth.NewTxBuilder(
-		auth.DefaultTxEncoder(cdc),
-		auth.DefaultTxDecoder(cdc),
+		auth.DefaultTxEncoder(legacyAminoCodec),
+		auth.DefaultTxDecoder(legacyAminoCodec),
 		chainID,
 		"", nil).WithKeybase(kb)
 	return txBuilder.SignMultisigTransaction(fa, nil, passphrase, bz)
@@ -75,8 +75,8 @@ func SignMultisigOutOfOrder(fromAddr, txHex, passphrase, chainID string, keys []
 		return nil, err
 	}
 	txBuilder := auth.NewTxBuilder(
-		auth.DefaultTxEncoder(cdc),
-		auth.DefaultTxDecoder(cdc),
+		auth.DefaultTxEncoder(legacyAminoCodec),
+		auth.DefaultTxDecoder(legacyAminoCodec),
 		chainID,
 		"", nil).WithKeybase(kb)
 	return txBuilder.SignMultisigTransaction(fa, keys, passphrase, bz)
@@ -104,7 +104,7 @@ func UnmarshalTxStr(txStr string) auth.StdTx {
 }
 
 func UnmarshalTx(txBytes []byte) auth.StdTx {
-	defaultTxDecoder := auth.DefaultTxDecoder(cdc)
+	defaultTxDecoder := auth.DefaultTxDecoder(legacyAminoCodec)
 	tx, err := defaultTxDecoder(txBytes)
 	if err != nil {
 		log.Fatalf("Could not decode transaction: " + err.Error())
