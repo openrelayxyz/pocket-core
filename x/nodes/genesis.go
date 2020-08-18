@@ -155,7 +155,7 @@ func ExportGenesis(ctx sdk.Ctx, keeper keeper.Keeper) types.GenesisState {
 // ValidateGenesis validates the provided staking genesis state to ensure the
 // expected invariants holds. (i.e. params in correct bounds, no duplicate validators)
 func ValidateGenesis(data types.GenesisState) error {
-	err := validateGenesisStateValidators(data.Validators, sdk.NewInt(data.Params.StakeMinimun))
+	err := validateGenesisStateValidators(data.Validators, sdk.NewInt(data.Params.StakeMinimum))
 	if err != nil {
 		return err
 	}

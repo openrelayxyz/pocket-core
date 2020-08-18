@@ -160,7 +160,7 @@ func (k Keeper) StakeValidator(ctx sdk.Ctx, validator types.Validator, amount sd
 			StartHeight: ctx.BlockHeight(),
 			JailedUntil: time.Unix(0, 0),
 		}
-		k.SetValidatorSigningInfo(ctx, validator.GetAddress(), signingInfo)
+		k.SetValidatorSigningInfo(ctx, validator.GetAddress(), &signingInfo)
 	}
 	ctx.Logger().Info("Successfully staked validator: " + validator.Address.String())
 	return nil
@@ -389,7 +389,7 @@ func (k Keeper) IncrementJailedValidators(ctx sdk.Ctx) {
 				}
 				k.DeleteValidator(ctx, addr)
 			} else {
-				k.SetValidatorSigningInfo(ctx, addr, signInfo)
+				k.SetValidatorSigningInfo(ctx, addr, &signInfo)
 			}
 		}
 	}
@@ -397,7 +397,7 @@ func (k Keeper) IncrementJailedValidators(ctx sdk.Ctx) {
 
 // ValidateUnjailMessage - Check unjail message
 func (k Keeper) ValidateUnjailMessage(ctx sdk.Ctx, msg types.MsgUnjail) (addr sdk.Address, err sdk.Error) {
-	validator, found := k.GetValidator(ctx, msg.ValidatorAddr)
+	validator, found := k.GetValidator(ctx, msg.Address)
 	if !found {
 		return nil, types.ErrNoValidatorForAddress(k.Codespace())
 	}

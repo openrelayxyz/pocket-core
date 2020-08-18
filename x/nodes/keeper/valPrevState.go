@@ -10,19 +10,21 @@ import (
 
 // PrevStateValidatorsPower - Load the prevState total validator power.
 func (k Keeper) PrevStateValidatorsPower(ctx sdk.Ctx) (power sdk.Int) {
+	var p = sdk.IntProto{}
 	store := ctx.KVStore(k.storeKey)
 	b, _ := store.Get(types.PrevStateTotalPowerKey)
 	if b == nil {
 		return sdk.ZeroInt()
 	}
-	k.cdc.MustUnmarshalBinaryLengthPrefixed(b, &power)
-	return
+	k.cdc.MustUnmarshalBinaryLengthPrefixed(b, &p)
+	return p.Int
 }
 
 // SetPrevStateValidatorsPower - Store the prevState total validator power (used in moving the curr to prev)
 func (k Keeper) SetPrevStateValidatorsPower(ctx sdk.Ctx, power sdk.Int) {
+	var p = sdk.IntProto{Int: power}
 	store := ctx.KVStore(k.storeKey)
-	b := k.cdc.MustMarshalBinaryLengthPrefixed(power)
+	b := k.cdc.MustMarshalBinaryLengthPrefixed(&p)
 	_ = store.Set(types.PrevStateTotalPowerKey, b)
 }
 

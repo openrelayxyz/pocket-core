@@ -252,5 +252,5 @@ func (k Keeper) handleValidatorSignature(ctx sdk.Ctx, addr sdk.Address, power in
 		signInfo.JailedUntil = ctx.BlockHeader().Time.Add(k.DowntimeJailDuration(ctx))
 	}
 	// Set the updated signing info
-	k.SetValidatorSigningInfo(ctx, addr, signInfo)
+	k.SetValidatorSigningInfo(ctx, addr, &signInfo)
 }
