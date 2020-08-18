@@ -47,6 +47,10 @@ func VerifyAddressFormat(bz []byte) error {
 // When marshaled to a string or JSON.
 type Address tmCrypto.Address
 
+// Address a wrapper around bytes meant to represent an address.
+// When marshaled to a string or JSON.
+type addresses []Address
+
 // AddressFromHex creates an Address from a hex string.
 func AddressFromHex(address string) (addr Address, err error) {
 	if len(address) == 0 {

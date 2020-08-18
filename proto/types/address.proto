@@ -1,0 +1,9 @@
+syntax = "proto3";
+package types;
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/pokt-network/pocket-core/types";
+
+message Addresses {
+	repeated bytes arr = 1 [(gogoproto.castrepeated) = "addresses"];
+}

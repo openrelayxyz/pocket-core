@@ -15,7 +15,7 @@ var _ types.ApplicationSet = Keeper{}
 // Keeper of the staking store
 type Keeper struct {
 	storeKey       sdk.StoreKey
-	cdc            *codec.Codec
+	cdc            *codec.ProtoCodec
 	AccountsKeeper types.AuthKeeper
 	POSKeeper      types.PosKeeper
 	Paramstore     sdk.Subspace
@@ -24,7 +24,7 @@ type Keeper struct {
 }
 
 // NewKeeper creates a new staking Keeper instance
-func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, posKeeper types.PosKeeper, supplyKeeper types.AuthKeeper,
+func NewKeeper(cdc *codec.ProtoCodec, key sdk.StoreKey, posKeeper types.PosKeeper, supplyKeeper types.AuthKeeper,
 	paramstore sdk.Subspace, codespace sdk.CodespaceType) Keeper {
 
 	// ensure staked module accounts are set
