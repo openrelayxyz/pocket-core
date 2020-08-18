@@ -9,6 +9,7 @@ package baseapp
 
 import (
 	"fmt"
+	"github.com/pokt-network/pocket-core/codec/types"
 	"github.com/tendermint/tendermint/evidence"
 	"github.com/tendermint/tendermint/node"
 	"github.com/tendermint/tendermint/state/txindex"
@@ -35,6 +36,8 @@ import (
 	"github.com/pokt-network/pocket-core/store"
 	sdk "github.com/pokt-network/pocket-core/types"
 )
+
+var cdc = codec.NewProtoCodec(types.NewInterfaceRegistry())
 
 // Key to store the consensus params in the main store.
 var mainConsensusParamsKey = []byte("consensus_params")
@@ -540,7 +543,7 @@ func handleQueryApp(app *BaseApp, path []string, req abci.RequestQuery) (res abc
 			result = sdk.ErrUnknownRequest(fmt.Sprintf("Unknown query: %s", path)).Result()
 		}
 
-		value := codec.Cdc.MustMarshalBinaryLengthPrefixed(result)
+		value := cdc.MustMarshalBinaryLengthPrefixed(&result)
 		return abci.ResponseQuery{
 			Code:      uint32(sdk.CodeOK),
 			Codespace: string(sdk.CodespaceRoot),

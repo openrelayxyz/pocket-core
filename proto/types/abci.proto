@@ -81,6 +81,7 @@ message GasInfo {
 // Result is the union of ResponseFormat and ResponseCheckTx.
 message Result {
   option (gogoproto.goproto_getters) = false;
+  option (gogoproto.stringer) = true;
 
   uint32 code = 1 [(gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.CodeType"];
 
@@ -95,11 +96,11 @@ message Result {
 
   uint64 gasWanted =5;
 
-  uint64 gasused = 6;
+  uint64 gasUsed = 6;
 
   // Events contains a slice of Event objects that were emitted during message or
   // handler execution.
-  repeated tendermint.abci.types.Event events = 7 [(gogoproto.nullable) = false];
+  repeated tendermint.abci.types.Event events = 7 [(gogoproto.nullable) = false,(gogoproto.castrepeated) = "github.com/pokt-network/pocket-core/types.Events"];
 }
 
 // SimulationResponse defines the response generated when a transaction is
