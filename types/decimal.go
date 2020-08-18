@@ -196,6 +196,7 @@ func MustNewDecFromStr(s string) Dec {
 //nolint
 func (d Dec) IsNil() bool       { return d.i == nil }                 // is decimal nil
 func (d Dec) IsZero() bool      { return (d.i).Sign() == 0 }          // is equal to zero
+func (d Dec) Sign() int         { return (d.i).Sign() }               // return is positive or negative
 func (d Dec) IsNegative() bool  { return (d.i).Sign() == -1 }         // is negative
 func (d Dec) IsPositive() bool  { return (d.i).Sign() == 1 }          // is positive
 func (d Dec) Equal(d2 Dec) bool { return (d.i).Cmp(d2.i) == 0 }       // equal decimals
