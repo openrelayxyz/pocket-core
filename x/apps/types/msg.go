@@ -29,7 +29,11 @@ const (
 
 // GetSigners return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgAppStake) GetSigner() sdk.Address {
-	return sdk.Address(msg.PubKey.Address())
+	res, err := crypto.NewPublicKey(msg.PubKey)
+	if err != nil {
+		return nil
+	}
+	return sdk.Address(res.Address())
 }
 
 // GetSignBytes returns the message bytes to sign over.
@@ -40,7 +44,11 @@ func (msg MsgAppStake) GetSignBytes() []byte {
 
 // ValidateBasic quick validity check for staking an application
 func (msg MsgAppStake) ValidateBasic() sdk.Error {
-	if msg.PubKey == nil || msg.PubKey.RawString() == "" {
+	pk, err := crypto.NewPublicKey(msg.PubKey)
+	if err != nil {
+		return sdk.ErrInvalidPubKey(err.Error())
+	}
+	if pk == nil || pk.RawString() == "" {
 		return ErrNilApplicationAddr(DefaultCodespace)
 	}
 	if msg.Value.LTE(sdk.ZeroInt()) {

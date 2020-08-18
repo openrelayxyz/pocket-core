@@ -1,7 +1,6 @@
 package types
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/pokt-network/pocket-core/types"
 	"math"
@@ -35,15 +34,15 @@ var (
 var _ types.ParamSet = (*Params)(nil)
 
 // Params defines the high level settings for pos module
-type Params struct {
-	UnstakingTime       time.Duration `json:"unstaking_time" yaml:"unstaking_time"`               // duration of unstaking
-	MaxApplications     int64         `json:"max_applications" yaml:"max_applications"`           // maximum number of applications
-	AppStakeMin         int64         `json:"app_stake_minimum" yaml:"app_stake_minimum"`         // minimum amount needed to stake as an application
-	BaseRelaysPerPOKT   int64         `json:"base_relays_per_pokt" yaml:"base_relays_per_pokt"`   // base relays per POKT coin staked
-	StabilityAdjustment int64         `json:"stability_adjustment" yaml:"stability_adjustment"`   // the stability adjustment from the governance
-	ParticipationRateOn bool          `json:"participation_rate_on" yaml:"participation_rate_on"` // the participation rate affects the amount minted based on staked ratio
-	MaxChains           int64         `json:"maximum_chains" yaml:"maximum_chains"`               // the maximum number of chains an app can stake for
-}
+//type Params struct {
+//	UnstakingTime       time.Duration `json:"unstaking_time" yaml:"unstaking_time"`               // duration of unstaking
+//	MaxApplications     int64         `json:"max_applications" yaml:"max_applications"`           // maximum number of applications
+//	AppStakeMin         int64         `json:"app_stake_minimum" yaml:"app_stake_minimum"`         // minimum amount needed to stake as an application
+//	BaseRelaysPerPOKT   int64         `json:"base_relays_per_pokt" yaml:"base_relays_per_pokt"`   // base relays per POKT coin staked
+//	StabilityAdjustment int64         `json:"stability_adjustment" yaml:"stability_adjustment"`   // the stability adjustment from the governance
+//	ParticipationRateOn bool          `json:"participation_rate_on" yaml:"participation_rate_on"` // the participation rate affects the amount minted based on staked ratio
+//	MaxChains           int64         `json:"maximum_chains" yaml:"maximum_chains"`               // the maximum number of chains an app can stake for
+//}
 
 // Implements params.ParamSet
 func (p *Params) ParamSetPairs() types.ParamSetPairs {
@@ -84,13 +83,6 @@ func (p Params) Validate() error {
 	}
 	// todo
 	return nil
-}
-
-// Checks the equality of two param objects
-func (p Params) Equal(p2 Params) bool {
-	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
-	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
-	return bytes.Equal(bz1, bz2)
 }
 
 // String returns a human readable string representation of the parameters.

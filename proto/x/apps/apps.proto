@@ -15,7 +15,6 @@ option go_package = "github.com/pokt-network/pocket-core/x/apps/types";
 // calculated as total bonded shares multiplied by exchange rate.
 message ApplicationEncodable {
   option (gogoproto.equal)            = true;
-  option (gogoproto.goproto_stringer) = false;
   option (gogoproto.goproto_getters)  = false;
 
   bytes address = 1 [
@@ -60,7 +59,7 @@ message ApplicationEncodable {
 message Pool {
   option (gogoproto.description) = true;
   option (gogoproto.equal)       = true;
-  string not_bonded_tokens       = 1 [
+  string tokens       = 1 [
     (gogoproto.customtype) = "github.com/pokt-network/pocket-core/types.Int",
     (gogoproto.nullable)   = false];
 }
