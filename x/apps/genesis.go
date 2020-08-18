@@ -15,7 +15,7 @@ func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, supplyKeeper types.AuthKeepe
 	stakedTokens := sdk.ZeroInt()
 	ctx = ctx.WithBlockHeight(1 - sdk.ValidatorUpdateDelay)
 	// set the parameters from the data
-	keeper.SetParams(ctx, data.Params)
+	keeper.SetParams(ctx, *data.Params)
 	for _, application := range data.Applications {
 		if application.IsUnstaked() || application.IsUnstaking() {
 			fmt.Println(fmt.Errorf("%v the applications must be staked at genesis", application))
@@ -50,7 +50,7 @@ func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, supplyKeeper types.AuthKeepe
 	// add coins to the total supply
 	keeper.AccountsKeeper.SetSupply(ctx, keeper.AccountsKeeper.GetSupply(ctx).Inflate(stakedCoins))
 	// set the params set in the keeper
-	keeper.Paramstore.SetParamSet(ctx, &data.Params)
+	keeper.Paramstore.SetParamSet(ctx, data.Params)
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
@@ -58,7 +58,7 @@ func ExportGenesis(ctx sdk.Ctx, keeper keeper.Keeper) types.GenesisState {
 	params := keeper.GetParams(ctx)
 	applications := keeper.GetAllApplications(ctx)
 	return types.GenesisState{
-		Params:       params,
+		Params:       &params,
 		Applications: applications,
 		Exported:     true,
 	}

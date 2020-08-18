@@ -48,7 +48,7 @@ func (a Applications) JSON() (out []byte, err error) {
 
 // MarshalJSON marshals the application to JSON using raw Hex for the public key
 func (a Application) MarshalJSON() ([]byte, error) {
-	return codec.Cdc.MarshalJSON(hexApplication{
+	return ModuleCdc.MarshalJSON(hexApplication{
 		Address:                 a.Address,
 		PublicKey:               a.PublicKey.RawString(),
 		Jailed:                  a.Jailed,
@@ -63,7 +63,7 @@ func (a Application) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON unmarshals the application from JSON using raw hex for the public key
 func (a *Application) UnmarshalJSON(data []byte) error {
 	bv := &hexApplication{}
-	if err := codec.Cdc.UnmarshalJSON(data, bv); err != nil {
+	if err := ModuleCdc.UnmarshalJSON(data, bv); err != nil {
 		return err
 	}
 	consPubKey, err := crypto.NewPublicKey(bv.PublicKey)
@@ -84,14 +84,40 @@ func (a *Application) UnmarshalJSON(data []byte) error {
 }
 
 // unmarshal the application
-func MarshalApplication(cdc *codec.Codec, application Application) (result []byte, err error) {
-	return cdc.MarshalBinaryLengthPrefixed(application)
+func MarshalApplication(cdc *codec.ProtoCodec, application Application) (result []byte, err error) {
+	return cdc.MarshalBinaryLengthPrefixed(&ApplicationEncodable{
+		Address:                 application.Address,
+		PublicKey:               application.PublicKey.RawString(),
+		Jailed:                  application.Jailed,
+		Status:                  application.Status,
+		Chains:                  application.Chains,
+		StakedTokens:            application.StakedTokens,
+		MaxRelays:               application.MaxRelays,
+		UnstakingCompletionTime: application.UnstakingCompletionTime,
+	})
 }
 
 // unmarshal the application
-func UnmarshalApplication(cdc *codec.Codec, appBytes []byte) (application Application, err error) {
-	err = cdc.UnmarshalBinaryLengthPrefixed(appBytes, &application)
-	return application, err
+func UnmarshalApplication(cdc *codec.ProtoCodec, appBytes []byte) (application Application, err error) {
+	var appEncodable ApplicationEncodable
+	err = cdc.UnmarshalBinaryLengthPrefixed(appBytes, &appEncodable)
+	if err != nil {
+		return
+	}
+	pk, err := crypto.NewPublicKey(appEncodable.PublicKey)
+	if err != nil {
+		return
+	}
+	return Application{
+		Address:                 appEncodable.Address,
+		PublicKey:               pk,
+		Jailed:                  appEncodable.Jailed,
+		Status:                  appEncodable.Status,
+		Chains:                  appEncodable.Chains,
+		StakedTokens:            appEncodable.StakedTokens,
+		MaxRelays:               appEncodable.MaxRelays,
+		UnstakingCompletionTime: appEncodable.UnstakingCompletionTime,
+	}, nil
 }
 
 // TODO shared code among modules below

@@ -24,7 +24,7 @@ message Params {
   int64 app_stake_min     = 3 [
     (gogoproto.jsontag) = "app_stake_minimum",
     (gogoproto.moretags) = "yaml:\"app_stake_minimum\""];
-  int64 base_relays_per_POKT     = 4 [
+  int64 base_relays_perPOKT     = 4 [
     (gogoproto.jsontag) = "base_relays_per_pokt",
     (gogoproto.moretags) = "yaml:\"base_relays_per_pokt\""];
   int64 stability_adjustment     = 5 [
@@ -44,7 +44,7 @@ message GenesisState {
     (gogoproto.moretags) = "yaml:\"params\""];
     repeated ApplicationEncodable applications = 2 [
     (gogoproto.jsontag) = "applications",
-    (gogoproto.moretags) = "yaml:\"applications\""];
+    (gogoproto.moretags) = "yaml:\"applications\"", (gogoproto.castrepeated)="Applications"];
     bool exported = 3 [
     (gogoproto.jsontag) = "exported",
     (gogoproto.moretags) = "yaml:\"exported\""];

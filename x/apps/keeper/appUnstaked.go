@@ -59,7 +59,7 @@ func (k Keeper) getAllUnstakingApplications(ctx sdk.Ctx) (applications []types.A
 
 // getUnstakingApplications - Retrieve all of the applications who will be unstaked at exactly this time
 func (k Keeper) getUnstakingApplications(ctx sdk.Ctx, unstakingTime time.Time) (valAddrs []sdk.Address) {
-	addrs := sdk.Addresses{Arr:make([]sdk.Address, 0)}
+	addrs := sdk.Addresses{}
 	store := ctx.KVStore(k.storeKey)
 	bz, _ := store.Get(types.KeyForUnstakingApps(unstakingTime))
 	if bz == nil {
