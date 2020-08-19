@@ -17,7 +17,7 @@ import (
 // CLIContext implements a typical CLI context created in SDK modules for
 // transaction handling and queries.
 type CLIContext struct { // TODO consider module passing clicontext instead of node and keybase
-	Codec         *codec.Codec
+	Codec         *codec.ProtoCodec
 	Client        rpcclient.Client
 	FromAddress   sdk.Address
 	Passphrase    string
@@ -39,7 +39,7 @@ func NewCLIContext(node rpcclient.Client, fromAddress sdk.Address, passphrase st
 }
 
 // WithCodec returns a copy of the context with an updated codec.
-func (ctx CLIContext) WithCodec(cdc *codec.Codec) CLIContext {
+func (ctx CLIContext) WithCodec(cdc *codec.ProtoCodec) CLIContext {
 	ctx.Codec = cdc
 	return ctx
 }
