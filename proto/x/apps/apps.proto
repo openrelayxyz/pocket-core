@@ -67,7 +67,7 @@ message Pool {
 
 message PrevStatePowerMapping {
   option (gogoproto.equal)            = true;
-  option (gogoproto.goproto_stringer) = false;
+  option (gogoproto.goproto_stringer) = true;
   option (gogoproto.goproto_getters)  = false;
 
   bytes address = 1 [(gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.Address"];
