@@ -8,6 +8,7 @@ import (
 	"github.com/go-kit/kit/log/term"
 	"github.com/pokt-network/pocket-core/baseapp"
 	"github.com/pokt-network/pocket-core/codec"
+	types2 "github.com/pokt-network/pocket-core/codec/types"
 	cfg "github.com/pokt-network/pocket-core/config"
 	"github.com/pokt-network/pocket-core/crypto"
 	kb "github.com/pokt-network/pocket-core/crypto/keys"
@@ -661,7 +662,9 @@ func Codec() *codec.Codec {
 func MakeCodec() {
 	// create a new codec
 	legacyAminoCodec = codec.NewLegacyAminoCodec()
-	protoCodec = codec.NewProtoCodec()
+	protoCodec := codec.NewProtoCodec(types2.NewInterfaceRegistry())
+	// register the sdk types
+	sdk.RegisterCodec(legacyAminoCodec, protoCodec)
 	// register all of the app module types
 	module.NewBasicManager(
 		apps.AppModuleBasic{},
@@ -669,9 +672,8 @@ func MakeCodec() {
 		gov.AppModuleBasic{},
 		nodes.AppModuleBasic{},
 		pocket.AppModuleBasic{},
-	).RegisterCodec(legacyAminoCodec)
-	// register the sdk types
-	sdk.RegisterCodec(legacyAminoCodec)
+	).RegisterCodec(legacyAminoCodec, protoCodec)
+
 	// register the crypto types
 	crypto.RegisterCrypto(legacyAminoCodec, nil)
 }

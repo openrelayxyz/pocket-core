@@ -72,7 +72,7 @@ func (k Keeper) getUnstakingApplications(ctx sdk.Ctx, unstakingTime time.Time) (
 // setUnstakingApplications - Store applications in unstaking queue at a certain unstaking time
 func (k Keeper) setUnstakingApplications(ctx sdk.Ctx, unstakingTime time.Time, keys []sdk.Address) {
 	store := ctx.KVStore(k.storeKey)
-	bz := k.cdc.MustMarshalBinaryLengthPrefixed(&sdk.Addresses{Arr:keys})
+	bz := k.cdc.MustMarshalBinaryLengthPrefixed(&sdk.Addresses{Arr: keys})
 	_ = store.Set(types.KeyForUnstakingApps(unstakingTime), bz)
 }
 
@@ -109,7 +109,7 @@ func (k Keeper) unstakeAllMatureApplications(ctx sdk.Ctx) {
 	for ; unstakingApplicationsIterator.Valid(); unstakingApplicationsIterator.Next() {
 		var unstakingVals sdk.Addresses
 		k.cdc.MustUnmarshalBinaryLengthPrefixed(unstakingApplicationsIterator.Value(), &unstakingVals)
-		for _, valAddr := range unstakingVals.Arr{
+		for _, valAddr := range unstakingVals.Arr {
 			val, found := k.GetApplication(ctx, valAddr)
 			if !found {
 				k.Logger(ctx).Error(fmt.Errorf("application %s, in the unstaking queue was not found", valAddr).Error())

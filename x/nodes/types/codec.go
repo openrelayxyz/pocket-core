@@ -4,6 +4,7 @@ import (
 	"github.com/pokt-network/pocket-core/codec"
 	"github.com/pokt-network/pocket-core/codec/types"
 	"github.com/pokt-network/pocket-core/crypto"
+	sdk "github.com/pokt-network/pocket-core/types"
 )
 
 // RegisterCodec registers concrete types on the codec
@@ -12,6 +13,8 @@ func RegisterCodec(amino *codec.LegacyAmino, proto *codec.ProtoCodec) {
 	amino.RegisterConcrete(MsgBeginUnstake{}, "pos/MsgBeginUnstake", nil)
 	amino.RegisterConcrete(MsgUnjail{}, "pos/MsgUnjail", nil)
 	amino.RegisterConcrete(MsgSend{}, "pos/Send", nil)
+
+	proto.RegisterImplementation((*sdk.Msg)(nil), &MsgStake{}, &MsgUnjail{}, &MsgBeginUnstake{}, &MsgSend{})
 }
 
 // module wide codec

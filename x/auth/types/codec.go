@@ -4,6 +4,7 @@ import (
 	"github.com/pokt-network/pocket-core/codec"
 	"github.com/pokt-network/pocket-core/codec/types"
 	"github.com/pokt-network/pocket-core/crypto"
+	sdk "github.com/pokt-network/pocket-core/types"
 	"github.com/pokt-network/pocket-core/x/auth/exported"
 )
 
@@ -19,6 +20,7 @@ func RegisterCodec(amino *codec.LegacyAmino, proto *codec.ProtoCodec) {
 	proto.Register("x.auth.Account", (*exported.Account)(nil), &BaseAccountEncodable{}, &ModuleAccountEncodable{})
 	proto.Register("x.auth.ModuleAccount", (*exported.Account)(nil), &ModuleAccountEncodable{})
 	proto.Register("x.auth.SupplyI", (*exported.SupplyI)(nil), &Supply{})
+	proto.RegisterImplementation((*sdk.Tx)(nil), &StdTx{})
 }
 
 // module wide codec
