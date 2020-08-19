@@ -153,6 +153,6 @@ func (k Keeper) GetParams(ctx sdk.Ctx) types.Params {
 }
 
 // SetParams - Apply set of params
-func (k Keeper) SetParams(ctx sdk.Ctx, params types.Params) {
-	k.Paramstore.SetParamSet(ctx, &params)
+func (k Keeper) SetParams(ctx sdk.Ctx, params *types.Params) {
+	k.Paramstore.SetParamSet(ctx, params)
 }

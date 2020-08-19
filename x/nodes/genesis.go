@@ -21,7 +21,7 @@ func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, supplyKeeper types.AuthKeepe
 	// set the context
 	ctx = ctx.WithBlockHeight(1 - sdk.ValidatorUpdateDelay)
 	// set the parameters from the data
-	keeper.SetParams(ctx, *data.Params)
+	keeper.SetParams(ctx, data.Params)
 	// set the 'previous state total power' from the data
 	keeper.SetPrevStateValidatorsPower(ctx, data.PrevStateTotalPower)
 	// for each validator in validators, setup based on genesis file

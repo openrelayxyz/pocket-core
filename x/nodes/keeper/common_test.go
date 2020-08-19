@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	types2 "github.com/pokt-network/pocket-core/codec/types"
 	"math/rand"
 	"testing"
 
@@ -32,12 +33,14 @@ var (
 // : deadcode unused
 // create a codec used only for testing
 func makeTestCodec() *codec.ProtoCodec {
-	var cdc = codec.NewLegacyAminoCodec()
-	auth.RegisterCodec(cdc)
-	gov.RegisterCodec(cdc)
-	sdk.RegisterCodec(cdc)
-	crypto.RegisterCrypto(cdc)
-	return cdc
+	var amino = codec.NewLegacyAminoCodec()
+	var proto = codec.NewProtoCodec(types2.NewInterfaceRegistry())
+
+	auth.RegisterCodec(amino, proto)
+	gov.RegisterCodec(amino, proto)
+	sdk.RegisterCodec(amino)
+	crypto.RegisterCrypto(amino, proto)
+	return proto
 }
 
 // : deadcode unused
