@@ -56,7 +56,7 @@ type (
 	//}
 
 	// Events defines a slice of Event objects
-	Events []Event
+	Events []abci.Event
 )
 
 // NewEvent creates a new Event object with a given type and slice of one or more
@@ -100,7 +100,7 @@ func (e Event) AppendAttributes(attrs ...Attribute) Event {
 
 // AppendEvent adds an Event to a slice of events.
 func (e Events) AppendEvent(event Event) Events {
-	return append(e, event)
+	return append(e, abci.Event(event))
 }
 
 // AppendEvents adds a slice of Event objects to an exist slice of Event objects.

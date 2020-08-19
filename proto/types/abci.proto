@@ -71,6 +71,7 @@ message Attribute {
 
 // GasInfo defines tx execution gas context.
 message GasInfo {
+	option (gogoproto.stringer) = true;
   // GasWanted is the maximum units of work we allow this tx to perform.
   uint64 gas_wanted = 1 [(gogoproto.moretags) = "yaml:\"gas_wanted\""];
 
@@ -85,7 +86,7 @@ message Result {
 
   uint32 code = 1 [(gogoproto.casttype) = "CodeType"];
 
-  uint32 codespace = 2 [(gogoproto.casttype) = "CodespaceType"];
+  string codespace = 2 [(gogoproto.casttype) = "CodespaceType"];
 
   // Data is any data returned from message or handler execution. It MUST be length
   // prefixed in order to separate data from multiple message executions.
@@ -106,6 +107,7 @@ message Result {
 // SimulationResponse defines the response generated when a transaction is
 // successfully simulated.
 message SimulationResponse {
+	option (gogoproto.stringer) = true;
   GasInfo gas_info = 1 [(gogoproto.embed) = true, (gogoproto.nullable) = false];
   Result  result   = 2;
 }
