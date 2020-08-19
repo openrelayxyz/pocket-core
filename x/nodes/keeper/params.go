@@ -132,15 +132,15 @@ func (k Keeper) MaxJailedBlocks(ctx sdk.Ctx) (res int64) {
 }
 
 // GetParams - Retrieve all parameters as types.Params
-func (k Keeper) GetParams(ctx sdk.Ctx) *types.Params {
-	return &types.Params{
+func (k Keeper) GetParams(ctx sdk.Ctx) types.Params {
+	return types.Params{
 		UnstakingTime:           k.UnStakingTime(ctx),
 		MaxValidators:           k.MaxValidators(ctx),
 		StakeDenom:              k.StakeDenom(ctx),
 		StakeMinimum:            k.MinimumStake(ctx),
 		ProposerAllocation:      k.ProposerAllocation(ctx),
 		SessionBlockFrequency:   k.BlocksPerSession(ctx),
-		DaoAllocation:           k.DAOAllocation(ctx),
+		DAOAllocation:           k.DAOAllocation(ctx),
 		MaxEvidenceAge:          k.MaxEvidenceAge(ctx),
 		SignedBlocksWindow:      k.SignedBlocksWindow(ctx),
 		MinSignedPerWindow:      sdk.NewDec(k.MinSignedPerWindow(ctx)),
@@ -153,6 +153,6 @@ func (k Keeper) GetParams(ctx sdk.Ctx) *types.Params {
 }
 
 // SetParams - Apply set of params
-func (k Keeper) SetParams(ctx sdk.Ctx, params *types.Params) {
-	k.Paramstore.SetParamSet(ctx, params)
+func (k Keeper) SetParams(ctx sdk.Ctx, params types.Params) {
+	k.Paramstore.SetParamSet(ctx, &params)
 }

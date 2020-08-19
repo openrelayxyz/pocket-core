@@ -11,8 +11,8 @@ func TestDefaultGenesisState(t *testing.T) {
 		want GenesisState
 	}{{"defaultState", GenesisState{
 		Params:       DefaultParams(),
-		SigningInfos: make(map[string]*ValidatorSigningInfo),
-		MissedBlocks: make(map[string]*MissedBlockArray),
+		SigningInfos: make(map[string]ValidatorSigningInfo),
+		MissedBlocks: make(map[string][]MissedBlock),
 	}},
 	}
 	for _, tt := range tests {
