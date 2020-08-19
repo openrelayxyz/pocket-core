@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/pokt-network/pocket-core/codec"
+	types2 "github.com/pokt-network/pocket-core/codec/types"
 	"github.com/pokt-network/pocket-core/crypto"
 	sdk "github.com/pokt-network/pocket-core/types"
 
@@ -16,7 +17,8 @@ import (
 )
 
 var application Application
-var moduleCdc *codec.Codec
+var moduleCdc *codec.LegacyAmino
+var protoCdc *codec.ProtoCodec
 
 func init() {
 	var pub crypto.Ed25519PublicKey
@@ -27,7 +29,8 @@ func init() {
 	}
 
 	moduleCdc = codec.NewLegacyAminoCodec()
-	RegisterCodec(moduleCdc)
+	protoCdc = codec.NewProtoCodec(types2.NewInterfaceRegistry())
+	RegisterCodec(moduleCdc, protoCdc)
 	crypto.RegisterCrypto(moduleCdc, nil)
 	moduleCdc.Seal()
 
@@ -45,7 +48,7 @@ func init() {
 func TestApplicationUtil_MarshalJSON(t *testing.T) {
 	type args struct {
 		application Application
-		codec       *codec.Codec
+		codec       *codec.LegacyAmino
 	}
 	hexApp := hexApplication{
 		Address:                 application.Address,
@@ -56,7 +59,7 @@ func TestApplicationUtil_MarshalJSON(t *testing.T) {
 		UnstakingCompletionTime: application.UnstakingCompletionTime,
 		MaxRelays:               application.MaxRelays,
 	}
-	bz, _ := codec.Cdc.MarshalJSON(hexApp)
+	bz, _ := moduleCdc.MarshalJSON(hexApp)
 
 	tests := []struct {
 		name string
@@ -185,7 +188,7 @@ func TestApplicationUtil_UnmarshalJSON(t *testing.T) {
 func TestApplicationUtil_UnMarshalApplication(t *testing.T) {
 	type args struct {
 		application Application
-		codec       *codec.Codec
+		codec       *codec.ProtoCodec
 	}
 	tests := []struct {
 		name string
@@ -194,7 +197,7 @@ func TestApplicationUtil_UnMarshalApplication(t *testing.T) {
 	}{
 		{
 			name: "can unmarshal application",
-			args: args{application: application, codec: moduleCdc},
+			args: args{application: application, codec: protoCdc},
 			want: application,
 		},
 	}

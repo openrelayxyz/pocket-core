@@ -2,9 +2,10 @@ package types
 
 import (
 	"fmt"
-	"github.com/pokt-network/pocket-core/types"
 	"math"
 	"time"
+
+	"github.com/pokt-network/pocket-core/types"
 )
 
 // POS params default values

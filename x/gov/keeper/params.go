@@ -27,8 +27,8 @@ func (k Keeper) GetParams(ctx sdk.Ctx) types.Params {
 }
 
 // set the params
-func (k Keeper) SetParams(ctx sdk.Ctx, params types.Params) {
-	k.paramstore.SetParamSet(ctx, &params)
+func (k Keeper) SetParams(ctx sdk.Ctx, params *types.Params) {
+	k.paramstore.SetParamSet(ctx, params)
 }
 
 func (k Keeper) GetDAOOwner(ctx sdk.Ctx) (res sdk.Address) {

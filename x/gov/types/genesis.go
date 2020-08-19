@@ -15,7 +15,7 @@ import (
 func NewGenesisState(params Params, daoTokens sdk.Int) GenesisState {
 	return GenesisState{
 		Params:    &params,
-		DAOTokens: &daoTokens,
+		DAOTokens: daoTokens,
 	}
 }
 

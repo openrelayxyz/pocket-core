@@ -2,11 +2,12 @@ package keeper
 
 import (
 	"fmt"
+	log2 "log"
+
 	"github.com/pokt-network/pocket-core/codec"
 	sdk "github.com/pokt-network/pocket-core/types"
 	"github.com/pokt-network/pocket-core/x/apps/types"
 	"github.com/tendermint/tendermint/libs/log"
-	log2 "log"
 )
 
 // Implements ApplicationSet interface
