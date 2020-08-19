@@ -43,9 +43,9 @@ func (k Keeper) IterateAndExecuteOverPrevStateValsByPower(
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
 		addr := sdk.Address(iter.Key()[len(types.PrevStateValidatorsPowerKey):])
-		var power int64
+		var power sdk.IntProto
 		k.cdc.MustUnmarshalBinaryLengthPrefixed(iter.Value(), &power)
-		if handler(addr, power) {
+		if handler(addr, power.Int.Int64()) {
 			break
 		}
 	}
@@ -74,8 +74,9 @@ func (k Keeper) IterateAndExecuteOverPrevStateVals(
 
 // SetPrevStateValPower - Store the power of a SINGLE staked validator from the previous state
 func (k Keeper) SetPrevStateValPower(ctx sdk.Ctx, addr sdk.Address, power int64) {
+	p := sdk.IntProto{Int: sdk.NewInt(power)}
 	store := ctx.KVStore(k.storeKey)
-	bz := k.cdc.MustMarshalBinaryLengthPrefixed(power)
+	bz := k.cdc.MustMarshalBinaryLengthPrefixed(&p)
 	_ = store.Set(types.KeyForValidatorPrevStateStateByPower(addr), bz)
 }
 

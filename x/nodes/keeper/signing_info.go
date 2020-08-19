@@ -65,20 +65,22 @@ func (k Keeper) IterateAndExecuteOverValSigningInfo(ctx sdk.Ctx, handler func(ad
 
 // valMissedAt - Check if validator is missed
 func (k Keeper) valMissedAt(ctx sdk.Ctx, addr sdk.Address, index int64) (missed bool) {
+	m := sdk.BoolProto{}
 	store := ctx.KVStore(k.storeKey)
 	bz, _ := store.Get(types.GetValMissedBlockKey(addr, index))
 	if bz == nil { // lazy: treat empty key as not missed
 		missed = false
 		return
 	}
-	k.cdc.MustUnmarshalBinaryLengthPrefixed(bz, &missed)
-	return
+	k.cdc.MustUnmarshalBinaryLengthPrefixed(bz, &m)
+	return m.Value
 }
 
 // SetValidatorMissedAt - Store missed validaor
 func (k Keeper) SetValidatorMissedAt(ctx sdk.Ctx, addr sdk.Address, index int64, missed bool) {
+	m := sdk.BoolProto{Value: missed}
 	store := ctx.KVStore(k.storeKey)
-	bz := k.cdc.MustMarshalBinaryLengthPrefixed(missed)
+	bz := k.cdc.MustMarshalBinaryLengthPrefixed(&m)
 	_ = store.Set(types.GetValMissedBlockKey(addr, index), bz)
 }
 
@@ -99,13 +101,14 @@ func (k Keeper) IterateAndExecuteOverMissedArray(ctx sdk.Ctx,
 	index := int64(0)
 	// Array may be sparse
 	for ; index < k.SignedBlocksWindow(ctx); index++ {
-		var missed bool
+		var missed = sdk.BoolProto{}
+
 		bz, _ := store.Get(types.GetValMissedBlockKey(address, index))
 		if bz == nil {
 			continue
 		}
 		k.cdc.MustUnmarshalBinaryLengthPrefixed(bz, &missed)
-		if handler(index, missed) {
+		if handler(index, missed.Value) {
 			break
 		}
 	}
