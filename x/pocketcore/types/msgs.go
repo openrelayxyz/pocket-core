@@ -22,7 +22,7 @@ const (
 //	ExpirationHeight int64           `json:"expiration_height"`
 //}
 
-type Claims []MsgClaim
+type Claims []*MsgClaim
 
 // "GetFee" - Returns the fee (sdk.Int) of the messgae type
 func (msg MsgClaim) GetFee() sdk.Int {
