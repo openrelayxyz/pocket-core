@@ -824,7 +824,7 @@ func (app *BaseApp) runMsg(ctx sdk.Ctx, msg sdk.Msg, mode runTxMode) (result sdk
 	// each result.
 	data = append(data, msgResult.Data...)
 	// append events from the message's execution and a message action event
-	events = events.AppendEvent(sdk.NewEvent(sdk.EventTypeMessage, sdk.NewAttribute(sdk.AttributeKeyAction, msg.Type())))
+	events = events.AppendEvent(sdk.Event(sdk.NewEvent(sdk.EventTypeMessage, sdk.NewAttribute(sdk.AttributeKeyAction, msg.Type()))))
 	events = events.AppendEvents(msgResult.Events)
 	// stop execution and return on first failed message
 	if !msgResult.IsOK() {

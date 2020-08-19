@@ -61,14 +61,14 @@ type (
 
 // NewEvent creates a new Event object with a given type and slice of one or more
 // attributes.
-func NewEvent(ty string, attrs ...Attribute) Event {
+func NewEvent(ty string, attrs ...Attribute) abci.Event {
 	e := Event{Type: ty}
 
 	for _, attr := range attrs {
 		e.Attributes = append(e.Attributes, NewAttribute(attr.Key, attr.Value).ToKVPair())
 	}
 
-	return e
+	return abci.Event(e)
 }
 
 // NewAttribute returns a new key/value Attribute object.
