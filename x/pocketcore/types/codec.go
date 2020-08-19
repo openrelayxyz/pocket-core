@@ -5,7 +5,6 @@ import (
 	"github.com/pokt-network/pocket-core/codec/types"
 	"github.com/pokt-network/pocket-core/crypto"
 	sdk "github.com/pokt-network/pocket-core/types"
-	"github.com/pokt-network/pocket-core/x/nodes/exported"
 	nodesTypes "github.com/pokt-network/pocket-core/x/nodes/types"
 )
 
@@ -33,7 +32,6 @@ func RegisterCodec(amino *codec.LegacyAmino, proto *codec.ProtoCodec) {
 	amino.RegisterConcrete(EvidenceEncodable{}, "pocketcore/evidence_persisted", nil)
 	amino.RegisterConcrete(nodesTypes.Validator{}, "pos/Validator", nil) // todo does this really need to depend on nodes/types
 	amino.RegisterInterface((*Proof)(nil), nil)
-	amino.RegisterInterface((*exported.ValidatorI)(nil), nil)
 
 	proto.Register("x.pocketcore.Proof", (*Proof)(nil), &RelayProof{}, &ChallengeProofInvalidData{})
 	proto.RegisterImplementation((*sdk.Msg)(nil), &MsgClaim{}, &MsgProof{})
