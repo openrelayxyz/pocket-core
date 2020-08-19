@@ -62,7 +62,7 @@ func (p Params) Equal(p2 Params) bool {
 
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
-	acl := ACL(make([]ACLPair, 0))
+	acl := ACL(make([]*ACLPair, 0))
 	u := NewUpgrade(0, "")
 	return Params{
 		ACL:      acl,
