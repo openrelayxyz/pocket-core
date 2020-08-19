@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	types2 "github.com/pokt-network/pocket-core/codec/types"
 	posConfig "github.com/pokt-network/pocket-core/config"
 	"log"
 	"os"
@@ -15416,7 +15417,7 @@ func GenesisStateFromJson(json string) posConfig.GenesisState {
 		fmt.Println("unable to read genesis from json (internal)")
 		os.Exit(1)
 	}
-	return posConfig.GenesisStateFromGenDoc(legacyAminoCodec, *genDoc)
+	return posConfig.GenesisStateFromGenDoc(protoCodec, *genDoc)
 }
 
 func newDefaultGenesisState() []byte {
@@ -15428,6 +15429,7 @@ func newDefaultGenesisState() []byte {
 	if err != nil {
 		log.Fatal(err)
 	}
+	_, protoCodec := Codec()
 	pubKey := cb.PublicKey
 	defaultGenesis := module.NewBasicManager(
 		apps.AppModuleBasic{},
@@ -15440,12 +15442,13 @@ func newDefaultGenesisState() []byte {
 	rawAuth := defaultGenesis[auth.ModuleName]
 	var accountGenesis auth.GenesisState
 	types.ModuleCdc.MustUnmarshalJSON(rawAuth, &accountGenesis)
-	accountGenesis.Accounts = append(accountGenesis.Accounts, &auth.BaseAccount{
+	acc := auth.BaseAccount{
 		Address: cb.GetAddress(),
 		Coins:   sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(1000000))),
 		PubKey:  pubKey,
-	})
-	res := Codec().MustMarshalJSON(accountGenesis)
+	}
+	accountGenesis.Accounts = append(accountGenesis.Accounts, &acc)
+	res := protoCodec.MustMarshalJSON(accountGenesis)
 	defaultGenesis[auth.ModuleName] = res
 	// set address as application too
 	rawApps := defaultGenesis[appsTypes.ModuleName]
@@ -15461,41 +15464,42 @@ func newDefaultGenesisState() []byte {
 		MaxRelays:               sdk.NewInt(10000000000000),
 		UnstakingCompletionTime: time.Time{},
 	})
-	res = Codec().MustMarshalJSON(appsGenesis)
+	res = protoCodec.MustMarshalJSON(appsGenesis)
 	defaultGenesis[appsTypes.ModuleName] = res
 	// set default governance in genesis
 	rawPocket := defaultGenesis[types.ModuleName]
 	var pocketGenesis types.GenesisState
 	types.ModuleCdc.MustUnmarshalJSON(rawPocket, &pocketGenesis)
 	pocketGenesis.Params.SessionNodeCount = 1
-	res = Codec().MustMarshalJSON(pocketGenesis)
+	res = protoCodec.MustMarshalJSON(pocketGenesis)
 	defaultGenesis[types.ModuleName] = res
 	// setup pos genesis
 	rawPOS := defaultGenesis[nodesTypes.ModuleName]
 	var posGenesisState nodesTypes.GenesisState
 	types.ModuleCdc.MustUnmarshalJSON(rawPOS, &posGenesisState)
-	posGenesisState.Validators = append(posGenesisState.Validators,
-		nodesTypes.Validator{Address: sdk.Address(pubKey.Address()),
-			PublicKey:    pubKey,
-			Status:       sdk.Staked,
-			Chains:       []string{PlaceholderHash},
-			ServiceURL:   PlaceholderServiceURL,
-			StakedTokens: sdk.NewInt(10000000)})
+	n := nodesTypes.Validator{Address: sdk.Address(pubKey.Address()),
+		PublicKey:    pubKey,
+		Status:       sdk.Staked,
+		Chains:       []string{PlaceholderHash},
+		ServiceURL:   PlaceholderServiceURL,
+		StakedTokens: sdk.NewInt(10000000)}.ToProto()
+	posGenesisState.Validators = append(posGenesisState.Validators, &n)
 	res = types.ModuleCdc.MustMarshalJSON(posGenesisState)
 	defaultGenesis[nodesTypes.ModuleName] = res
 	// set default governance in genesis
 	var govGenesisState govTypes.GenesisState
 	rawGov := defaultGenesis[govTypes.ModuleName]
-	Codec().MustUnmarshalJSON(rawGov, &govGenesisState)
+	protoCodec.MustUnmarshalJSON(rawGov, &govGenesisState)
 	mACL := createDummyACL(pubKey)
 	govGenesisState.Params.ACL = mACL
 	govGenesisState.Params.DAOOwner = sdk.Address(pubKey.Address())
-	govGenesisState.Params.Upgrade = govTypes.NewUpgrade(0, "0")
-	res4 := Codec().MustMarshalJSON(govGenesisState)
+	u := govTypes.NewUpgrade(0, "0")
+	govGenesisState.Params.Upgrade = &u
+	res4 := protoCodec.MustMarshalJSON(govGenesisState)
 	defaultGenesis[govTypes.ModuleName] = res4
 	// end genesis setup
-	j, _ := types.ModuleCdc.MarshalJSONIndent(defaultGenesis, "", "    ")
-	j, _ = types.ModuleCdc.MarshalJSONIndent(tmType.GenesisDoc{
+	j, _ := types.ModuleCdc.MarshalJSON(defaultGenesis)
+	j, _ = types.ModuleCdc.MarshalJSON(tmType.GenesisDoc{
 		GenesisTime: time.Now(),
 		ChainID:     "pocket-test",
 		ConsensusParams: &tmType.ConsensusParams{
@@ -15514,14 +15518,14 @@ func newDefaultGenesisState() []byte {
 		Validators: nil,
 		AppHash:    nil,
 		AppState:   j,
-	}, "", "    ")
+	})
 	return j
 }
 
 func createDummyACL(kp crypto.PublicKey) govTypes.ACL {
 	addr := sdk.Address(kp.Address())
 	acl := govTypes.ACL{}
-	acl = make([]govTypes.ACLPair, 0)
+	acl = make([]*govTypes.ACLPair, 0)
 	acl.SetOwner("application/ApplicationStakeMinimum", addr)
 	acl.SetOwner("application/AppUnstakingTime", addr)
 	acl.SetOwner("application/BaseRelaysPerPOKT", addr)
