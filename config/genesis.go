@@ -16,7 +16,7 @@ type GenesisState map[string]json.RawMessage
 //	genesisState := GetGensisFromFile(app.cdc, "genesis.go")
 //	return app.mm.InitGenesis(ctx, genesisState)
 //}
-func GenesisStateFromFile(cdc *codec.Codec, genFile string) GenesisState {
+func GenesisStateFromFile(cdc *codec.ProtoCodec, genFile string) GenesisState {
 	if !os.FileExists(genFile) {
 		panic(fmt.Errorf("%s does not exist, run `init` first", genFile))
 	}
@@ -35,7 +35,7 @@ func GenesisFileToGenDoc(genFile string) *tmtypes.GenesisDoc {
 	return genDoc
 }
 
-func GenesisStateFromGenDoc(cdc *codec.Codec, genDoc tmtypes.GenesisDoc) (genesisState map[string]json.RawMessage) {
+func GenesisStateFromGenDoc(cdc *codec.ProtoCodec, genDoc tmtypes.GenesisDoc) (genesisState map[string]json.RawMessage) {
 	if err := cdc.UnmarshalJSON(genDoc.AppState, &genesisState); err != nil {
 		panic(err)
 	}

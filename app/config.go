@@ -660,6 +660,13 @@ func Codec() (*codec.LegacyAmino, *codec.ProtoCodec) {
 	return legacyAminoCodec, protoCodec
 }
 
+func CodecP() *codec.ProtoCodec {
+	if legacyAminoCodec == nil || protoCodec == nil {
+		MakeCodec()
+	}
+	return protoCodec
+}
+
 func MakeCodec() {
 	// create a new codec
 	legacyAminoCodec = codec.NewLegacyAminoCodec()
