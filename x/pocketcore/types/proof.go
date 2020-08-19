@@ -23,6 +23,37 @@ type Proof interface {
 
 type Proofs []Proof
 
+type ProofIs []ProofI
+func (ps Proofs) ToProofI(evidenceType EvidenceType) (res []ProofI) {
+	if evidenceType == RelayEvidence {
+		for _, proof := range ps {
+			rp := proof.(RelayProof)
+			res = append(res, ProofI{Proof: &ProofI_RelayProof{RelayProof: &rp}})
+		}
+	} else {
+		for _, proof := range ps {
+			cp := proof.(ChallengeProofInvalidData)
+			res = append(res, ProofI{Proof: &ProofI_ChallengeProof{ChallengeProof: &cp}})
+		}
+	}
+	return
+}
+
+func (ps ProofIs) FromProofI(evidenceType EvidenceType) (res Proofs) {
+	if evidenceType == RelayEvidence {
+		for _, proof := range ps {
+			rp := proof.Proof.(*ProofI_RelayProof).RelayProof
+			res = append(res, rp)
+		}
+	} else {
+		for _, proof := range ps {
+			cp := proof.Proof.(*ProofI_ChallengeProof).ChallengeProof
+			res = append(res, cp)
+		}
+	}
+	return
+}
+
 var _ Proof = RelayProof{} // ensure implements interface at compile time
 
 // "RelayProof" - A proof object that represetns one relay finished

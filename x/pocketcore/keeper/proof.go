@@ -69,7 +69,7 @@ func (k Keeper) ValidateProof(ctx sdk.Ctx, proof pc.MsgProof) (servicerAddr sdk.
 	// get the public key from the claim
 	addr := proof.GetSigner()
 	// get the claim for the address
-	claim, found := k.GetClaim(ctx, addr, (*proof.Leaf).SessionHeader(), proof.EvidenceType)
+	claim, found := k.GetClaim(ctx, addr, proof.GetLeaf().SessionHeader(), proof.EvidenceType)
 	// if the claim is not found for this claim
 	if !found {
 		return nil, pc.MsgClaim{}, pc.NewClaimNotFoundError(pc.ModuleName)
@@ -99,7 +99,7 @@ func (k Keeper) ValidateProof(ctx sdk.Ctx, proof pc.MsgProof) (servicerAddr sdk.
 		return nil, pc.MsgClaim{}, pc.NewInvalidMerkleVerifyError(pc.ModuleName)
 	}
 	// validate the merkle proofs
-	isValid := proof.MerkleProof.Validate(*claim.MerkleRoot, *proof.Leaf, claim.TotalProofs)
+	isValid := proof.MerkleProof.Validate(*claim.MerkleRoot, proof.GetLeaf(), claim.TotalProofs)
 	// if is not valid for other reasons
 	if !isValid {
 		return nil, pc.MsgClaim{}, pc.NewInvalidMerkleVerifyError(pc.ModuleName)
@@ -110,7 +110,7 @@ func (k Keeper) ValidateProof(ctx sdk.Ctx, proof pc.MsgProof) (servicerAddr sdk.
 		return nil, pc.MsgClaim{}, pc.NewAppNotFoundError(pc.ModuleName)
 	}
 	// validate the proof depending on the type of proof it is
-	er := (*proof.Leaf).Validate(application.GetChains(), int(k.SessionNodeCount(sessionCtx)), claim.SessionHeader.SessionBlockHeight)
+	er := (proof.GetLeaf()).Validate(application.GetChains(), int(k.SessionNodeCount(sessionCtx)), claim.SessionHeader.SessionBlockHeight)
 	if er != nil {
 		return nil, pc.MsgClaim{}, er
 	}
@@ -119,7 +119,7 @@ func (k Keeper) ValidateProof(ctx sdk.Ctx, proof pc.MsgProof) (servicerAddr sdk.
 }
 
 func (k Keeper) ExecuteProof(ctx sdk.Ctx, proof pc.MsgProof, claim pc.MsgClaim) (tokens sdk.Int, err sdk.Error) {
-	switch (*proof.Leaf).(type) {
+	switch (proof.GetLeaf()).(type) {
 	case pc.RelayProof:
 		ctx.Logger().Info(fmt.Sprintf("reward coins to %s, for %d relays", claim.FromAddress.String(), claim.TotalProofs))
 		tokens = k.AwardCoinsForRelays(ctx, claim.TotalProofs, claim.FromAddress)
@@ -129,7 +129,7 @@ func (k Keeper) ExecuteProof(ctx sdk.Ctx, proof pc.MsgProof, claim pc.MsgClaim) 
 		}
 	case pc.ChallengeProofInvalidData:
 		ctx.Logger().Info(fmt.Sprintf("burning coins from %s, for %d valid challenges", claim.FromAddress.String(), claim.TotalProofs))
-		proof, ok := (*proof.Leaf).(pc.ChallengeProofInvalidData)
+		proof, ok := (proof.GetLeaf()).(pc.ChallengeProofInvalidData)
 		if !ok {
 			return sdk.ZeroInt(), pc.NewInvalidProofsError(pc.ModuleName)
 		}
@@ -209,8 +209,8 @@ func newTxBuilderAndCliCtx(ctx sdk.Ctx, msg sdk.Msg, n client.Client, key crypto
 	}
 	// ensure that the tx builder has the correct tx encoder, chainID, fee
 	txBuilder = auth.NewTxBuilder(
-		auth.DefaultTxEncoder(k.cdc),
-		auth.DefaultTxDecoder(k.cdc),
+		auth.DefaultTxEncoder(nil, k.cdc),
+		auth.DefaultTxDecoder(nil, k.cdc),
 		genDoc.Genesis.ChainID,
 		"",
 		sdk.NewCoins(sdk.NewCoin(k.posKeeper.StakeDenom(ctx), fee)),

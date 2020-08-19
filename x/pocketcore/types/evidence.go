@@ -9,11 +9,11 @@ import (
 
 // "Evidence" - A proof of work/burn for nodes.
 type Evidence struct {
-	Bloom         bloom.BloomFilter        `json:"bloom_filter"` // used to check if proof contains
-	SessionHeader `json:"evidence_header"` // the session h serves as an identifier for the EvidenceEncodable
-	NumOfProofs   int64                    `json:"num_of_proofs"` // the total number of proofs in the EvidenceEncodable
-	Proofs        []Proof                  `json:"proofs"`        // a slice of Proof objects (Proof per relay or challenge)
-	EvidenceType  EvidenceType             `json:"evidence_type"`
+	Bloom         bloom.BloomFilter `json:"bloom_filter"` // used to check if proof contains
+	SessionHeader `json:"evidence_header"`                // the session h serves as an identifier for the EvidenceEncodable
+	NumOfProofs   int64        `json:"num_of_proofs"`     // the total number of proofs in the EvidenceEncodable
+	Proofs        Proofs       `json:"proofs"`            // a slice of Proof objects (Proof per relay or challenge)
+	EvidenceType  EvidenceType `json:"evidence_type"`
 }
 
 // "GenerateMerkleRoot" - Generates the merkle root for an EvidenceEncodable object
@@ -66,7 +66,7 @@ func (e Evidence) MarshalObject() ([]byte, error) {
 		BloomBytes:    encodedBloom,
 		SessionHeader: &e.SessionHeader,
 		NumOfProofs:   e.NumOfProofs,
-		Proofs:        e.Proofs,
+		Proofs:        e.Proofs.ToProofI(e.EvidenceType),
 		EvidenceType:  e.EvidenceType,
 	}
 	return ModuleCdc.MarshalBinaryBare(&ep)
@@ -87,7 +87,7 @@ func (e Evidence) UnmarshalObject(b []byte) (CacheObject, error) {
 		Bloom:         bloomFilter,
 		SessionHeader: *ep.SessionHeader,
 		NumOfProofs:   ep.NumOfProofs,
-		Proofs:        ep.Proofs,
+		Proofs:        ep.Proofs.FromProofI(ep.EvidenceType),
 		EvidenceType:  ep.EvidenceType}
 	return evidence, nil
 }

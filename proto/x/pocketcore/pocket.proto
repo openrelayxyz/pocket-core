@@ -15,12 +15,12 @@ message SessionHeader {
 	int64 sessionBlockHeight = 3 [(gogoproto.jsontag) = "session_height"];
 }
 
-message Session {
+message SessionEncodable {
 	option (gogoproto.goproto_getters) = false;
 
-	SessionHeader sessionHeader = 1 [(gogoproto.jsontag)="header"];
+	SessionHeader sessionHeader = 1 [(gogoproto.jsontag)="header", (gogoproto.nullable)=false];
 	bytes sessionKey = 2 [(gogoproto.jsontag)="key", (gogoproto.casttype)="SessionKey"];
-	repeated x.nodes.ValidatorProto sessionNodes = 3 [(gogoproto.jsontag)="key", (gogoproto.castrepeated)="SessionNodes"];
+	repeated x.nodes.ValidatorProto sessionNodes = 3 [(gogoproto.jsontag)="key", (gogoproto.nullable)=false, (gogoproto.castrepeated)="SessionNodesEncodable"];
 }
 
 message MsgClaim {
@@ -37,8 +37,8 @@ message MsgClaim {
 message MsgProof {
 	option (gogoproto.goproto_getters) = false;
 
-	MerkleProof merkleProof = 1 [(gogoproto.jsontag) = "merkle_proofs"];
-	ProofI leaf = 2 [(gogoproto.jsontag) = "leaf", (gogoproto.casttype) = "Proof"];
+	MerkleProof merkleProof = 1 [(gogoproto.jsontag) = "merkle_proofs", (gogoproto.nullable) = false];
+	ProofI leaf = 2 [(gogoproto.jsontag) = "leaf", (gogoproto.nullable) = false];
 	int32 evidenceType = 3 [(gogoproto.jsontag) = "evidence_type", (gogoproto.casttype) = "EvidenceType"];
 }
 
@@ -57,7 +57,7 @@ message EvidenceEncodable {
 	bytes bloomBytes = 1 [(gogoproto.jsontag) = "bloom_bytes"];
 	SessionHeader sessionHeader = 2 [(gogoproto.jsontag) = "evidence_header"];
 	int64 numOfProofs = 3  [(gogoproto.jsontag) = "num_of_proofs"];
-	repeated ProofI proofs= 4 [(gogoproto.jsontag) = "proofs", (gogoproto.castrepeated) = "Proofs"];
+	repeated ProofI proofs= 4 [(gogoproto.jsontag) = "proofs", (gogoproto.castrepeated)="ProofIs",(gogoproto.nullable) = false];
 	int32 evidenceType = 5 [(gogoproto.jsontag) = "evidence_type", (gogoproto.casttype) = "EvidenceType"];
 }
 

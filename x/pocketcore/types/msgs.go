@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/hex"
+	"fmt"
 	sdk "github.com/pokt-network/pocket-core/types"
 )
 
@@ -128,7 +129,7 @@ func (msg MsgProof) ValidateBasic() sdk.Error {
 		return NewInvalidMerkleRangeError(ModuleName)
 	}
 	// validate the leaf
-	if err := (*msg.Leaf).ValidateBasic(); err != nil {
+	if err := msg.GetLeaf().ValidateBasic(); err != nil {
 		return err
 	}
 	if _, err := msg.EvidenceType.Byte(); err != nil {
@@ -144,5 +145,17 @@ func (msg MsgProof) GetSignBytes() []byte {
 
 // GetSigners defines whose signature is required
 func (msg MsgProof) GetSigner() sdk.Address {
-	return (*msg.Leaf).GetSigner()
+	return msg.GetLeaf().GetSigner()
+}
+
+func (msg MsgProof) GetLeaf() Proof {
+	switch x := msg.Leaf.Proof.(type) {
+	case *ProofI_RelayProof:
+		return x.RelayProof
+	case *ProofI_ChallengeProof:
+		return x.ChallengeProof
+	default:
+		fmt.Println(fmt.Errorf("msg.Proof has unexpected type %T", x))
+		return RelayProof{}
+	}
 }
