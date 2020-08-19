@@ -11,7 +11,3 @@ message Addresses {
 message AddressProto {
 	bytes address = 1 [(gogoproto.casttype) = "Address"];
 }
-
-message BoolProto{
-	bool value = 1;
-}

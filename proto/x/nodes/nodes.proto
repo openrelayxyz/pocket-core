@@ -54,3 +54,11 @@ message ValidatorSigningInfo {
 	int64 missed_blocks_counter = 5 [(gogoproto.jsontag) = "missed_blocks_counter",(gogoproto.moretags) = "yaml:\"missed_blocks_counter\""];
 	int64 jailed_blocks_counter = 6 [(gogoproto.jsontag) = "jailed_blocks_counter",(gogoproto.moretags) = "yaml:\"jailed_blocks_counter\""];
 }
+
+message Power{
+	int64 value = 1;
+}
+
+message ValidatorMissed{
+	bool value = 1;
+}

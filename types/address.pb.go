@@ -111,60 +111,15 @@ func (m *AddressProto) GetAddress() Address {
 	return nil
 }
 
-type BoolProto struct {
-	Value bool `protobuf:"varint,1,opt,name=value,proto3" json:"value,omitempty"`
-}
-
-func (m *BoolProto) Reset()         { *m = BoolProto{} }
-func (m *BoolProto) String() string { return proto.CompactTextString(m) }
-func (*BoolProto) ProtoMessage()    {}
-func (*BoolProto) Descriptor() ([]byte, []int) {
-	return fileDescriptor_468dd63a469488c9, []int{2}
-}
-func (m *BoolProto) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *BoolProto) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_BoolProto.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *BoolProto) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BoolProto.Merge(m, src)
-}
-func (m *BoolProto) XXX_Size() int {
-	return m.Size()
-}
-func (m *BoolProto) XXX_DiscardUnknown() {
-	xxx_messageInfo_BoolProto.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_BoolProto proto.InternalMessageInfo
-
-func (m *BoolProto) GetValue() bool {
-	if m != nil {
-		return m.Value
-	}
-	return false
-}
-
 func init() {
 	proto.RegisterType((*Addresses)(nil), "types.Addresses")
 	proto.RegisterType((*AddressProto)(nil), "types.AddressProto")
-	proto.RegisterType((*BoolProto)(nil), "types.BoolProto")
 }
 
 func init() { proto.RegisterFile("types/address.proto", fileDescriptor_468dd63a469488c9) }
 
 var fileDescriptor_468dd63a469488c9 = []byte{
-	// 223 bytes of a gzipped FileDescriptorProto
+	// 200 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0x2e, 0xa9, 0x2c, 0x48,
 	0x2d, 0xd6, 0x4f, 0x4c, 0x49, 0x29, 0x4a, 0x2d, 0x2e, 0xd6, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17,
 	0x62, 0x05, 0x0b, 0x4a, 0x89, 0xa4, 0xe7, 0xa7, 0xe7, 0x83, 0x45, 0xf4, 0x41, 0x2c, 0x88, 0xa4,
@@ -172,13 +127,12 @@ var fileDescriptor_468dd63a469488c9 = []byte{
 	0x04, 0xa3, 0x02, 0xb3, 0x06, 0x8f, 0x13, 0xef, 0xaa, 0xfb, 0xf2, 0x9c, 0x89, 0x30, 0xb9, 0x20,
 	0x90, 0x8c, 0x92, 0x29, 0x17, 0x0f, 0x54, 0x75, 0x00, 0xd8, 0x68, 0x55, 0x2e, 0x76, 0xa8, 0x0a,
 	0x09, 0x46, 0x05, 0x46, 0x0d, 0x1e, 0x27, 0xee, 0x5f, 0xf7, 0xe4, 0xd9, 0xa1, 0x4a, 0x82, 0x60,
-	0x72, 0x4a, 0x8a, 0x5c, 0x9c, 0x4e, 0xf9, 0xf9, 0x39, 0x10, 0x3d, 0x22, 0x5c, 0xac, 0x65, 0x89,
-	0x39, 0xa5, 0xa9, 0x60, 0x1d, 0x1c, 0x41, 0x10, 0x8e, 0x93, 0xf3, 0x89, 0x47, 0x72, 0x8c, 0x17,
-	0x1e, 0xc9, 0x31, 0x3e, 0x78, 0x24, 0xc7, 0x38, 0xe1, 0xb1, 0x1c, 0xc3, 0x85, 0xc7, 0x72, 0x0c,
-	0x37, 0x1e, 0xcb, 0x31, 0x44, 0x69, 0xa6, 0x67, 0x96, 0x64, 0x94, 0x26, 0xe9, 0x25, 0xe7, 0xe7,
-	0xea, 0x17, 0xe4, 0x67, 0x97, 0xe8, 0xe6, 0xa5, 0x96, 0x94, 0xe7, 0x17, 0x65, 0xeb, 0x17, 0xe4,
-	0x27, 0x67, 0xa7, 0x96, 0xe8, 0x26, 0xe7, 0x17, 0xa5, 0xea, 0x83, 0xbd, 0x98, 0xc4, 0x06, 0xf6,
-	0x93, 0x31, 0x20, 0x00, 0x00, 0xff, 0xff, 0x67, 0x4d, 0x3d, 0xfc, 0x07, 0x01, 0x00, 0x00,
+	0x72, 0x4e, 0xce, 0x27, 0x1e, 0xc9, 0x31, 0x5e, 0x78, 0x24, 0xc7, 0xf8, 0xe0, 0x91, 0x1c, 0xe3,
+	0x84, 0xc7, 0x72, 0x0c, 0x17, 0x1e, 0xcb, 0x31, 0xdc, 0x78, 0x2c, 0xc7, 0x10, 0xa5, 0x99, 0x9e,
+	0x59, 0x92, 0x51, 0x9a, 0xa4, 0x97, 0x9c, 0x9f, 0xab, 0x5f, 0x90, 0x9f, 0x5d, 0xa2, 0x9b, 0x97,
+	0x5a, 0x52, 0x9e, 0x5f, 0x94, 0xad, 0x5f, 0x90, 0x9f, 0x9c, 0x9d, 0x5a, 0xa2, 0x9b, 0x9c, 0x5f,
+	0x94, 0xaa, 0x0f, 0x76, 0x7f, 0x12, 0x1b, 0xd8, 0xc1, 0xc6, 0x80, 0x00, 0x00, 0x00, 0xff, 0xff,
+	0xf3, 0x75, 0xd8, 0xba, 0xe4, 0x00, 0x00, 0x00,
 }
 
 func (m *Addresses) Marshal() (dAtA []byte, err error) {
@@ -243,39 +197,6 @@ func (m *AddressProto) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *BoolProto) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *BoolProto) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *BoolProto) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.Value {
-		i--
-		if m.Value {
-			dAtA[i] = 1
-		} else {
-			dAtA[i] = 0
-		}
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
 func encodeVarintAddress(dAtA []byte, offset int, v uint64) int {
 	offset -= sovAddress(v)
 	base := offset
@@ -311,18 +232,6 @@ func (m *AddressProto) Size() (n int) {
 	l = len(m.Address)
 	if l > 0 {
 		n += 1 + l + sovAddress(uint64(l))
-	}
-	return n
-}
-
-func (m *BoolProto) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Value {
-		n += 2
 	}
 	return n
 }
@@ -481,79 +390,6 @@ func (m *AddressProto) Unmarshal(dAtA []byte) error {
 				m.Address = []byte{}
 			}
 			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipAddress(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthAddress
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthAddress
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *BoolProto) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowAddress
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: BoolProto: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: BoolProto: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Value", wireType)
-			}
-			var v int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowAddress
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				v |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			m.Value = bool(v != 0)
 		default:
 			iNdEx = preIndex
 			skippy, err := skipAddress(dAtA[iNdEx:])
