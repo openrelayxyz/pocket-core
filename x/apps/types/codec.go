@@ -14,6 +14,7 @@ func RegisterCodec(amino *codec.LegacyAmino, proto *codec.ProtoCodec) {
 	amino.RegisterConcrete(MsgAppUnjail{}, "apps/MsgAppUnjail", nil)
 
 	proto.RegisterImplementation((*sdk.Msg)(nil), &MsgAppStake{},&MsgBeginAppUnstake{}, &MsgAppUnjail{})
+	ModuleCdc = proto
 }
 
 // module wide codec

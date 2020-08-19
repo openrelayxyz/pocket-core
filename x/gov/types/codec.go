@@ -17,6 +17,7 @@ func RegisterCodec(amino *codec.LegacyAmino, proto *codec.ProtoCodec) {
 	amino.RegisterConcrete(MsgUpgrade{}, "gov/msg_upgrade", nil)
 
 	proto.RegisterImplementation((*sdk.Msg)(nil), &MsgChangeParam{}, &MsgDAOTransfer{})
+	ModuleCdc = proto
 }
 
 // module wide codec

@@ -18,6 +18,7 @@ func RegisterCodec(amino *codec.LegacyAmino, proto *codec.ProtoCodec) {
 	proto.RegisterImplementation((*sdk.Msg)(nil), &MsgStake{}, &MsgUnjail{}, &MsgBeginUnstake{}, &MsgSend{})
 	amino.RegisterInterface((*exported.ValidatorI)(nil), nil)
 	proto.Register("nodes/validatorI", (*exported.ValidatorI)(nil), &ValidatorProto{})
+	ModuleCdc = proto
 }
 
 // module wide codec

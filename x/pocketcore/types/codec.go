@@ -37,4 +37,5 @@ func RegisterCodec(amino *codec.LegacyAmino, proto *codec.ProtoCodec) {
 
 	proto.Register("x.pocketcore.Proof", (*Proof)(nil), &RelayProof{}, &ChallengeProofInvalidData{})
 	proto.RegisterImplementation((*sdk.Msg)(nil), &MsgClaim{}, &MsgProof{})
+	ModuleCdc = proto
 }

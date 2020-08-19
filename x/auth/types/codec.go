@@ -21,6 +21,7 @@ func RegisterCodec(amino *codec.LegacyAmino, proto *codec.ProtoCodec) {
 	proto.Register("x.auth.ModuleAccount", (*exported.Account)(nil), &ModuleAccountEncodable{})
 	proto.Register("x.auth.SupplyI", (*exported.SupplyI)(nil), &Supply{})
 	proto.RegisterImplementation((*sdk.Tx)(nil), &StdTx{})
+	ModuleCdc = proto
 }
 
 // module wide codec
