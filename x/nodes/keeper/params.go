@@ -132,8 +132,8 @@ func (k Keeper) MaxJailedBlocks(ctx sdk.Ctx) (res int64) {
 }
 
 // GetParams - Retrieve all parameters as types.Params
-func (k Keeper) GetParams(ctx sdk.Ctx) types.Params {
-	return types.Params{
+func (k Keeper) GetParams(ctx sdk.Ctx) *types.Params {
+	return &types.Params{
 		UnstakingTime:           k.UnStakingTime(ctx),
 		MaxValidators:           k.MaxValidators(ctx),
 		StakeDenom:              k.StakeDenom(ctx),

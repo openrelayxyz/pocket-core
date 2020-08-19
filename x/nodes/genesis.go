@@ -141,7 +141,7 @@ func ExportGenesis(ctx sdk.Ctx, keeper keeper.Keeper) types.GenesisState {
 	prevProposer := keeper.GetPreviousProposer(ctx)
 
 	return types.GenesisState{
-		Params:                   &params,
+		Params:                   params,
 		PrevStateTotalPower:      prevStateTotalPower,
 		PrevStateValidatorPowers: prevStateValidatorPowers,
 		Validators:               validators,
@@ -210,7 +210,7 @@ func validateGenesisStateValidators(validators []*types.ValidatorProto, minimumS
 		if !val.IsUnstaked() && val.StakedTokens.LT(minimumStake) {
 			return fmt.Errorf("validator has less than minimum stake: %v", val)
 		}
-		if err := types.ValidateServiceURL(val.ServiceUrl); err != nil {
+		if err := types.ValidateServiceURL(val.ServiceURL); err != nil {
 			return types.ErrInvalidServiceURL(types.ModuleName, err)
 		}
 		for _, chain := range val.Chains {

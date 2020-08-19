@@ -354,11 +354,11 @@ func (k Keeper) JailValidator(ctx sdk.Ctx, addr sdk.Address) {
 	logger := k.Logger(ctx)
 	logger.Info(fmt.Sprintf("validator %s jailed", addr))
 	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
+		sdk.Event(sdk.NewEvent(
 			types.EventTypeJail,
 			sdk.NewAttribute(types.AttributeKeyAddress, addr.String()),
 			sdk.NewAttribute(types.AttributeKeyReason, types.AttributeValueMissingSignature),
-		),
+		)),
 	)
 }
 
