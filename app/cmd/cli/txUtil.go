@@ -47,7 +47,7 @@ func SendTransaction(fromAddr, toAddr, passphrase, chainID string, amount sdk.In
 	if err != nil {
 		return nil, err
 	}
-	txBz, err := newTxBz(app.CodecP(), msg, fa, chainID, kb, passphrase, fees, memo)
+	txBz, err := newTxBz(app.CodecP(), &msg, fa, chainID, kb, passphrase, fees, memo)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func StakeNode(chains []string, serviceURL, fromAddr, passphrase, chainID string
 	if err != nil {
 		return nil, err
 	}
-	txBz, err := newTxBz(app.CodecP(), msg, fa, chainID, kb, passphrase, fees, "")
+	txBz, err := newTxBz(app.CodecP(), &msg, fa, chainID, kb, passphrase, fees, "")
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +121,7 @@ func UnstakeNode(fromAddr, passphrase, chainID string, fees int64) (*rpc.SendRaw
 	if err != nil {
 		return nil, err
 	}
-	txBz, err := newTxBz(app.CodecP(), msg, fa, chainID, kb, passphrase, fees, "")
+	txBz, err := newTxBz(app.CodecP(), &msg, fa, chainID, kb, passphrase, fees, "")
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +148,7 @@ func UnjailNode(fromAddr, passphrase, chainID string, fees int64) (*rpc.SendRawT
 	if err != nil {
 		return nil, err
 	}
-	txBz, err := newTxBz(app.CodecP(), msg, fa, chainID, kb, passphrase, fees, "")
+	txBz, err := newTxBz(app.CodecP(), &msg, fa, chainID, kb, passphrase, fees, "")
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +190,7 @@ func StakeApp(chains []string, fromAddr, passphrase, chainID string, amount sdk.
 	if err != nil {
 		return nil, err
 	}
-	txBz, err := newTxBz(app.CodecP(), msg, fa, chainID, kb, passphrase, fees, "")
+	txBz, err := newTxBz(app.CodecP(), &msg, fa, chainID, kb, passphrase, fees, "")
 	if err != nil {
 		return nil, err
 	}
@@ -216,7 +216,7 @@ func UnstakeApp(fromAddr, passphrase, chainID string, fees int64) (*rpc.SendRawT
 	if err != nil {
 		return nil, err
 	}
-	txBz, err := newTxBz(app.CodecP(), msg, fa, chainID, kb, passphrase, fees, "")
+	txBz, err := newTxBz(app.CodecP(), &msg, fa, chainID, kb, passphrase, fees, "")
 	if err != nil {
 		return nil, err
 	}
@@ -249,7 +249,7 @@ func DAOTx(fromAddr, toAddr, passphrase string, amount sdk.Int, action, chainID 
 	if err != nil {
 		return nil, err
 	}
-	txBz, err := newTxBz(app.CodecP(), msg, fa, chainID, kb, passphrase, fees, "")
+	txBz, err := newTxBz(app.CodecP(), &msg, fa, chainID, kb, passphrase, fees, "")
 	if err != nil {
 		return nil, err
 	}
@@ -283,7 +283,7 @@ func ChangeParam(fromAddr, paramACLKey string, paramValue json.RawMessage, passp
 	if err != nil {
 		return nil, err
 	}
-	txBz, err := newTxBz(app.CodecP(), msg, fa, chainID, kb, passphrase, fees, "")
+	txBz, err := newTxBz(app.CodecP(), &msg, fa, chainID, kb, passphrase, fees, "")
 	if err != nil {
 		return nil, err
 	}
@@ -310,7 +310,7 @@ func Upgrade(fromAddr string, upgrade govTypes.Upgrade, passphrase, chainID stri
 	if err != nil {
 		return nil, err
 	}
-	txBz, err := newTxBz(app.CodecP(), msg, fa, chainID, kb, passphrase, fees, "")
+	txBz, err := newTxBz(app.CodecP(), &msg, fa, chainID, kb, passphrase, fees, "")
 	if err != nil {
 		return nil, err
 	}
