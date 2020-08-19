@@ -183,6 +183,18 @@ func (v ValidatorProto) IsJailed() bool             { return v.Jailed }
 func (v ValidatorProto) GetStatus() sdk.StakeStatus { return v.Status }
 func (v ValidatorProto) GetAddress() sdk.Address    { return v.Address }
 func (v ValidatorProto) GetTokens() sdk.Int         { return v.StakedTokens }
+func (v ValidatorProto) GetPublicKey() crypto.PublicKey {
+	pubkey, _ := crypto.NewPublicKey(v.PublicKey)
+	return pubkey
+}
+func (v ValidatorProto) GetConsensusPower() int64 { return v.ConsensusPower() }
+
+func (v ValidatorProto) ConsensusPower() int64 {
+	if v.IsStaked() && !v.IsJailed() {
+		return sdk.TokensToConsensusPower(v.StakedTokens)
+	}
+	return 0
+}
 
 // MarshalJSON marshals the validator to JSON using Hex
 func (v ValidatorProto) FromProto() Validator {
