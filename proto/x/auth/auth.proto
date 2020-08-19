@@ -44,12 +44,14 @@ message Params {
 
 // Fee Multiplier derfines a key value multiplier for the fee of the
 message FeeMultiplier {
+	option (gogoproto.equal) = true;
 	option (gogoproto.goproto_stringer) = true;
 	string key = 1 [(gogoproto.jsontag) = "key"];
 	int64 multiplier = 2 [(gogoproto.jsontag) = "multiplier"];
 }
 
 message FeeMultipliers {
+	option (gogoproto.equal) = true;
 	option (gogoproto.goproto_stringer) = true;
 	repeated FeeMultiplier feeMultis = 1 [(gogoproto.jsontag) = "fee_multiplier", (gogoproto.nullable) = false];
 	int64 default = 2 [(gogoproto.jsontag) = "default"];
