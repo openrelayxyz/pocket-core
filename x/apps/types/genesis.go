@@ -1,11 +1,11 @@
 package types
 
 // GenesisState - all staking state that must be provided at genesis
-//type GenesisState struct {
-//	Params       Params       `json:"params" yaml:"params"`
-//	Applications Applications `json:"applications" yaml:"applications"`
-//	Exported     bool         `json:"exported" yaml:"exported"`
-//}
+type GenesisState struct {
+	Params       Params       `json:"params" yaml:"params"`
+	Applications Applications `json:"applications" yaml:"applications"`
+	Exported     bool         `json:"exported" yaml:"exported"`
+}
 
 //// PrevState application power, needed for application set update logic
 //type PrevStatePowerMapping struct {
@@ -17,6 +17,7 @@ package types
 func DefaultGenesisState() GenesisState {
 	dp := DefaultParams()
 	return GenesisState{
-		Params: &dp,
+		Params:       dp,
+		Applications: make(Applications, 0),
 	}
 }

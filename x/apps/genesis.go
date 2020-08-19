@@ -2,10 +2,11 @@ package pos
 
 import (
 	"fmt"
+	"log"
+
 	sdk "github.com/pokt-network/pocket-core/types"
 	"github.com/pokt-network/pocket-core/x/apps/keeper"
 	"github.com/pokt-network/pocket-core/x/apps/types"
-	"log"
 )
 
 // InitGenesis sets up the module based on the genesis state
@@ -15,7 +16,7 @@ func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, supplyKeeper types.AuthKeepe
 	stakedTokens := sdk.ZeroInt()
 	ctx = ctx.WithBlockHeight(1 - sdk.ValidatorUpdateDelay)
 	// set the parameters from the data
-	keeper.SetParams(ctx, *data.Params)
+	keeper.SetParams(ctx, data.Params)
 	for _, application := range data.Applications {
 		if application.IsUnstaked() || application.IsUnstaking() {
 			fmt.Println(fmt.Errorf("%v the applications must be staked at genesis", application))
@@ -62,7 +63,7 @@ func ExportGenesis(ctx sdk.Ctx, keeper keeper.Keeper) types.GenesisState {
 	params := keeper.GetParams(ctx)
 	applications := keeper.GetAllApplications(ctx)
 	return types.GenesisState{
-		Params:       &params,
+		Params:       params,
 		Applications: applications.ToProto(),
 		Exported:     true,
 	}
