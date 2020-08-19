@@ -15448,12 +15448,7 @@ func newDefaultGenesisState() []byte {
 		Coins:   sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(1000000))),
 		PubKey:  pubKey,
 	}
-	var accs authTypes.Accounts
-	a, err := authTypes.PackAccounts(append(accs, &acc))
-	if err != nil {
-		panic("unable to pack accounts in genesis: " + err.Error())
-	}
-	accountGenesis.Accounts = a
+	accountGenesis.Accounts = append(accountGenesis.Accounts, &acc)
 	res := aminoCodec.MustMarshalJSON(accountGenesis)
 	defaultGenesis[auth.ModuleName] = res
 	// set address as application too

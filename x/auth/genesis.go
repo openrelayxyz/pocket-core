@@ -29,11 +29,7 @@ func InitGenesis(ctx sdk.Ctx, k keeper.Keeper, data types.GenesisState) {
 		keys[feeM.Key] = struct{}{}
 	}
 	k.SetParams(ctx, data.Params)
-	accs, err := types.UnpackAccounts(data.Accounts)
-	if err != nil {
-		panic(err)
-	}
-	for _, account := range accs {
+	for _, account := range data.Accounts {
 		k.SetAccount(ctx, account)
 	}
 	// manually set the total supply based on accounts if not provided
