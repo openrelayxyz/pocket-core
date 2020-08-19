@@ -587,7 +587,6 @@ func (si StoreInfo) Hash() []byte {
 // Misc.
 
 func getLatestVersion(db dbm.DB) int64 {
-	var latest int64
 	latestBytes, _ := db.Get([]byte(latestVersionKey))
 	if latestBytes == nil {
 		return 0
