@@ -20,7 +20,7 @@ func StakeTx(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase, 
 		Value:  amount,
 		Chains: chains, // non native blockchains
 	}
-	txBuilder, cliCtx, err := newTx(cdc, msg, fromAddr, tmNode, keybase, passphrase)
+	txBuilder, cliCtx, err := newTx(cdc, &msg, fromAddr, tmNode, keybase, passphrase)
 	if err != nil {
 		return nil, err
 	}
@@ -28,12 +28,12 @@ func StakeTx(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase, 
 	if err != nil {
 		return nil, err
 	}
-	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, msg)
+	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, &msg)
 }
 
 func UnstakeTx(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase, address sdk.Address, passphrase string) (*sdk.TxResponse, error) {
 	msg := types.MsgBeginAppUnstake{Address: address}
-	txBuilder, cliCtx, err := newTx(cdc, msg, address, tmNode, keybase, passphrase)
+	txBuilder, cliCtx, err := newTx(cdc, &msg, address, tmNode, keybase, passphrase)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func UnstakeTx(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase
 	if err != nil {
 		return nil, err
 	}
-	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, msg)
+	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, &msg)
 }
 
 func newTx(cdc *codec.ProtoCodec, msg sdk.Msg, fromAddr sdk.Address, tmNode client.Client, keybase keys.Keybase, passphrase string) (txBuilder auth.TxBuilder, cliCtx util.CLIContext, err error) {

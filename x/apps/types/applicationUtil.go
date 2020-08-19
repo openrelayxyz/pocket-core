@@ -15,6 +15,13 @@ import (
 // Applications is a slice of type application.
 type Applications []Application
 
+func (a Applications) ToProto() (res []ApplicationEncodable) {
+	for _, app := range a {
+		res = append(res, app.ToProto())
+	}
+	return
+}
+
 func (a Applications) String() (out string) {
 	for _, val := range a {
 		out += val.String() + "\n\n"
@@ -27,6 +34,20 @@ func (a Application) String() string {
 	return fmt.Sprintf("Address:\t\t%s\nPublic Key:\t\t%s\nJailed:\t\t\t%v\nChains:\t\t\t%v\nMaxRelays:\t\t%v\nStatus:\t\t\t%s\nTokens:\t\t\t%s\nUnstaking Time:\t%v\n----\n",
 		a.Address, a.PublicKey.RawString(), a.Jailed, a.Chains, a.MaxRelays, a.Status, a.StakedTokens, a.UnstakingCompletionTime,
 	)
+}
+
+type ApplicationsEncodable []ApplicationEncodable
+
+func (a ApplicationsEncodable) FromProto() (res Applications) {
+	for _, app := range a {
+		a, err := app.FromProto()
+		if err != nil {
+			fmt.Println("can't convert app in applications encodable, continuing")
+			continue
+		}
+		res = append(res, a)
+	}
+	return
 }
 
 // this is a helper struct used for JSON de- and encoding only
@@ -85,16 +106,8 @@ func (a *Application) UnmarshalJSON(data []byte) error {
 
 // unmarshal the application
 func MarshalApplication(cdc *codec.ProtoCodec, application Application) (result []byte, err error) {
-	return cdc.MarshalBinaryLengthPrefixed(&ApplicationEncodable{
-		Address:                 application.Address,
-		PublicKey:               application.PublicKey.RawString(),
-		Jailed:                  application.Jailed,
-		Status:                  application.Status,
-		Chains:                  application.Chains,
-		StakedTokens:            application.StakedTokens,
-		MaxRelays:               application.MaxRelays,
-		UnstakingCompletionTime: application.UnstakingCompletionTime,
-	})
+	ae := application.ToProto()
+	return cdc.MarshalBinaryLengthPrefixed(&ae)
 }
 
 // unmarshal the application
@@ -104,20 +117,7 @@ func UnmarshalApplication(cdc *codec.ProtoCodec, appBytes []byte) (application A
 	if err != nil {
 		return
 	}
-	pk, err := crypto.NewPublicKey(appEncodable.PublicKey)
-	if err != nil {
-		return
-	}
-	return Application{
-		Address:                 appEncodable.Address,
-		PublicKey:               pk,
-		Jailed:                  appEncodable.Jailed,
-		Status:                  appEncodable.Status,
-		Chains:                  appEncodable.Chains,
-		StakedTokens:            appEncodable.StakedTokens,
-		MaxRelays:               appEncodable.MaxRelays,
-		UnstakingCompletionTime: appEncodable.UnstakingCompletionTime,
-	}, nil
+	return appEncodable.FromProto()
 }
 
 // TODO shared code among modules below

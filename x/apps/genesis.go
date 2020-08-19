@@ -21,13 +21,17 @@ func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, supplyKeeper types.AuthKeepe
 			fmt.Println(fmt.Errorf("%v the applications must be staked at genesis", application))
 			continue
 		}
+		app, err := application.FromProto()
+		if err != nil {
+			panic("can't convert app encodable to app: " + err.Error())
+		}
 		// calculate relays
-		application.MaxRelays = keeper.CalculateAppRelays(ctx, application)
+		application.MaxRelays = keeper.CalculateAppRelays(ctx, app)
 		// set the applications from the data
-		keeper.SetApplication(ctx, application)
-		keeper.SetStakedApplication(ctx, application)
+		keeper.SetApplication(ctx, app)
+		keeper.SetStakedApplication(ctx, app)
 		if application.IsStaked() {
-			stakedTokens = stakedTokens.Add(application.GetTokens())
+			stakedTokens = stakedTokens.Add(app.GetTokens())
 		}
 	}
 	stakedCoins := sdk.NewCoins(sdk.NewCoin(posKeeper.StakeDenom(ctx), stakedTokens))
@@ -59,7 +63,7 @@ func ExportGenesis(ctx sdk.Ctx, keeper keeper.Keeper) types.GenesisState {
 	applications := keeper.GetAllApplications(ctx)
 	return types.GenesisState{
 		Params:       &params,
-		Applications: applications,
+		Applications: applications.ToProto(),
 		Exported:     true,
 	}
 }
@@ -67,7 +71,7 @@ func ExportGenesis(ctx sdk.Ctx, keeper keeper.Keeper) types.GenesisState {
 // ValidateGenesis validates the provided staking genesis state to ensure the
 // expected invariants holds. (i.e. params in correct bounds, no duplicate applications)
 func ValidateGenesis(data types.GenesisState) error {
-	err := validateGenesisStateApplications(data.Applications, sdk.NewInt(data.Params.AppStakeMin))
+	err := validateGenesisStateApplications(data.Applications.FromProto(), sdk.NewInt(data.Params.AppStakeMin))
 	if err != nil {
 		return err
 	}
