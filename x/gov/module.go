@@ -110,8 +110,8 @@ func (am AppModule) BeginBlock(ctx sdk.Ctx, req abci.RequestBeginBlock) {
 	u := am.keeper.GetUpgrade(ctx)
 	if ctx.AppVersion() < u.Version && ctx.BlockHeight() == u.UpgradeHeight() && ctx.BlockHeight() != 0 {
 		ctx.Logger().Error("MUST UPGRADE TO NEXT VERSION: ", u.Version)
-		ctx.EventManager().EmitEvent(sdk.NewEvent(types.EventMustUpgrade,
-			sdk.NewAttribute("VERSION:", u.UpgradeVersion())))
+		ctx.EventManager().EmitEvent(sdk.Event(sdk.NewEvent(types.EventMustUpgrade,
+			sdk.NewAttribute("VERSION:", u.UpgradeVersion()))))
 		ctx.Logger().Error(fmt.Sprintf("GRACEFULLY EXITING FOR UPGRADE, AT HEIGHT: %d", ctx.BlockHeight()))
 		p, err := os.FindProcess(os.Getpid())
 		if err != nil {
