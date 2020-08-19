@@ -29,7 +29,8 @@ type PocketCoreApp struct {
 	// extends baseapp
 	*bam.BaseApp
 	// the codec (uses amino)
-	cdc *codec.Codec
+	legacyAminoCodec *codec.LegacyAmino
+	protoCodec       *codec.ProtoCodec
 	// Keys to access the substores
 	Keys  map[string]*sdk.KVStoreKey
 	Tkeys map[string]*sdk.TransientStoreKey
@@ -47,7 +48,7 @@ type PocketCoreApp struct {
 func NewPocketBaseApp(logger log.Logger, db db.DB, options ...func(*bam.BaseApp)) *PocketCoreApp {
 	Codec()
 	// BaseApp handles interactions with Tendermint through the ABCI protocol
-	bApp := bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(legacyAminoCodec), options...)
+	bApp := bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(legacyAminoCodec, protoCodec), options...)
 	// set version of the baseapp
 	bApp.SetAppVersion(AppVersion)
 	// setup the key value store Keys
@@ -57,10 +58,11 @@ func NewPocketBaseApp(logger log.Logger, db db.DB, options ...func(*bam.BaseApp)
 	// add params Keys too
 	// Create the application
 	return &PocketCoreApp{
-		BaseApp: bApp,
-		cdc:     legacyAminoCodec,
-		Keys:    k,
-		Tkeys:   tkeys,
+		BaseApp:          bApp,
+		legacyAminoCodec: legacyAminoCodec,
+		protoCodec:       protoCodec,
+		Keys:             k,
+		Tkeys:            tkeys,
 	}
 }
 
@@ -113,7 +115,8 @@ func (app *PocketCoreApp) ExportAppState(height int64, forZeroHeight bool, jailW
 		return nil, err
 	}
 	genState := app.mm.ExportGenesis(ctx)
-	appState, err = Codec().MarshalJSONIndent(genState, "", "    ")
+	legacyAminoCodec, _ := Codec()
+	appState, err = legacyAminoCodec.MarshalJSONIndent(genState, "", "    ")
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +131,8 @@ func (app *PocketCoreApp) ExportState(height int64, chainID string) (string, err
 	if chainID == "" {
 		chainID = "<Input NewLegacyAminoCodec ChainID>"
 	}
-	j, _ = Codec().MarshalJSONIndent(types.GenesisDoc{
+	legacyAminoCodec, _ := Codec()
+	j, _ = legacyAminoCodec.MarshalJSONIndent(types.GenesisDoc{
 		ChainID: chainID,
 		ConsensusParams: &types.ConsensusParams{
 			Block: types.BlockParams{

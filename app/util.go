@@ -25,7 +25,8 @@ func BuildMultisig(fromAddr, jsonMessage, passphrase, chainID string, pk crypto.
 		return nil, err
 	}
 	var m sdk.Msg
-	if err := Codec().UnmarshalJSON([]byte(jsonMessage), &m); err != nil {
+	legacyAminoCodec, protoCodec := Codec()
+	if err := protoCodec.UnmarshalJSON([]byte(jsonMessage), &m); err != nil {
 		return nil, err
 	}
 	kb, err := GetKeybase()
@@ -33,8 +34,8 @@ func BuildMultisig(fromAddr, jsonMessage, passphrase, chainID string, pk crypto.
 		return nil, err
 	}
 	txBuilder := auth.NewTxBuilder(
-		auth.DefaultTxEncoder(legacyAminoCodec),
-		auth.DefaultTxDecoder(legacyAminoCodec),
+		auth.DefaultTxEncoder(legacyAminoCodec, protoCodec),
+		auth.DefaultTxDecoder(legacyAminoCodec, protoCodec),
 		chainID,
 		"", nil).WithKeybase(kb)
 	return txBuilder.BuildAndSignMultisigTransaction(fa, pk, m, passphrase, fees)
@@ -53,9 +54,10 @@ func SignMultisigNext(fromAddr, txHex, passphrase, chainID string) ([]byte, erro
 	if err != nil {
 		return nil, err
 	}
+	legacyAminoCodec, protoCodec := Codec()
 	txBuilder := auth.NewTxBuilder(
-		auth.DefaultTxEncoder(legacyAminoCodec),
-		auth.DefaultTxDecoder(legacyAminoCodec),
+		auth.DefaultTxEncoder(legacyAminoCodec, protoCodec),
+		auth.DefaultTxDecoder(legacyAminoCodec, protoCodec),
 		chainID,
 		"", nil).WithKeybase(kb)
 	return txBuilder.SignMultisigTransaction(fa, nil, passphrase, bz)
@@ -74,9 +76,10 @@ func SignMultisigOutOfOrder(fromAddr, txHex, passphrase, chainID string, keys []
 	if err != nil {
 		return nil, err
 	}
+	legacyAminoCodec, protoCodec := Codec()
 	txBuilder := auth.NewTxBuilder(
-		auth.DefaultTxEncoder(legacyAminoCodec),
-		auth.DefaultTxDecoder(legacyAminoCodec),
+		auth.DefaultTxEncoder(legacyAminoCodec, protoCodec),
+		auth.DefaultTxDecoder(legacyAminoCodec, protoCodec),
 		chainID,
 		"", nil).WithKeybase(kb)
 	return txBuilder.SignMultisigTransaction(fa, keys, passphrase, bz)
@@ -104,7 +107,8 @@ func UnmarshalTxStr(txStr string) auth.StdTx {
 }
 
 func UnmarshalTx(txBytes []byte) auth.StdTx {
-	defaultTxDecoder := auth.DefaultTxDecoder(legacyAminoCodec)
+	legacyAminoCodec, protoCodec := Codec()
+	defaultTxDecoder := auth.DefaultTxDecoder(legacyAminoCodec, protoCodec)
 	tx, err := defaultTxDecoder(txBytes)
 	if err != nil {
 		log.Fatalf("Could not decode transaction: " + err.Error())

@@ -82,7 +82,8 @@ const (
 )
 
 var (
-	legacyAminoCodec *codec.Codec
+	legacyAminoCodec *codec.LegacyAmino
+	protoCodec       *codec.ProtoCodec
 	// the default fileseparator based on OS
 	FS = string(fp.Separator)
 	// app instance currently running
@@ -652,17 +653,17 @@ func DeleteHostedChains() {
 	}
 }
 
-func Codec() *codec.Codec {
-	if legacyAminoCodec == nil {
+func Codec() (*codec.LegacyAmino, *codec.ProtoCodec) {
+	if legacyAminoCodec == nil || protoCodec == nil {
 		MakeCodec()
 	}
-	return legacyAminoCodec
+	return legacyAminoCodec, protoCodec
 }
 
 func MakeCodec() {
 	// create a new codec
 	legacyAminoCodec = codec.NewLegacyAminoCodec()
-	protoCodec := codec.NewProtoCodec(types2.NewInterfaceRegistry())
+	protoCodec = codec.NewProtoCodec(types2.NewInterfaceRegistry())
 	// register the sdk types
 	sdk.RegisterCodec(legacyAminoCodec, protoCodec)
 	// register all of the app module types

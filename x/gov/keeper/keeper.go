@@ -10,7 +10,7 @@ import (
 
 // Keeper of the global paramstore
 type Keeper struct {
-	cdc        *codec.Codec
+	cdc        *codec.ProtoCodec
 	key        sdk.StoreKey
 	tkey       sdk.StoreKey
 	codespace  sdk.CodespaceType
@@ -20,7 +20,7 @@ type Keeper struct {
 }
 
 // NewKeeper constructs a params keeper
-func NewKeeper(cdc *codec.Codec, key *sdk.KVStoreKey, tkey *sdk.TransientStoreKey, codespace sdk.CodespaceType, authKeeper types.AuthKeeper, subspaces ...sdk.Subspace) (k Keeper) {
+func NewKeeper(cdc *codec.ProtoCodec, key *sdk.KVStoreKey, tkey *sdk.TransientStoreKey, codespace sdk.CodespaceType, authKeeper types.AuthKeeper, subspaces ...sdk.Subspace) (k Keeper) {
 	k = Keeper{
 		cdc:        cdc,
 		key:        key,
