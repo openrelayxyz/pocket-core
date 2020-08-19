@@ -524,16 +524,16 @@ type storeParams struct {
 // commitInfo
 
 // NOTE: Keep commitInfo a simple immutable struct.
-type commitInfo struct {
-	// Version
-	Version int64
+// type commitInfo struct {
+// 	// Version
+// 	Version int64
 
-	// Store info for
-	StoreInfos []StoreInfo
-}
+// 	// Store info for
+// 	StoreInfos []StoreInfo
+// }
 
 // Hash returns the simple merkle root hash of the stores sorted by name.
-func (ci commitInfo) Hash() []byte {
+func (ci *CommitInfo) Hash() []byte {
 	// TODO: cache to ci.hash []byte
 	m := make(map[string][]byte, len(ci.StoreInfos))
 	for _, storeInfo := range ci.StoreInfos {
@@ -543,7 +543,7 @@ func (ci commitInfo) Hash() []byte {
 	return merkle.SimpleHashFromMap(m)
 }
 
-func (ci commitInfo) CommitID() types.CommitID {
+func (ci *CommitInfo) CommitID() types.CommitID {
 	return types.CommitID{
 		Version: ci.Version,
 		Hash:    ci.Hash(),
@@ -592,23 +592,24 @@ func getLatestVersion(db dbm.DB) int64 {
 	if latestBytes == nil {
 		return 0
 	}
-
-	err := cdc.UnmarshalBinaryLengthPrefixed(latestBytes, &latest)
+	v := Version{}
+	err := cdc.UnmarshalBinaryLengthPrefixed(latestBytes, &v)
 	if err != nil {
 		panic(err)
 	}
 
-	return latest
+	return v.Version
 }
 
 // Set the latest version.
 func setLatestVersion(batch dbm.Batch, version int64) {
-	latestBytes, _ := cdc.MarshalBinaryLengthPrefixed(version)
+	v := Version{version}
+	latestBytes, _ := cdc.MarshalBinaryLengthPrefixed(&v)
 	batch.Set([]byte(latestVersionKey), latestBytes)
 }
 
 // Commits each store and returns a new commitInfo.
-func commitStores(version int64, storeMap map[types.StoreKey]types.CommitStore) commitInfo {
+func commitStores(version int64, storeMap map[types.StoreKey]types.CommitStore) CommitInfo {
 	storeInfos := make([]StoreInfo, 0, len(storeMap))
 
 	for key, store := range storeMap {
@@ -627,7 +628,7 @@ func commitStores(version int64, storeMap map[types.StoreKey]types.CommitStore) 
 		storeInfos = append(storeInfos, si)
 	}
 
-	ci := commitInfo{
+	ci := CommitInfo{
 		Version:    version,
 		StoreInfos: storeInfos,
 	}
@@ -635,28 +636,28 @@ func commitStores(version int64, storeMap map[types.StoreKey]types.CommitStore) 
 }
 
 // Gets commitInfo from disk.
-func getCommitInfo(db dbm.DB, ver int64) (commitInfo, error) {
+func getCommitInfo(db dbm.DB, ver int64) (CommitInfo, error) {
 
 	// Get from DB.
 	cInfoKey := fmt.Sprintf(commitInfoKeyFmt, ver)
 	cInfoBytes, _ := db.Get([]byte(cInfoKey))
 	if cInfoBytes == nil {
-		return commitInfo{}, fmt.Errorf("failed to get Store: no data")
+		return CommitInfo{}, fmt.Errorf("failed to get Store: no data")
 	}
 
-	var cInfo commitInfo
+	var cInfo CommitInfo
 
 	err := cdc.UnmarshalBinaryLengthPrefixed(cInfoBytes, &cInfo)
 	if err != nil {
-		return commitInfo{}, fmt.Errorf("failed to get Store: %v", err)
+		return CommitInfo{}, fmt.Errorf("failed to get Store: %v", err)
 	}
 
 	return cInfo, nil
 }
 
 // Set a commitInfo for given version.
-func setCommitInfo(batch dbm.Batch, version int64, cInfo commitInfo) {
-	cInfoBytes := cdc.MustMarshalBinaryLengthPrefixed(cInfo)
+func setCommitInfo(batch dbm.Batch, version int64, cInfo CommitInfo) {
+	cInfoBytes := cdc.MustMarshalBinaryLengthPrefixed(&cInfo)
 	cInfoKey := fmt.Sprintf(commitInfoKeyFmt, version)
 	batch.Set([]byte(cInfoKey), cInfoBytes)
 }

@@ -2,6 +2,7 @@ package rootmulti
 
 import (
 	"bytes"
+
 	"github.com/pkg/errors"
 
 	"github.com/tendermint/iavl"
@@ -19,7 +20,7 @@ func NewMultiStoreProof(storeInfos []StoreInfo) *MultiStoreProof {
 
 // ComputeRootHash returns the root hash for a given multi-store proof.
 func (proof *MultiStoreProof) ComputeRootHash() []byte {
-	ci := commitInfo{
+	ci := CommitInfo{
 		Version:    -1, // TODO: Not needed; improve code.
 		StoreInfos: proof.StoreInfos,
 	}
@@ -80,7 +81,7 @@ func MultiStoreProofOpDecoder(pop merkle.ProofOp) (merkle.ProofOperator, error) 
 // ProofOp return a merkle proof operation from a given multi-store proof
 // operation.
 func (op MultiStoreProofOp) ProofOp() merkle.ProofOp {
-	bz := cdc.MustMarshalBinaryLengthPrefixed(op)
+	bz := cdc.MustMarshalBinaryLengthPrefixed(&op)
 	return merkle.ProofOp{
 		Type: ProofOpMultiStore,
 		Key:  op.Key,
