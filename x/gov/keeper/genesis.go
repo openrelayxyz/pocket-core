@@ -2,15 +2,16 @@ package keeper
 
 import (
 	"fmt"
+	"os"
+
 	sdk "github.com/pokt-network/pocket-core/types"
 	"github.com/pokt-network/pocket-core/x/gov/types"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"os"
 )
 
 // InitGenesis - Init store state from genesis data
 func (k Keeper) InitGenesis(ctx sdk.Ctx, data types.GenesisState) []abci.ValidatorUpdate {
-	k.SetParams(ctx, data.Params)
+	k.SetParams(ctx, &data.Params)
 	// validate acl
 	if err := k.GetACL(ctx).Validate(k.GetAllParamNames(ctx)); err != nil {
 		k.Logger(ctx).Error(err.Error())

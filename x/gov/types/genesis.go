@@ -2,19 +2,20 @@ package types
 
 import (
 	"fmt"
+
 	sdk "github.com/pokt-network/pocket-core/types"
 )
 
 // GenesisState - all auth state that must be provided at genesis
-//type GenesisState struct {
-//	Params    Params  `json:"params" yaml:"params"`
-//	DAOTokens sdk.Int `json:"DAO_Tokens"`
-//}
+type GenesisState struct {
+	Params    Params  `json:"params" yaml:"params"`
+	DAOTokens sdk.Int `json:"DAO_Tokens"`
+}
 
 // NewGenesisState - Create a new genesis state
 func NewGenesisState(params Params, daoTokens sdk.Int) GenesisState {
 	return GenesisState{
-		Params:    &params,
+		Params:    params,
 		DAOTokens: daoTokens,
 	}
 }
