@@ -33,7 +33,7 @@ func (AppModuleBasic) RegisterCodec(amino *codec.LegacyAmino, proto *codec.Proto
 // DefaultGenesis returns default genesis state as raw bytes for the staking
 // module.
 func (AppModuleBasic) DefaultGenesis() json.RawMessage {
-	return types.ModuleCdc.MustMarshalJSON(types.DefaultGenesisState())
+	return types.LegacyModuleCdc.MustMarshalJSON(types.DefaultGenesisState())
 }
 
 // ValidateGenesis performs genesis state validation for the staking module.

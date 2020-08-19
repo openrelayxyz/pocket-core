@@ -15417,7 +15417,7 @@ func GenesisStateFromJson(json string) posConfig.GenesisState {
 		fmt.Println("unable to read genesis from json (internal)")
 		os.Exit(1)
 	}
-	return posConfig.GenesisStateFromGenDoc(protoCodec, *genDoc)
+	return posConfig.GenesisStateFromGenDoc(legacyAminoCodec, *genDoc)
 }
 
 func newDefaultGenesisState() []byte {
@@ -15429,7 +15429,7 @@ func newDefaultGenesisState() []byte {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, protoCodec := Codec()
+	aminoCodec, _ := Codec()
 	pubKey := cb.PublicKey
 	defaultGenesis := module.NewBasicManager(
 		apps.AppModuleBasic{},
@@ -15441,8 +15441,8 @@ func newDefaultGenesisState() []byte {
 	// setup account genesis
 	rawAuth := defaultGenesis[auth.ModuleName]
 	var accountGenesis auth.GenesisState
-	types.ModuleCdc.MustUnmarshalJSON(rawAuth, &accountGenesis)
-	acc := auth.BaseAccount{
+	types.LegacyModuleCdc.MustUnmarshalJSON(rawAuth, &accountGenesis)
+	acc := authTypes.BaseAccount{
 		Address: cb.GetAddress(),
 		Coins:   sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(1000000))),
 		PubKey:  pubKey,
@@ -15453,7 +15453,7 @@ func newDefaultGenesisState() []byte {
 		panic("unable to pack accounts in genesis: " + err.Error())
 	}
 	accountGenesis.Accounts = a
-	res := protoCodec.MustMarshalJSON(accountGenesis)
+	res := aminoCodec.MustMarshalJSON(accountGenesis)
 	defaultGenesis[auth.ModuleName] = res
 	// set address as application too
 	rawApps := defaultGenesis[appsTypes.ModuleName]
@@ -15470,14 +15470,14 @@ func newDefaultGenesisState() []byte {
 		UnstakingCompletionTime: time.Time{},
 	}
 	appsGenesis.Applications = append(appsGenesis.Applications, app.ToProto())
-	res = protoCodec.MustMarshalJSON(appsGenesis)
+	res = aminoCodec.MustMarshalJSON(appsGenesis)
 	defaultGenesis[appsTypes.ModuleName] = res
 	// set default governance in genesis
 	rawPocket := defaultGenesis[types.ModuleName]
 	var pocketGenesis types.GenesisState
 	types.ModuleCdc.MustUnmarshalJSON(rawPocket, &pocketGenesis)
 	pocketGenesis.Params.SessionNodeCount = 1
-	res = protoCodec.MustMarshalJSON(pocketGenesis)
+	res = aminoCodec.MustMarshalJSON(pocketGenesis)
 	defaultGenesis[types.ModuleName] = res
 	// setup pos genesis
 	rawPOS := defaultGenesis[nodesTypes.ModuleName]
@@ -15495,13 +15495,13 @@ func newDefaultGenesisState() []byte {
 	// set default governance in genesis
 	var govGenesisState govTypes.GenesisState
 	rawGov := defaultGenesis[govTypes.ModuleName]
-	protoCodec.MustUnmarshalJSON(rawGov, &govGenesisState)
+	aminoCodec.MustUnmarshalJSON(rawGov, &govGenesisState)
 	mACL := createDummyACL(pubKey)
 	govGenesisState.Params.ACL = mACL
 	govGenesisState.Params.DAOOwner = sdk.Address(pubKey.Address())
 	u := govTypes.NewUpgrade(0, "0")
 	govGenesisState.Params.Upgrade = &u
-	res4 := protoCodec.MustMarshalJSON(govGenesisState)
+	res4 := aminoCodec.MustMarshalJSON(govGenesisState)
 	defaultGenesis[govTypes.ModuleName] = res4
 	// end genesis setup
 	j, _ := types.ModuleCdc.MarshalJSON(defaultGenesis)

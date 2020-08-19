@@ -31,7 +31,7 @@ func (AppModuleBasic) RegisterCodec(amino *codec.LegacyAmino, proto *codec.Proto
 
 // DefaultGenesis default genesis state
 func (AppModuleBasic) DefaultGenesis() json.RawMessage {
-	return types.ModuleCdc.MustMarshalJSON(types.DefaultGenesisState())
+	return types.LegacyModuleCdc.MustMarshalJSON(types.DefaultGenesisState())
 }
 
 // ValidateGenesis module validate genesis

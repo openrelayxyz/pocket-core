@@ -70,8 +70,6 @@ func (m *BaseAccountEncodable) SpendableCoins(blockTime time.Time) sdk.Coins {
 	return m.Coins
 }
 
-
-
 // String implements fmt.Stringer
 func (acc BaseAccount) String() string {
 	var pubkey string
