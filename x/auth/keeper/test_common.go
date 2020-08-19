@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	types2 "github.com/pokt-network/pocket-core/codec/types"
 	"github.com/pokt-network/pocket-core/crypto"
 	"os"
 	"testing"
@@ -29,13 +30,14 @@ var (
 
 // nolint: deadcode unused
 // create a codec used only for testing
-func makeTestCodec() *codec.Codec {
+func makeTestCodec() (*codec.LegacyAmino, *codec.ProtoCodec) {
 	var cdc = codec.NewLegacyAminoCodec()
-	types.RegisterCodec(cdc)
-	sdk.RegisterCodec(cdc)
+	var proto = codec.NewProtoCodec(types2.NewInterfaceRegistry())
+	types.RegisterCodec(cdc, proto)
+	sdk.RegisterCodec(cdc, proto)
 	crypto.RegisterCrypto(cdc, nil)
 
-	return cdc
+	return cdc, proto
 }
 
 // nolint: deadcode unused
@@ -58,7 +60,7 @@ func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64)
 			},
 		},
 	)
-	cdc := makeTestCodec()
+	_, proto := makeTestCodec()
 	maccPerms := map[string][]string{
 		holder:       nil,
 		types.Minter: {types.Minter},
@@ -66,7 +68,7 @@ func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64)
 		multiPerm:    {types.Minter, types.Burner, types.Staking},
 		randomPerm:   {"random"},
 	}
-	keeper := NewKeeper(cdc, keyAcc, sdk.NewSubspace(types.StoreKey), maccPerms)
+	keeper := NewKeeper(proto, keyAcc, sdk.NewSubspace(types.StoreKey), maccPerms)
 	valTokens := sdk.TokensFromConsensusPower(initPower)
 	initialCoins := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, valTokens))
 	createTestAccs(ctx, int(nAccs), initialCoins, &keeper)
