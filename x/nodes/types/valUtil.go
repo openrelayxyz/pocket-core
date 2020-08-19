@@ -7,9 +7,7 @@ import (
 	"github.com/pokt-network/pocket-core/codec"
 	"github.com/pokt-network/pocket-core/crypto"
 	sdk "github.com/pokt-network/pocket-core/types"
-	"log"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -33,45 +31,50 @@ func (v Validator) String() string {
 	)
 }
 
-// MUST return the amino encoded version of this validator
-func MustMarshalValidator(cdc *codec.ProtoCodec, validator Validator) []byte {
+// Returns the proto endcoding of a validator
+func MarshalValidator(cdc *codec.ProtoCodec, validator Validator) ([]byte, error) {
 
-	return cdc.MustMarshalBinaryLengthPrefixed(&ValidatorProto{
+	return cdc.MarshalBinaryLengthPrefixed(&ValidatorProto{
 		Address:                 validator.Address,
 		PublicKey:               validator.PublicKey.RawString(),
 		Jailed:                  validator.Jailed,
 		Status:                  validator.Status,
 		Chains:                  validator.Chains,
-		ServiceUrl:              validator.ServiceURL,
+		ServiceURL:              validator.ServiceURL,
 		StakedTokens:            validator.StakedTokens,
 		UnstakingCompletionTime: validator.UnstakingCompletionTime,
 	})
 }
 
 // MUST decode the validator from the bytes
-func MustUnmarshalValidator(cdc *codec.ProtoCodec, valBytes []byte) Validator {
-	validator, err := UnmarshalValidator(cdc, valBytes)
+func UnmarshalValidator(cdc *codec.ProtoCodec, valBytes []byte) (v Validator, err error) {
+	validator, err := UnmarshalProtoValidator(cdc, valBytes)
 	if err != nil {
-		log.Fatal("Cannot unmarshal validator with bytes: ", hex.EncodeToString(valBytes))
-		os.Exit(1)
+		return
 	}
-	pubkey, _ := crypto.NewPublicKey(validator.PublicKey)
+	pubkey, err := crypto.NewPublicKey(validator.PublicKey)
+	if err != nil {
+		return
+	}
 	return Validator{
 		Address:                 validator.Address,
 		PublicKey:               pubkey,
 		Jailed:                  validator.Jailed,
 		Status:                  validator.Status,
 		Chains:                  validator.Chains,
-		ServiceURL:              validator.ServiceUrl,
+		ServiceURL:              validator.ServiceURL,
 		StakedTokens:            validator.StakedTokens,
 		UnstakingCompletionTime: validator.UnstakingCompletionTime,
-	}
+	}, nil
 }
 
-// unmarshal the validator
-func UnmarshalValidator(cdc *codec.ProtoCodec, valBytes []byte) (validator ValidatorProto, err error) {
+func UnmarshalProtoValidator(cdc *codec.ProtoCodec, valBytes []byte) (v ValidatorProto, err error) {
+	var validator ValidatorProto
 	err = cdc.UnmarshalBinaryLengthPrefixed(valBytes, &validator)
-	return validator, err
+	if err != nil {
+		return
+	}
+	return v, nil
 }
 
 // Marshals struct into JSON
@@ -87,7 +90,7 @@ func (v Validator) MarshalJSON() ([]byte, error) {
 		PublicKey:               v.PublicKey.RawString(),
 		Jailed:                  v.Jailed,
 		Status:                  v.Status,
-		ServiceUrl:              v.ServiceURL,
+		ServiceURL:              v.ServiceURL,
 		Chains:                  v.Chains,
 		StakedTokens:            v.StakedTokens,
 		UnstakingCompletionTime: v.UnstakingCompletionTime,
@@ -109,7 +112,7 @@ func (v *Validator) UnmarshalJSON(data []byte) error {
 		PublicKey:               publicKey,
 		Jailed:                  bv.Jailed,
 		Chains:                  bv.Chains,
-		ServiceURL:              bv.ServiceUrl,
+		ServiceURL:              bv.ServiceURL,
 		StakedTokens:            bv.StakedTokens,
 		Status:                  bv.Status,
 		UnstakingCompletionTime: bv.UnstakingCompletionTime,
@@ -189,7 +192,7 @@ func (v ValidatorProto) FromProto() Validator {
 		PublicKey:               pubkey,
 		Jailed:                  v.Jailed,
 		Status:                  v.Status,
-		ServiceURL:              v.ServiceUrl,
+		ServiceURL:              v.ServiceURL,
 		Chains:                  v.Chains,
 		StakedTokens:            v.StakedTokens,
 		UnstakingCompletionTime: v.UnstakingCompletionTime,
@@ -203,7 +206,7 @@ func (v Validator) ToProto() ValidatorProto {
 		PublicKey:               v.PublicKey.RawString(),
 		Jailed:                  v.Jailed,
 		Status:                  v.Status,
-		ServiceUrl:              v.ServiceURL,
+		ServiceURL:              v.ServiceURL,
 		Chains:                  v.Chains,
 		StakedTokens:            v.StakedTokens,
 		UnstakingCompletionTime: v.UnstakingCompletionTime,

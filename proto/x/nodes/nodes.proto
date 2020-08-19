@@ -20,7 +20,7 @@ message ValidatorProto {
 	bool   jailed           = 3;
 	int32  status = 4 [(gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.StakeStatus"];
 	repeated string Chains = 5 [ (gogoproto.jsontag) = "chains"];
-	string ServiceUrl = 6 [(gogoproto.jsontag)="service_url"];
+	string ServiceURL = 6 [(gogoproto.jsontag)="service_url"];
 	string StakedTokens = 7 [
 		(gogoproto.customtype) = "github.com/pokt-network/pocket-core/types.Int",
 		(gogoproto.jsontag) = "tokens",

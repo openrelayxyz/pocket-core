@@ -367,7 +367,11 @@ func (k Keeper) IncrementJailedValidators(ctx sdk.Ctx) {
 	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
-		val := types.MustUnmarshalValidator(k.cdc, iterator.Value())
+		val, err := types.UnmarshalValidator(k.cdc, iterator.Value())
+		if err != nil {
+			ctx.Logger().Error("could not unmarshal validator in IncrementJailedValidators: ", err.Error())
+			continue
+		}
 		if val.IsJailed() {
 			addr := val.Address
 			signInfo, found := k.GetValidatorSigningInfo(ctx, addr)
