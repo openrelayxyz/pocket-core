@@ -2,8 +2,8 @@ package app
 
 import (
 	"fmt"
-	types2 "github.com/pokt-network/pocket-core/codec/types"
 	posConfig "github.com/pokt-network/pocket-core/config"
+	authTypes "github.com/pokt-network/pocket-core/x/auth/types"
 	"log"
 	"os"
 	"time"
@@ -15447,14 +15447,19 @@ func newDefaultGenesisState() []byte {
 		Coins:   sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(1000000))),
 		PubKey:  pubKey,
 	}
-	accountGenesis.Accounts = append(accountGenesis.Accounts, &acc)
+	var accs authTypes.Accounts
+	a, err := authTypes.PackAccounts(append(accs, &acc))
+	if err != nil {
+		panic("unable to pack accounts in genesis: " + err.Error())
+	}
+	accountGenesis.Accounts = a
 	res := protoCodec.MustMarshalJSON(accountGenesis)
 	defaultGenesis[auth.ModuleName] = res
 	// set address as application too
 	rawApps := defaultGenesis[appsTypes.ModuleName]
 	var appsGenesis appsTypes.GenesisState
 	types.ModuleCdc.MustUnmarshalJSON(rawApps, &appsGenesis)
-	appsGenesis.Applications = append(appsGenesis.Applications, appsTypes.Application{
+	app := appsTypes.Application{
 		Address:                 cb.GetAddress(),
 		PublicKey:               cb.PublicKey,
 		Jailed:                  false,
@@ -15463,7 +15468,8 @@ func newDefaultGenesisState() []byte {
 		StakedTokens:            sdk.NewInt(10000000000000),
 		MaxRelays:               sdk.NewInt(10000000000000),
 		UnstakingCompletionTime: time.Time{},
-	})
+	}
+	appsGenesis.Applications = append(appsGenesis.Applications, app.ToProto())
 	res = protoCodec.MustMarshalJSON(appsGenesis)
 	defaultGenesis[appsTypes.ModuleName] = res
 	// set default governance in genesis

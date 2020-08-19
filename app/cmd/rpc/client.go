@@ -115,7 +115,8 @@ func SendRawTx(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, er := app.Codec().MarshalJSON(res)
+	_, protoCodec := app.Codec()
+	j, er := protoCodec.MarshalJSON(res)
 	if er != nil {
 		WriteErrorResponse(w, 400, er.Error())
 		return
