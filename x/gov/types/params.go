@@ -3,8 +3,9 @@ package types
 import (
 	"bytes"
 	"fmt"
-	sdk "github.com/pokt-network/pocket-core/types"
 	"strings"
+
+	sdk "github.com/pokt-network/pocket-core/types"
 )
 
 // DefaultCodespace defines the default auth module parameter subspace
@@ -20,14 +21,14 @@ var (
 	UpgradeKey  = []byte("upgrade")
 )
 
-var _ sdk.ParamSet = &Params{}
+var _ sdk.ParamSet = (*Params)(nil)
 
 // Params defines the parameters for the auth module.
-//type Params struct {
-//	ACL      ACL         `json:"acl"`
-//	DAOOwner sdk.Address `json:"dao_owner"`
-//	Upgrade  Upgrade     `json:"upgrade"`
-//}
+type Params struct {
+	ACL      ACL         `json:"acl"`
+	DAOOwner sdk.Address `json:"dao_owner"`
+	Upgrade  Upgrade     `json:"upgrade"`
+}
 
 // NewParams creates a new Params object
 func NewParams(acl ACL, daoOwner sdk.Address) Params {
@@ -55,8 +56,8 @@ func (p *Params) ParamSetPairs() sdk.ParamSetPairs {
 
 // Equal returns a boolean determining if two Params types are identical.
 func (p Params) Equal(p2 Params) bool {
-	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
-	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
+	bz1 := LegacyModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
+	bz2 := LegacyModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
 	return bytes.Equal(bz1, bz2)
 }
 
@@ -67,7 +68,7 @@ func DefaultParams() Params {
 	return Params{
 		ACL:      acl,
 		DAOOwner: sdk.Address{},
-		Upgrade:  &u,
+		Upgrade:  u,
 	}
 }
 
