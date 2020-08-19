@@ -2,11 +2,12 @@ package app
 
 import (
 	"fmt"
-	posConfig "github.com/pokt-network/pocket-core/config"
-	authTypes "github.com/pokt-network/pocket-core/x/auth/types"
 	"log"
 	"os"
 	"time"
+
+	posConfig "github.com/pokt-network/pocket-core/config"
+	authTypes "github.com/pokt-network/pocket-core/x/auth/types"
 
 	tmType "github.com/tendermint/tendermint/types"
 
@@ -15469,7 +15470,7 @@ func newDefaultGenesisState() []byte {
 		MaxRelays:               sdk.NewInt(10000000000000),
 		UnstakingCompletionTime: time.Time{},
 	}
-	appsGenesis.Applications = append(appsGenesis.Applications, app.ToProto())
+	appsGenesis.Applications = append(appsGenesis.Applications, app)
 	res = aminoCodec.MustMarshalJSON(appsGenesis)
 	defaultGenesis[appsTypes.ModuleName] = res
 	// set default governance in genesis
