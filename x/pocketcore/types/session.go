@@ -82,7 +82,7 @@ func (s Session) Validate(node nodeexported.ValidatorI, app appexported.Applicat
 var _ CacheObject = Session{} // satisfies the cache object interface
 
 func (s Session) MarshalObject() ([]byte, error) {
-	return ModuleCdc.MarshalBinaryBare(s)
+	return ModuleCdc.MarshalBinaryBare(&s)
 }
 
 func (s Session) UnmarshalObject(b []byte) (CacheObject, error) {

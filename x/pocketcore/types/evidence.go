@@ -69,7 +69,7 @@ func (e Evidence) MarshalObject() ([]byte, error) {
 		Proofs:        e.Proofs,
 		EvidenceType:  e.EvidenceType,
 	}
-	return ModuleCdc.MarshalBinaryBare(ep)
+	return ModuleCdc.MarshalBinaryBare(&ep)
 }
 
 func (e Evidence) UnmarshalObject(b []byte) (CacheObject, error) {
