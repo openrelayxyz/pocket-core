@@ -8,7 +8,7 @@ option go_package = "github.com/pokt-network/pocket-core/x/apps/types";
 
 message MsgAppStake {
   option (gogoproto.equal)            = true;
-  option (gogoproto.goproto_stringer) = false;
+  option (gogoproto.goproto_stringer) = true;
   option (gogoproto.goproto_getters)  = false;
 
   string pub_key = 1 [
@@ -26,7 +26,7 @@ message MsgAppStake {
 
 message MsgBeginAppUnstake {
   option (gogoproto.equal)            = true;
-  option (gogoproto.goproto_stringer) = false;
+  option (gogoproto.goproto_stringer) = true;
   option (gogoproto.goproto_getters)  = false;
 
   bytes Address = 1 [
@@ -37,7 +37,7 @@ message MsgBeginAppUnstake {
 
 message MsgAppUnjail {
   option (gogoproto.equal)            = true;
-  option (gogoproto.goproto_stringer) = false;
+  option (gogoproto.goproto_stringer) = true;
   option (gogoproto.goproto_getters)  = false;
 
   bytes AppAddr = 1 [

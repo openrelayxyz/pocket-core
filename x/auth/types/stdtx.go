@@ -3,6 +3,7 @@ package types
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/pokt-network/pocket-core/codec"
@@ -19,17 +20,17 @@ var (
 
 // StdTx is a standard way to wrap a Msg with Fee and Sigs.
 // NOTE: the first signature is the fee payer (Sigs must not be nil).
-type StdTx struct {
-	Msg       sdk.Msg      `json:"msg" yaml:"msg"`
-	Fee       sdk.Coins    `json:"fee" yaml:"fee"`
-	Signature StdSignature `json:"signature" yaml:"signature"`
-	Memo      string       `json:"memo" yaml:"memo"`
-	Entropy   int64        `json:"entropy" yaml:"entropy"`
-}
+//type StdTx struct {
+//	Msg       sdk.Msg      `json:"msg" yaml:"msg"`
+//	Fee       sdk.Coins    `json:"fee" yaml:"fee"`
+//	Signature StdSignature `json:"signature" yaml:"signature"`
+//	Memo      string       `json:"memo" yaml:"memo"`
+//	Entropy   int64        `json:"entropy" yaml:"entropy"`
+//}
 
 func NewStdTx(msgs sdk.Msg, fee sdk.Coins, sigs StdSignature, memo string, entropy int64) StdTx {
 	return StdTx{
-		Msg:       msgs,
+		Msg:       &msgs,
 		Fee:       fee,
 		Signature: sigs,
 		Memo:      memo,
@@ -38,7 +39,7 @@ func NewStdTx(msgs sdk.Msg, fee sdk.Coins, sigs StdSignature, memo string, entro
 }
 
 // GetMsg returns the all the transaction's messages.
-func (tx StdTx) GetMsg() sdk.Msg { return tx.Msg }
+func (tx StdTx) GetMsg() sdk.Msg { return *tx.Msg }
 
 // ValidateBasic does a simple and lightweight validation check that doesn't
 // require access to any other information.
@@ -125,13 +126,13 @@ func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msg sdk.Msg, mem
 }
 
 // StdSignature represents a sig
-type StdSignature struct {
-	posCrypto.PublicKey `json:"pub_key" yaml:"pub_key"` // technically optional if the public key is in the world state
-	Signature           []byte                          `json:"signature" yaml:"signature"`
-}
+//type StdSignature struct {
+//	posCrypto.PublicKey `json:"pub_key" yaml:"pub_key"` // technically optional if the public key is in the world state
+//	Signature           []byte                          `json:"signature" yaml:"signature"`
+//}
 
 // DefaultTxDecoder logic for standard transaction decoding
-func DefaultTxDecoder(cdc *codec.Codec) sdk.TxDecoder {
+func DefaultTxDecoder(_ *codec.LegacyAmino, proto *codec.ProtoCodec) sdk.TxDecoder {
 	return func(txBytes []byte) (sdk.Tx, sdk.Error) {
 		var tx = StdTx{}
 		if len(txBytes) == 0 {
@@ -139,7 +140,7 @@ func DefaultTxDecoder(cdc *codec.Codec) sdk.TxDecoder {
 		}
 		// StdTx.Msg is an interface. The concrete types
 		// are registered by MakeTxCodec
-		err := cdc.UnmarshalBinaryLengthPrefixed(txBytes, &tx)
+		err := proto.UnmarshalBinaryLengthPrefixed(txBytes, &tx)
 		if err != nil {
 			return nil, sdk.ErrTxDecode("error decoding transaction").TraceSDK(err.Error())
 		}
@@ -148,27 +149,27 @@ func DefaultTxDecoder(cdc *codec.Codec) sdk.TxDecoder {
 }
 
 // DefaultTxEncoder logic for standard transaction encoding
-func DefaultTxEncoder(cdc *codec.Codec) sdk.TxEncoder {
+func DefaultTxEncoder(_ *codec.LegacyAmino, proto *codec.ProtoCodec) sdk.TxEncoder {
 	return func(tx sdk.Tx) ([]byte, error) {
-		return cdc.MarshalBinaryLengthPrefixed(tx)
+		stdTx, ok := tx.(StdTx)
+		if !ok {
+			log.Fatal("tx must be of type stdTx")
+		}
+		return proto.MarshalBinaryLengthPrefixed(&stdTx)
 	}
 }
 
 // MarshalYAML returns the YAML representation of the signature.
 func (ss StdSignature) MarshalYAML() (interface{}, error) {
 	var (
-		bz     []byte
-		pubkey string
-		err    error
+		bz  []byte
+		err error
 	)
-	if ss.PublicKey != nil {
-		pubkey = ss.PublicKey.RawString()
-	}
 	bz, err = yaml.Marshal(struct {
 		PubKey    string
 		Signature string
 	}{
-		PubKey:    pubkey,
+		PubKey:    ss.PublicKey,
 		Signature: fmt.Sprintf("%s", ss.Signature),
 	})
 	if err != nil {
@@ -188,7 +189,7 @@ func NewTestTx(ctx sdk.Ctx, msgs sdk.Msg, priv posCrypto.PrivateKey, entropy int
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	s := StdSignature{PublicKey: priv.PublicKey(), Signature: sig}
+	s := StdSignature{PublicKey: priv.PublicKey().RawString(), Signature: sig}
 	tx := NewStdTx(msgs, fee, s, "", entropy)
 	return tx
 }

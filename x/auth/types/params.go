@@ -1,10 +1,8 @@
 package types
 
 import (
-	"bytes"
 	"fmt"
 	sdk "github.com/pokt-network/pocket-core/types"
-	"reflect"
 	"strings"
 )
 
@@ -28,11 +26,11 @@ var (
 var _ sdk.ParamSet = &Params{}
 
 // Params defines the parameters for the auth module.
-type Params struct {
-	MaxMemoCharacters uint64         `json:"max_memo_characters" yaml:"max_memo_characters"`
-	TxSigLimit        uint64         `json:"tx_sig_limit" yaml:"tx_sig_limit"`
-	FeeMultiplier     FeeMultipliers `json:"fee_multipliers"`
-}
+//type Params struct {
+//	MaxMemoCharacters uint64         `json:"max_memo_characters" yaml:"max_memo_characters"`
+//	TxSigLimit        uint64         `json:"tx_sig_limit" yaml:"tx_sig_limit"`
+//	FeeMultiplier     FeeMultipliers `json:"fee_multipliers"`
+//}
 
 // ParamKeyTable for auth module
 func ParamKeyTable() sdk.KeyTable {
@@ -51,16 +49,16 @@ func (p *Params) ParamSetPairs() sdk.ParamSetPairs {
 }
 
 // Equal returns a boolean determining if two Params types are identical.
-func (p Params) Equal(p2 Params) bool {
-	return reflect.DeepEqual(p, p2)
-}
+//func (p Params) Equal(p2 Params) bool {
+//	return reflect.DeepEqual(p, p2)
+//}
 
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	return Params{
 		MaxMemoCharacters: DefaultMaxMemoCharacters,
 		TxSigLimit:        DefaultTxSigLimit,
-		FeeMultiplier:     DefaultFeeMultiplier,
+		FeeMultiplier:     &DefaultFeeMultiplier,
 	}
 }
 

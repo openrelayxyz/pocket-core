@@ -4,6 +4,7 @@ package x.auth;
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "types/coin.proto";
+import "google/protobuf/any.proto";
 
 option go_package = "github.com/pokt-network/pocket-core/x/auth/types";
 
@@ -34,7 +35,7 @@ message ModuleAccountEncodable {
 // Params defines the parameters for the auth module.
 message Params {
 	option (gogoproto.equal) = true;
-	option (gogoproto.goproto_stringer) = true;
+	option (gogoproto.goproto_stringer) = false;
 
 	uint64 max_memo_characters = 1 [(gogoproto.jsontag) = "max_memo_characters"];
 	uint64 tx_sig_limit = 2 [(gogoproto.jsontag) = "tx_sig_limit"];
@@ -56,4 +57,18 @@ message FeeMultipliers {
 message Supply {
 	option (gogoproto.goproto_stringer) = true;
 	repeated types.Coin total = 1 [(gogoproto.jsontag) = "total", (gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/pokt-network/pocket-core/types.Coins"];
+}
+
+message StdTx {
+	option (gogoproto.goproto_getters) = false;
+	google.protobuf.Any msg = 1 [(gogoproto.jsontag) = "msg", (gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.Msg"];
+	repeated types.Coin fee = 2 [(gogoproto.jsontag) = "fee", (gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/pokt-network/pocket-core/types.Coins"];
+	StdSignature signature = 3 [(gogoproto.jsontag) = "signature", (gogoproto.nullable) = false, (gogoproto.casttype) = "StdSignature"];
+	string memo = 4 [(gogoproto.jsontag) = "memo"];
+	int64 entropy = 5 [(gogoproto.jsontag) = "entropy"];
+}
+
+message StdSignature {
+	string publicKey = 1 [(gogoproto.jsontag) = "pub_key"];
+	bytes Signature = 2 [(gogoproto.jsontag) = "signature"];
 }

@@ -30,6 +30,14 @@ func (pc *ProtoCodec) Register(protoName string, iface interface{}, impls ...pro
 	res.RegisterInterface(protoName, iface, impls...)
 }
 
+func (pc *ProtoCodec) RegisterImplementation(iface interface{}, impls ...proto.Message) {
+	res, ok := pc.anyUnpacker.(types.InterfaceRegistry)
+	if !ok {
+		panic("unable to convert protocodec.anyUnpacker into types.InterfaceRegistry")
+	}
+	res.RegisterImplementations(iface, impls...)
+}
+
 func (pc *ProtoCodec) MarshalBinaryBare(o ProtoMarshaler) ([]byte, error) {
 	return o.Marshal()
 }

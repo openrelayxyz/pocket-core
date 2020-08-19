@@ -47,8 +47,12 @@ func ValidateTransaction(ctx sdk.Ctx, k Keeper, stdTx StdTx, params Params, txIn
 	}
 	var pk posCrypto.PublicKey
 	// attempt to get the public key from the signature
-	if stdTx.Signature.PublicKey != nil && len(stdTx.Signature.PublicKey.RawBytes()) != 0 {
-		pk = stdTx.Signature.PublicKey
+	if stdTx.Signature.PublicKey != "" {
+		var err error
+		pk, err = posCrypto.NewPublicKey(stdTx.Signature.PublicKey)
+		if err != nil {
+			return sdk.ErrInvalidPubKey(err.Error())
+		}
 	} else {
 		// public key in the signature not found so check world state
 		acc := k.GetAccount(ctx, stdTx.GetSigner())
@@ -72,7 +76,7 @@ func ValidateTransaction(ctx sdk.Ctx, k Keeper, stdTx StdTx, params Params, txIn
 		return sdk.ErrInternal(err.Error())
 	}
 	// get the fees from the tx
-	expectedFee := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, k.GetParams(ctx).FeeMultiplier.GetFee(stdTx.Msg)))
+	expectedFee := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, k.GetParams(ctx).FeeMultiplier.GetFee(*stdTx.Msg)))
 	// test for public key type
 	p, ok := pk.(posCrypto.PublicKeyMultiSig)
 	// if standard public key
@@ -171,6 +175,6 @@ func DeductFees(keeper keeper.Keeper, ctx sdk.Ctx, tx types.StdTx) sdk.Error {
 // and an account.
 func GetSignBytes(chainID string, stdTx StdTx) ([]byte, error) {
 	return StdSignBytes(
-		chainID, stdTx.Entropy, stdTx.Fee, stdTx.Msg, stdTx.Memo,
+		chainID, stdTx.Entropy, stdTx.Fee, *stdTx.Msg, stdTx.Memo,
 	)
 }
