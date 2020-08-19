@@ -2,9 +2,10 @@ package types
 
 import (
 	"fmt"
-	sdk "github.com/pokt-network/pocket-core/types"
 	"reflect"
 	"testing"
+
+	sdk "github.com/pokt-network/pocket-core/types"
 )
 
 func TestPool_NewPool(t *testing.T) {

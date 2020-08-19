@@ -2,17 +2,19 @@ package types
 
 import (
 	"fmt"
-	"github.com/pokt-network/pocket-core/codec"
-	"github.com/pokt-network/pocket-core/crypto"
-	sdk "github.com/pokt-network/pocket-core/types"
 	"math/rand"
 	"reflect"
 	"testing"
+
+	"github.com/pokt-network/pocket-core/codec"
+	"github.com/pokt-network/pocket-core/crypto"
+	sdk "github.com/pokt-network/pocket-core/types"
 )
 
 var msgAppStake MsgAppStake
 var msgBeginAppUnstake MsgBeginAppUnstake
 var msgAppUnjail MsgAppUnjail
+var pk crypto.Ed25519PublicKey
 
 func init() {
 	var pub crypto.Ed25519PublicKey
@@ -22,12 +24,12 @@ func init() {
 	}
 
 	moduleCdc = codec.NewLegacyAminoCodec()
-	RegisterCodec(moduleCdc)
+	RegisterCodec(moduleCdc, nil)
 	crypto.RegisterCrypto(moduleCdc, nil)
 	moduleCdc.Seal()
 
 	msgAppStake = MsgAppStake{
-		PubKey: pub,
+		PubKey: pub.String(),
 		Chains: []string{"0001"},
 		Value:  sdk.NewInt(10),
 	}
@@ -47,7 +49,7 @@ func TestMsgApp_GetSigners(t *testing.T) {
 		{
 			name: "return signers",
 			args: args{msgAppStake},
-			want: sdk.Address(msgAppStake.PubKey.Address()),
+			want: sdk.Address(pk.Address()),
 		},
 	}
 	for _, tt := range tests {
@@ -185,7 +187,7 @@ func TestMsgBeginAppUnstake_GetSigners(t *testing.T) {
 		{
 			name: "return signers",
 			args: args{msgBeginAppUnstake},
-			want: sdk.Address(msgAppStake.PubKey.Address()),
+			want: sdk.Address(pk.Address()),
 		},
 	}
 	for _, tt := range tests {

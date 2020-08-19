@@ -44,7 +44,7 @@ message GenesisState {
     (gogoproto.moretags) = "yaml:\"params\""];
     repeated ApplicationEncodable applications = 2 [
     (gogoproto.jsontag) = "applications",
-    (gogoproto.moretags) = "yaml:\"applications\"", (gogoproto.castrepeated)="Applications"];
+    (gogoproto.moretags) = "yaml:\"applications\"" ];
     bool exported = 3 [
     (gogoproto.jsontag) = "exported",
     (gogoproto.moretags) = "yaml:\"exported\""];

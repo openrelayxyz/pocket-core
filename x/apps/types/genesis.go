@@ -17,7 +17,6 @@ package types
 func DefaultGenesisState() GenesisState {
 	dp := DefaultParams()
 	return GenesisState{
-		Params:       &dp,
-		Applications: make(Applications, 0),
+		Params: &dp,
 	}
 }

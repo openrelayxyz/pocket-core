@@ -2,8 +2,9 @@ package keeper
 
 import (
 	"fmt"
-	"github.com/tendermint/tendermint/libs/strings"
 	"time"
+
+	"github.com/tendermint/tendermint/libs/strings"
 
 	"github.com/pokt-network/pocket-core/crypto"
 	sdk "github.com/pokt-network/pocket-core/types"
