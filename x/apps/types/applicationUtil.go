@@ -142,3 +142,25 @@ func ValidateNetworkIdentifier(chain string) sdk.Error {
 	}
 	return nil
 }
+
+func (a ApplicationEncodable) GetChains() []string        { return a.Chains }
+func (a ApplicationEncodable) IsStaked() bool             { return a.GetStatus().Equal(sdk.Staked) }
+func (a ApplicationEncodable) IsUnstaked() bool           { return a.GetStatus().Equal(sdk.Unstaked) }
+func (a ApplicationEncodable) IsUnstaking() bool          { return a.GetStatus().Equal(sdk.Unstaking) }
+func (a ApplicationEncodable) IsJailed() bool             { return a.Jailed }
+func (a ApplicationEncodable) GetStatus() sdk.StakeStatus { return a.Status }
+func (a ApplicationEncodable) GetAddress() sdk.Address    { return a.Address }
+func (a ApplicationEncodable) GetPublicKey() crypto.PublicKey {
+	pubkey, _ := crypto.NewPublicKey(a.PublicKey)
+	return pubkey
+}
+func (a ApplicationEncodable) GetTokens() sdk.Int       { return a.StakedTokens }
+func (a ApplicationEncodable) GetConsensusPower() int64 { return a.ConsensusPower() }
+func (a ApplicationEncodable) GetMaxRelays() sdk.Int    { return a.MaxRelays }
+
+func (a ApplicationEncodable) ConsensusPower() int64 {
+	if a.IsStaked() {
+		return sdk.TokensToConsensusPower(a.StakedTokens)
+	}
+	return 0
+}

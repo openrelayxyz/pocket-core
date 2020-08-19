@@ -104,11 +104,11 @@ func handleMsgUnjail(ctx sdk.Ctx, msg types.MsgAppUnjail, k keeper.Keeper) sdk.R
 	}
 	k.UnjailApplication(ctx, consAddr)
 	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
+		sdk.Event(sdk.NewEvent(
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.AppAddr.String()),
-		),
+		)),
 	)
 	return sdk.Result{Events: ctx.EventManager().Events()}
 }
