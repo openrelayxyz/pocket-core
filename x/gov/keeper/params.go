@@ -21,7 +21,7 @@ func (k Keeper) GetParams(ctx sdk.Ctx) types.Params {
 	u := k.GetUpgrade(ctx)
 	return types.Params{
 		ACL:      k.GetACL(ctx),
-		Upgrade:  &u,
+		Upgrade:  u,
 		DAOOwner: k.GetDAOOwner(ctx),
 	}
 }

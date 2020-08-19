@@ -15496,7 +15496,7 @@ func newDefaultGenesisState() []byte {
 	govGenesisState.Params.ACL = mACL
 	govGenesisState.Params.DAOOwner = sdk.Address(pubKey.Address())
 	u := govTypes.NewUpgrade(0, "0")
-	govGenesisState.Params.Upgrade = &u
+	govGenesisState.Params.Upgrade = u
 	res4 := aminoCodec.MustMarshalJSON(govGenesisState)
 	defaultGenesis[govTypes.ModuleName] = res4
 	// end genesis setup
