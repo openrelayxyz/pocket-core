@@ -148,7 +148,7 @@ func (app PocketCoreApp) QueryNode(addr string, height int64) (res nodesTypes.Va
 	return
 }
 
-func (app PocketCoreApp) QueryNodeParams(height int64) (res *nodesTypes.Params, err error) {
+func (app PocketCoreApp) QueryNodeParams(height int64) (res nodesTypes.Params, err error) {
 	ctx, err := app.NewContext(height)
 	if err != nil {
 		return

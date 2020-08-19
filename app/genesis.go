@@ -15483,13 +15483,13 @@ func newDefaultGenesisState() []byte {
 	rawPOS := defaultGenesis[nodesTypes.ModuleName]
 	var posGenesisState nodesTypes.GenesisState
 	types.ModuleCdc.MustUnmarshalJSON(rawPOS, &posGenesisState)
-	n := nodesTypes.Validator{Address: sdk.Address(pubKey.Address()),
-		PublicKey:    pubKey,
-		Status:       sdk.Staked,
-		Chains:       []string{PlaceholderHash},
-		ServiceURL:   PlaceholderServiceURL,
-		StakedTokens: sdk.NewInt(10000000)}.ToProto()
-	posGenesisState.Validators = append(posGenesisState.Validators, &n)
+	posGenesisState.Validators = append(posGenesisState.Validators,
+		nodesTypes.Validator{Address: sdk.Address(pubKey.Address()),
+			PublicKey:    pubKey,
+			Status:       sdk.Staked,
+			Chains:       []string{PlaceholderHash},
+			ServiceURL:   PlaceholderServiceURL,
+			StakedTokens: sdk.NewInt(10000000)})
 	res = types.ModuleCdc.MustMarshalJSON(posGenesisState)
 	defaultGenesis[nodesTypes.ModuleName] = res
 	// set default governance in genesis
