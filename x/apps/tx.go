@@ -71,8 +71,8 @@ func newTx(cdc *codec.ProtoCodec, msg sdk.Msg, fromAddr sdk.Address, tmNode clie
 		return
 	}
 	txBuilder = auth.NewTxBuilder(
-		auth.DefaultTxEncoder(cdc),
-		auth.DefaultTxDecoder(cdc),
+		auth.DefaultTxEncoder(nil, cdc),
+		auth.DefaultTxDecoder(nil, cdc),
 		chainID,
 		"",
 		sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, fee))).WithKeybase(keybase)

@@ -48,18 +48,20 @@ func TestAppModuleBasic_Name(t *testing.T) {
 
 func TestAppModuleBasic_RegisterCodec(t *testing.T) {
 	type args struct {
-		cdc *codec.Codec
+		amino *codec.LegacyAmino
+		proto *codec.ProtoCodec
 	}
+	amino, proto := makeTestCodec()
 	tests := []struct {
 		name string
 		args args
 	}{
-		{"Test RegisterCodec", args{cdc: makeTestCodec()}},
+		{"Test RegisterCodec", args{amino: amino, proto: proto}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ap := AppModuleBasic{}
-			ap.RegisterCodec(tt.args.cdc)
+			ap.RegisterCodec(tt.args.amino, tt.args.proto)
 		})
 	}
 }

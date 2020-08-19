@@ -11,11 +11,13 @@ import (
 
 func TestRawTx(t *testing.T) {
 	type args struct {
-		cdc      *codec.Codec
+		cdc      *codec.ProtoCodec
 		tmNode   client.Client
 		fromAddr sdk.Address
 		txBytes  []byte
 	}
+
+	_, proto := makeTestCodec()
 	tests := []struct {
 		name    string
 		args    args
@@ -23,7 +25,7 @@ func TestRawTx(t *testing.T) {
 		wantErr bool
 	}{
 		{"Test RawTx", args{
-			cdc:      makeTestCodec(),
+			cdc:      proto,
 			tmNode:   GetTestTendermintClient(),
 			fromAddr: getRandomValidatorAddress(),
 			txBytes:  []byte{0x51, 0x41, 0x33},
@@ -45,7 +47,7 @@ func TestRawTx(t *testing.T) {
 
 func TestSend(t *testing.T) {
 	type args struct {
-		cdc        *codec.Codec
+		cdc        *codec.ProtoCodec
 		tmNode     client.Client
 		keybase    keys.Keybase
 		fromAddr   sdk.Address
@@ -53,6 +55,7 @@ func TestSend(t *testing.T) {
 		passphrase string
 		amount     sdk.Int
 	}
+	_, proto := makeTestCodec()
 	tests := []struct {
 		name    string
 		args    args
@@ -60,7 +63,7 @@ func TestSend(t *testing.T) {
 		wantErr bool
 	}{
 		{"Test Send", args{
-			cdc:        makeTestCodec(),
+			cdc:        proto,
 			tmNode:     GetTestTendermintClient(),
 			keybase:    nil,
 			fromAddr:   nil,

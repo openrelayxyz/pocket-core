@@ -47,7 +47,7 @@ func SendTransaction(fromAddr, toAddr, passphrase, chainID string, amount sdk.In
 	if err != nil {
 		return nil, err
 	}
-	txBz, err := newTxBz(app.Codec(), msg, fa, chainID, kb, passphrase, fees, memo)
+	txBz, err := newTxBz(app.CodecP(), msg, fa, chainID, kb, passphrase, fees, memo)
 	if err != nil {
 		return nil, err
 	}
@@ -85,16 +85,16 @@ func StakeNode(chains []string, serviceURL, fromAddr, passphrase, chainID string
 		return nil, err
 	}
 	msg := nodeTypes.MsgStake{
-		PublicKey:  kp.PublicKey,
+		Publickey:  kp.PublicKey.RawString(),
 		Chains:     chains,
 		Value:      amount,
-		ServiceURL: serviceURL,
+		ServiceUrl: serviceURL,
 	}
 	err = msg.ValidateBasic()
 	if err != nil {
 		return nil, err
 	}
-	txBz, err := newTxBz(app.Codec(), msg, fa, chainID, kb, passphrase, fees, "")
+	txBz, err := newTxBz(app.CodecP(), msg, fa, chainID, kb, passphrase, fees, "")
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +111,7 @@ func UnstakeNode(fromAddr, passphrase, chainID string, fees int64) (*rpc.SendRaw
 		return nil, err
 	}
 	msg := nodeTypes.MsgBeginUnstake{
-		Address: fa,
+		ValidatorAddress: fa,
 	}
 	kb, err := app.GetKeybase()
 	if err != nil {
@@ -121,7 +121,7 @@ func UnstakeNode(fromAddr, passphrase, chainID string, fees int64) (*rpc.SendRaw
 	if err != nil {
 		return nil, err
 	}
-	txBz, err := newTxBz(app.Codec(), msg, fa, chainID, kb, passphrase, fees, "")
+	txBz, err := newTxBz(app.CodecP(), msg, fa, chainID, kb, passphrase, fees, "")
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +138,7 @@ func UnjailNode(fromAddr, passphrase, chainID string, fees int64) (*rpc.SendRawT
 		return nil, err
 	}
 	msg := nodeTypes.MsgUnjail{
-		ValidatorAddr: fa,
+		Address: fa,
 	}
 	kb, err := app.GetKeybase()
 	if err != nil {
@@ -148,7 +148,7 @@ func UnjailNode(fromAddr, passphrase, chainID string, fees int64) (*rpc.SendRawT
 	if err != nil {
 		return nil, err
 	}
-	txBz, err := newTxBz(app.Codec(), msg, fa, chainID, kb, passphrase, fees, "")
+	txBz, err := newTxBz(app.CodecP(), msg, fa, chainID, kb, passphrase, fees, "")
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +190,7 @@ func StakeApp(chains []string, fromAddr, passphrase, chainID string, amount sdk.
 	if err != nil {
 		return nil, err
 	}
-	txBz, err := newTxBz(app.Codec(), msg, fa, chainID, kb, passphrase, fees, "")
+	txBz, err := newTxBz(app.CodecP(), msg, fa, chainID, kb, passphrase, fees, "")
 	if err != nil {
 		return nil, err
 	}
@@ -216,7 +216,7 @@ func UnstakeApp(fromAddr, passphrase, chainID string, fees int64) (*rpc.SendRawT
 	if err != nil {
 		return nil, err
 	}
-	txBz, err := newTxBz(app.Codec(), msg, fa, chainID, kb, passphrase, fees, "")
+	txBz, err := newTxBz(app.CodecP(), msg, fa, chainID, kb, passphrase, fees, "")
 	if err != nil {
 		return nil, err
 	}
@@ -242,14 +242,14 @@ func DAOTx(fromAddr, toAddr, passphrase string, amount sdk.Int, action, chainID 
 	msg := govTypes.MsgDAOTransfer{
 		FromAddress: fa,
 		ToAddress:   ta,
-		Amount:      amount,
+		Amount:      &amount,
 		Action:      action,
 	}
 	err = msg.ValidateBasic()
 	if err != nil {
 		return nil, err
 	}
-	txBz, err := newTxBz(app.Codec(), msg, fa, chainID, kb, passphrase, fees, "")
+	txBz, err := newTxBz(app.CodecP(), msg, fa, chainID, kb, passphrase, fees, "")
 	if err != nil {
 		return nil, err
 	}
@@ -269,7 +269,7 @@ func ChangeParam(fromAddr, paramACLKey string, paramValue json.RawMessage, passp
 		return nil, err
 	}
 
-	valueBytes, err := app.Codec().MarshalJSON(paramValue)
+	valueBytes, err := app.CodecP().MarshalJSON(paramValue)
 	if err != nil {
 		return nil, err
 
@@ -283,7 +283,7 @@ func ChangeParam(fromAddr, paramACLKey string, paramValue json.RawMessage, passp
 	if err != nil {
 		return nil, err
 	}
-	txBz, err := newTxBz(app.Codec(), msg, fa, chainID, kb, passphrase, fees, "")
+	txBz, err := newTxBz(app.CodecP(), msg, fa, chainID, kb, passphrase, fees, "")
 	if err != nil {
 		return nil, err
 	}
@@ -304,13 +304,13 @@ func Upgrade(fromAddr string, upgrade govTypes.Upgrade, passphrase, chainID stri
 	}
 	msg := govTypes.MsgUpgrade{
 		Address: fa,
-		Upgrade: upgrade,
+		Upgrade: &upgrade,
 	}
 	err = msg.ValidateBasic()
 	if err != nil {
 		return nil, err
 	}
-	txBz, err := newTxBz(app.Codec(), msg, fa, chainID, kb, passphrase, fees, "")
+	txBz, err := newTxBz(app.CodecP(), msg, fa, chainID, kb, passphrase, fees, "")
 	if err != nil {
 		return nil, err
 	}
@@ -320,7 +320,7 @@ func Upgrade(fromAddr string, upgrade govTypes.Upgrade, passphrase, chainID stri
 	}, nil
 }
 
-func newTxBz(cdc *codec.Codec, msg sdk.Msg, fromAddr sdk.Address, chainID string, keybase keys.Keybase, passphrase string, fee int64, memo string) (transactionBz []byte, err error) {
+func newTxBz(cdc *codec.ProtoCodec, msg sdk.Msg, fromAddr sdk.Address, chainID string, keybase keys.Keybase, passphrase string, fee int64, memo string) (transactionBz []byte, err error) {
 	// fees
 	fees := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(fee)))
 	// entroyp
@@ -333,7 +333,7 @@ func newTxBz(cdc *codec.Codec, msg sdk.Msg, fromAddr sdk.Address, chainID string
 	if err != nil {
 		return nil, err
 	}
-	s := authTypes.StdSignature{PublicKey: pubKey, Signature: sig}
+	s := authTypes.StdSignature{PublicKey: pubKey.RawString(), Signature: sig}
 	tx := authTypes.NewStdTx(msg, fees, s, memo, entropy)
-	return auth.DefaultTxEncoder(cdc)(tx)
+	return auth.DefaultTxEncoder(nil, cdc)(tx)
 }

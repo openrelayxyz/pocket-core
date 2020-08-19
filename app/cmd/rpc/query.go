@@ -316,7 +316,7 @@ func NodeParams(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, err := app.Codec().MarshalJSON(res)
+	j, err := app.CodecP().MarshalJSON(res)
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 		return
@@ -344,7 +344,7 @@ func NodeClaim(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, err := app.Codec().MarshalJSON(res)
+	j, err := app.CodecP().MarshalJSON(res)
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 		return
@@ -430,7 +430,7 @@ func AppParams(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, err := app.Codec().MarshalJSON(res)
+	j, err := app.CodecP().MarshalJSON(res)
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 		return
@@ -449,7 +449,7 @@ func PocketParams(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, err := app.Codec().MarshalJSON(res)
+	j, err := app.CodecP().MarshalJSON(res)
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 		return
@@ -468,7 +468,7 @@ func SupportedChains(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, err := app.Codec().MarshalJSON(res)
+	j, err := app.CodecP().MarshalJSON(res)
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 		return
@@ -572,7 +572,7 @@ func ACL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, err := app.Codec().MarshalJSON(res)
+	j, err := app.CodecP().MarshalJSON(res)
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 		return
@@ -591,7 +591,7 @@ func AllParams(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, err := app.Codec().MarshalJSON(res)
+	j, err := app.CodecP().MarshalJSON(res)
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 		return
@@ -609,7 +609,7 @@ func Param(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, err := app.Codec().MarshalJSON(res)
+	j, err := app.CodecP().MarshalJSON(res)
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 		return
