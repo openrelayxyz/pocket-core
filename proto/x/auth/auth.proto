@@ -63,7 +63,7 @@ message Supply {
 
 message StdTx {
 	option (gogoproto.goproto_getters) = false;
-	google.protobuf.Any msg = 1 [(gogoproto.jsontag) = "msg", (gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.Msg"];
+	google.protobuf.Any msg = 1 [(gogoproto.jsontag) = "msg", (gogoproto.nullable) = false];
 	repeated types.Coin fee = 2 [(gogoproto.jsontag) = "fee", (gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/pokt-network/pocket-core/types.Coins"];
 	StdSignature signature = 3 [(gogoproto.jsontag) = "signature", (gogoproto.nullable) = false, (gogoproto.casttype) = "StdSignature"];
 	string memo = 4 [(gogoproto.jsontag) = "memo"];

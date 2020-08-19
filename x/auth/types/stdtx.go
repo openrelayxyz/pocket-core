@@ -3,6 +3,7 @@ package types
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/pokt-network/pocket-core/codec/types"
 	"log"
 	"os"
 
@@ -29,8 +30,12 @@ var (
 //}
 
 func NewStdTx(msgs sdk.Msg, fee sdk.Coins, sigs StdSignature, memo string, entropy int64) StdTx {
+	any, err := types.NewAnyWithValue(msgs)
+	if err != nil {
+		return StdTx{}
+	}
 	return StdTx{
-		Msg:       &msgs,
+		Msg:       *any,
 		Fee:       fee,
 		Signature: sigs,
 		Memo:      memo,
@@ -39,7 +44,9 @@ func NewStdTx(msgs sdk.Msg, fee sdk.Coins, sigs StdSignature, memo string, entro
 }
 
 // GetMsg returns the all the transaction's messages.
-func (tx StdTx) GetMsg() sdk.Msg { return *tx.Msg }
+func (tx StdTx) GetMsg() sdk.Msg {
+	return tx.Msg.GetCachedValue().(sdk.Msg)
+}
 
 // ValidateBasic does a simple and lightweight validation check that doesn't
 // require access to any other information.

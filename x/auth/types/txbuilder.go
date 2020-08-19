@@ -146,7 +146,7 @@ func (bldr TxBuilder) SignMultisigTransaction(address sdk.Address, keys []crypto
 	t, err := bldr.txDecoder(txBytes)
 	tx := t.(StdTx)
 	// get the sign bytes from the transaction
-	bytesToSign, err := StdSignBytes(bldr.chainID, tx.Entropy, tx.Fee, *tx.Msg, tx.Memo)
+	bytesToSign, err := StdSignBytes(bldr.chainID, tx.Entropy, tx.Fee, tx.GetMsg(), tx.Memo)
 	if err != nil {
 		return nil, err
 	}

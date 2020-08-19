@@ -20,7 +20,7 @@ func NewAnteHandler(ak keeper.Keeper) sdk.AnteHandler {
 			os.Exit(1)
 		}
 		// all transactions must be of type auth.StdTx
-		stdTx, ok := tx.(StdTx)
+		stdTx, ok := tx.(*StdTx)
 		if !ok {
 			return newCtx, sdk.ErrInternal("tx must be StdTx").Result(), true
 		}
@@ -28,11 +28,11 @@ func NewAnteHandler(ak keeper.Keeper) sdk.AnteHandler {
 		if err := tx.ValidateBasic(); err != nil {
 			return newCtx, err.Result(), true
 		}
-		err := ValidateTransaction(ctx, ak, stdTx, ak.GetParams(ctx), txIndexer, txBz, simulate)
+		err := ValidateTransaction(ctx, ak, *stdTx, ak.GetParams(ctx), txIndexer, txBz, simulate)
 		if err != nil {
 			return newCtx, err.Result(), true
 		}
-		err = DeductFees(ak, ctx, stdTx)
+		err = DeductFees(ak, ctx, *stdTx)
 		if err != nil {
 			return newCtx, err.Result(), true
 		}
@@ -76,7 +76,7 @@ func ValidateTransaction(ctx sdk.Ctx, k Keeper, stdTx StdTx, params Params, txIn
 		return sdk.ErrInternal(err.Error())
 	}
 	// get the fees from the tx
-	expectedFee := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, k.GetParams(ctx).FeeMultiplier.GetFee(*stdTx.Msg)))
+	expectedFee := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, k.GetParams(ctx).FeeMultiplier.GetFee(stdTx.GetMsg())))
 	// test for public key type
 	p, ok := pk.(posCrypto.PublicKeyMultiSig)
 	// if standard public key
@@ -175,6 +175,6 @@ func DeductFees(keeper keeper.Keeper, ctx sdk.Ctx, tx types.StdTx) sdk.Error {
 // and an account.
 func GetSignBytes(chainID string, stdTx StdTx) ([]byte, error) {
 	return StdSignBytes(
-		chainID, stdTx.Entropy, stdTx.Fee, *stdTx.Msg, stdTx.Memo,
+		chainID, stdTx.Entropy, stdTx.Fee, stdTx.GetMsg(), stdTx.Memo,
 	)
 }
