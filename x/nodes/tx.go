@@ -21,7 +21,7 @@ func StakeTx(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase, 
 		ServiceUrl: serviceURL, // url where pocket service api is hosted
 		Chains:     chains,     // non native blockchains
 	}
-	txBuilder, cliCtx, err := newTx(cdc, msg, fromAddr, tmNode, keybase, passphrase)
+	txBuilder, cliCtx, err := newTx(cdc, &msg, fromAddr, tmNode, keybase, passphrase)
 	if err != nil {
 		return nil, err
 	}
@@ -29,12 +29,12 @@ func StakeTx(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase, 
 	if err != nil {
 		return nil, err
 	}
-	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, msg)
+	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, &msg)
 }
 
 func UnstakeTx(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase, address sdk.Address, passphrase string) (*sdk.TxResponse, error) {
 	msg := types.MsgBeginUnstake{ValidatorAddress: address}
-	txBuilder, cliCtx, err := newTx(cdc, msg, address, tmNode, keybase, passphrase)
+	txBuilder, cliCtx, err := newTx(cdc, &msg, address, tmNode, keybase, passphrase)
 	if err != nil {
 		return nil, err
 	}
@@ -42,12 +42,12 @@ func UnstakeTx(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase
 	if err != nil {
 		return nil, err
 	}
-	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, msg)
+	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, &msg)
 }
 
 func UnjailTx(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase, address sdk.Address, passphrase string) (*sdk.TxResponse, error) {
 	msg := types.MsgUnjail{Address: address}
-	txBuilder, cliCtx, err := newTx(cdc, msg, address, tmNode, keybase, passphrase)
+	txBuilder, cliCtx, err := newTx(cdc, &msg, address, tmNode, keybase, passphrase)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func UnjailTx(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase,
 	if err != nil {
 		return nil, err
 	}
-	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, msg)
+	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, &msg)
 }
 
 func Send(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase, fromAddr, toAddr sdk.Address, passphrase string, amount sdk.Int) (*sdk.TxResponse, error) {
@@ -64,7 +64,7 @@ func Send(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase, fro
 		ToAddress:   toAddr,
 		Amount:      amount,
 	}
-	txBuilder, cliCtx, err := newTx(cdc, msg, fromAddr, tmNode, keybase, passphrase)
+	txBuilder, cliCtx, err := newTx(cdc, &msg, fromAddr, tmNode, keybase, passphrase)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func Send(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase, fro
 	if err != nil {
 		return nil, err
 	}
-	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, msg)
+	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, &msg)
 }
 
 func RawTx(cdc *codec.ProtoCodec, tmNode client.Client, fromAddr sdk.Address, txBytes []byte) (sdk.TxResponse, error) {

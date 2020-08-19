@@ -12,12 +12,12 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 	return func(ctx sdk.Ctx, msg sdk.Msg) sdk.Result {
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
 		switch msg := msg.(type) {
-		case types.MsgAppStake:
-			return handleStake(ctx, msg, k)
-		case types.MsgBeginAppUnstake:
-			return handleMsgBeginUnstake(ctx, msg, k)
-		case types.MsgAppUnjail:
-			return handleMsgUnjail(ctx, msg, k)
+		case *types.MsgAppStake:
+			return handleStake(ctx, *msg, k)
+		case *types.MsgBeginAppUnstake:
+			return handleMsgBeginUnstake(ctx, *msg, k)
+		case *types.MsgAppUnjail:
+			return handleMsgUnjail(ctx, *msg, k)
 		default:
 			errMsg := fmt.Sprintf("unrecognized staking message type: %T", msg)
 			return sdk.ErrUnknownRequest(errMsg).Result()

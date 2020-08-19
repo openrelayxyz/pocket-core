@@ -2,7 +2,6 @@ package types
 
 import (
 	"encoding/hex"
-	"fmt"
 	sdk "github.com/pokt-network/pocket-core/types"
 )
 
@@ -23,7 +22,7 @@ const (
 //	ExpirationHeight int64           `json:"expiration_height"`
 //}
 
-type Claims []*MsgClaim
+type Claims []MsgClaim
 
 // "GetFee" - Returns the fee (sdk.Int) of the messgae type
 func (msg MsgClaim) GetFee() sdk.Int {
@@ -149,13 +148,5 @@ func (msg MsgProof) GetSigner() sdk.Address {
 }
 
 func (msg MsgProof) GetLeaf() Proof {
-	switch x := msg.Leaf.Proof.(type) {
-	case *ProofI_RelayProof:
-		return x.RelayProof
-	case *ProofI_ChallengeProof:
-		return x.ChallengeProof
-	default:
-		fmt.Println(fmt.Errorf("msg.Proof has unexpected type %T", x))
-		return RelayProof{}
-	}
+	return msg.Leaf.FromProto()
 }

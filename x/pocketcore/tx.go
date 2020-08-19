@@ -22,19 +22,19 @@ func ClaimTx(kp crypto.PrivateKey, cliCtx util.CLIContext, txBuilder auth.TxBuil
 	if err != nil {
 		return nil, err
 	}
-	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, msg)
+	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, &msg)
 }
 
 // "ProofTx" - A transaction to prove the claim that was previously sent (Merkle Proofs and leaf/cousin)
 func ProofTx(cliCtx util.CLIContext, txBuilder auth.TxBuilder, merkleProof types.MerkleProof, leafNode types.Proof, evidenceType types.EvidenceType) (*sdk.TxResponse, error) {
 	msg := types.MsgProof{
 		MerkleProof:  merkleProof,
-		Leaf:         leafNode,
+		Leaf:         leafNode.ToProto(),
 		EvidenceType: evidenceType,
 	}
 	err := msg.ValidateBasic()
 	if err != nil {
 		return nil, err
 	}
-	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, msg)
+	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, &msg)
 }

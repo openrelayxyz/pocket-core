@@ -66,7 +66,7 @@ func (e Evidence) MarshalObject() ([]byte, error) {
 		BloomBytes:    encodedBloom,
 		SessionHeader: &e.SessionHeader,
 		NumOfProofs:   e.NumOfProofs,
-		Proofs:        e.Proofs.ToProofI(e.EvidenceType),
+		Proofs:        e.Proofs.ToProofI(),
 		EvidenceType:  e.EvidenceType,
 	}
 	return ModuleCdc.MarshalBinaryBare(&ep)
@@ -87,7 +87,7 @@ func (e Evidence) UnmarshalObject(b []byte) (CacheObject, error) {
 		Bloom:         bloomFilter,
 		SessionHeader: *ep.SessionHeader,
 		NumOfProofs:   ep.NumOfProofs,
-		Proofs:        ep.Proofs.FromProofI(ep.EvidenceType),
+		Proofs:        ep.Proofs.FromProofI(),
 		EvidenceType:  ep.EvidenceType}
 	return evidence, nil
 }

@@ -19,37 +19,35 @@ type Proof interface {
 	SessionHeader() SessionHeader                                                                        // returns the session header
 	Validate(appSupportedBlockchains []string, sessionNodeCount int, sessionBlockHeight int64) sdk.Error // validate the object
 	Store(max sdk.Int)                                                                                   // handle the proof after validation
+	ToProto() ProofI
 }
 
 type Proofs []Proof
 
 type ProofIs []ProofI
-func (ps Proofs) ToProofI(evidenceType EvidenceType) (res []ProofI) {
-	if evidenceType == RelayEvidence {
-		for _, proof := range ps {
-			rp := proof.(RelayProof)
-			res = append(res, ProofI{Proof: &ProofI_RelayProof{RelayProof: &rp}})
-		}
-	} else {
-		for _, proof := range ps {
-			cp := proof.(ChallengeProofInvalidData)
-			res = append(res, ProofI{Proof: &ProofI_ChallengeProof{ChallengeProof: &cp}})
-		}
+
+func (ps Proofs) ToProofI() (res []ProofI) {
+	for _, proof := range ps {
+		res = append(res, proof.ToProto())
 	}
 	return
 }
 
-func (ps ProofIs) FromProofI(evidenceType EvidenceType) (res Proofs) {
-	if evidenceType == RelayEvidence {
-		for _, proof := range ps {
-			rp := proof.Proof.(*ProofI_RelayProof).RelayProof
-			res = append(res, rp)
-		}
-	} else {
-		for _, proof := range ps {
-			cp := proof.Proof.(*ProofI_ChallengeProof).ChallengeProof
-			res = append(res, cp)
-		}
+func (pi ProofI) FromProto() Proof {
+	switch x := pi.Proof.(type) {
+	case *ProofI_RelayProof:
+		return x.RelayProof
+	case *ProofI_ChallengeProof:
+		return x.ChallengeProof
+	default:
+		fmt.Println(fmt.Sprintf("invalid type assertion of proofI: %T", x))
+		return RelayProof{}
+	}
+}
+
+func (ps ProofIs) FromProofI() (res Proofs) {
+	for _, proof := range ps {
+		res = append(res, proof.FromProto())
 	}
 	return
 }
@@ -229,6 +227,10 @@ func (rp RelayProof) GetSigner() sdk.Address {
 		return nil
 	}
 	return sdk.Address(pk.Address())
+}
+
+func (rp RelayProof) ToProto() ProofI {
+	return ProofI{Proof: &ProofI_RelayProof{RelayProof: &rp}}
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -458,4 +460,8 @@ func (c ChallengeProofInvalidData) GetSigner() sdk.Address {
 func (c ChallengeProofInvalidData) Store(maxChallenges sdk.Int) {
 	// add the Proof to the global (in memory) collection of proofs
 	SetProof(c.SessionHeader(), ChallengeEvidence, c, maxChallenges)
+}
+
+func (c ChallengeProofInvalidData) ToProto() ProofI {
+	return ProofI{Proof: &ProofI_ChallengeProof{ChallengeProof: &c}}
 }

@@ -71,7 +71,7 @@ func (k Keeper) SendClaimTx(ctx sdk.Ctx, keeper Keeper, n client.Client, claimTx
 		// generate the merkle root for this evidence
 		root := evidence.GenerateMerkleRoot()
 		// generate the auto txbuilder and clictx
-		txBuilder, cliCtx, err := newTxBuilderAndCliCtx(ctx, pc.MsgClaim{}, n, kp, k)
+		txBuilder, cliCtx, err := newTxBuilderAndCliCtx(ctx, &pc.MsgClaim{}, n, kp, k)
 		if err != nil {
 			ctx.Logger().Error(fmt.Sprintf("an error occured creating the tx builder for the claim tx:\n%s", err.Error()))
 			return
