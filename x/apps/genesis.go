@@ -22,17 +22,13 @@ func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, supplyKeeper types.AuthKeepe
 			fmt.Println(fmt.Errorf("%v the applications must be staked at genesis", application))
 			continue
 		}
-		app, err := application.FromProto()
-		if err != nil {
-			panic("can't convert app encodable to app: " + err.Error())
-		}
 		// calculate relays
-		application.MaxRelays = keeper.CalculateAppRelays(ctx, app)
+		application.MaxRelays = keeper.CalculateAppRelays(ctx, application)
 		// set the applications from the data
-		keeper.SetApplication(ctx, app)
-		keeper.SetStakedApplication(ctx, app)
+		keeper.SetApplication(ctx, application)
+		keeper.SetStakedApplication(ctx, application)
 		if application.IsStaked() {
-			stakedTokens = stakedTokens.Add(app.GetTokens())
+			stakedTokens = stakedTokens.Add(application.GetTokens())
 		}
 	}
 	stakedCoins := sdk.NewCoins(sdk.NewCoin(posKeeper.StakeDenom(ctx), stakedTokens))
@@ -55,7 +51,7 @@ func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, supplyKeeper types.AuthKeepe
 	// add coins to the total supply
 	keeper.AccountsKeeper.SetSupply(ctx, keeper.AccountsKeeper.GetSupply(ctx).Inflate(stakedCoins))
 	// set the params set in the keeper
-	keeper.Paramstore.SetParamSet(ctx, data.Params)
+	keeper.Paramstore.SetParamSet(ctx, &data.Params)
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
@@ -64,7 +60,7 @@ func ExportGenesis(ctx sdk.Ctx, keeper keeper.Keeper) types.GenesisState {
 	applications := keeper.GetAllApplications(ctx)
 	return types.GenesisState{
 		Params:       params,
-		Applications: applications.ToProto(),
+		Applications: applications,
 		Exported:     true,
 	}
 }
@@ -72,7 +68,7 @@ func ExportGenesis(ctx sdk.Ctx, keeper keeper.Keeper) types.GenesisState {
 // ValidateGenesis validates the provided staking genesis state to ensure the
 // expected invariants holds. (i.e. params in correct bounds, no duplicate applications)
 func ValidateGenesis(data types.GenesisState) error {
-	err := validateGenesisStateApplications(data.Applications.FromProto(), sdk.NewInt(data.Params.AppStakeMin))
+	err := validateGenesisStateApplications(data.Applications, sdk.NewInt(data.Params.AppStakeMin))
 	if err != nil {
 		return err
 	}
