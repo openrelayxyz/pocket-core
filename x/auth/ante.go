@@ -20,7 +20,7 @@ func NewAnteHandler(ak keeper.Keeper) sdk.AnteHandler {
 			os.Exit(1)
 		}
 		// all transactions must be of type auth.StdTx
-		stdTx, ok := tx.(*StdTx)
+		stdTx, ok := tx.(StdTx)
 		if !ok {
 			return newCtx, sdk.ErrInternal("tx must be StdTx").Result(), true
 		}
@@ -28,11 +28,11 @@ func NewAnteHandler(ak keeper.Keeper) sdk.AnteHandler {
 		if err := tx.ValidateBasic(); err != nil {
 			return newCtx, err.Result(), true
 		}
-		err := ValidateTransaction(ctx, ak, *stdTx, ak.GetParams(ctx), txIndexer, txBz, simulate)
+		err := ValidateTransaction(ctx, ak, stdTx, ak.GetParams(ctx), txIndexer, txBz, simulate)
 		if err != nil {
 			return newCtx, err.Result(), true
 		}
-		err = DeductFees(ak, ctx, *stdTx)
+		err = DeductFees(ak, ctx, stdTx)
 		if err != nil {
 			return newCtx, err.Result(), true
 		}
@@ -55,7 +55,7 @@ func ValidateTransaction(ctx sdk.Ctx, k Keeper, stdTx StdTx, params Params, txIn
 		}
 	} else {
 		// public key in the signature not found so check world state
-		acc := k.GetAccount(ctx, stdTx.GetSigner())
+		acc := k.GetAcc(ctx, stdTx.GetSigner())
 		if acc == nil {
 			return types.ErrAccountNotFound(ModuleName)
 		}
@@ -128,7 +128,7 @@ func recSignDepth(count, limit uint64, publicKey posCrypto.PublicKeyMultiSig) (c
 // GetSignerAcc returns an account for a given address that is expected to sign
 // a transaction.
 func GetSignerAcc(ctx sdk.Ctx, ak keeper.Keeper, addr sdk.Address) (Account, sdk.Error) {
-	if acc := ak.GetAccount(ctx, addr); acc != nil {
+	if acc := ak.GetAcc(ctx, addr); acc != nil {
 		return acc, nil
 	}
 	return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))

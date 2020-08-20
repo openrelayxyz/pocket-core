@@ -34,14 +34,9 @@ func (k Keeper) GetModuleAccountAndPermissions(ctx sdk.Ctx, moduleName string) (
 	if addr == nil {
 		return nil, []string{}
 	}
-	acc := k.GetAccount(ctx, addr)
+	acc := k.GetModuleAcc(ctx, addr)
 	if acc != nil {
-		macc, ok := acc.(exported.ModuleAccountI)
-		if !ok {
-			fmt.Println("account that is retrieved is not a module account")
-			return types.ModuleAccount{}, []string{}
-		}
-		return macc, perms
+		return acc, perms
 	}
 
 	// create a new module account
@@ -80,14 +75,32 @@ func (k Keeper) NewAccount(ctx sdk.Ctx, acc exported.Account) exported.Account {
 	return acc
 }
 
-// GetAccount implements sdk.Keeper.
 func (k Keeper) GetAccount(ctx sdk.Ctx, addr sdk.Address) exported.Account {
+	return k.GetAcc(ctx, addr)
+}
+
+// GetAcc implements sdk.Keeper.
+func (k Keeper) GetAcc(ctx sdk.Ctx, addr sdk.Address) *types.BaseAccount {
 	store := ctx.KVStore(k.storeKey)
 	bz, _ := store.Get(types.AddressStoreKey(addr))
 	if bz == nil {
 		return nil
 	}
 	acc, err := k.DecodeAccount(bz)
+	if err != nil {
+		return nil // Could not decode account
+	}
+	return acc.(*types.BaseAccount)
+}
+
+// GetAcc implements sdk.Keeper.
+func (k Keeper) GetModuleAcc(ctx sdk.Ctx, addr sdk.Address) exported.ModuleAccountI {
+	store := ctx.KVStore(k.storeKey)
+	bz, _ := store.Get(types.AddressStoreKey(addr))
+	if bz == nil {
+		return nil
+	}
+	acc, err := k.DecodeModuleAccount(bz)
 	if err != nil {
 		return nil // Could not decode account
 	}
@@ -165,7 +178,7 @@ func (k Keeper) IterateAccounts(ctx sdk.Ctx, process func(exported.Account) (sto
 }
 
 // NewAccountWithAddress implements sdk.AuthKeeper.
-func (k Keeper) NewAccountWithAddress(ctx sdk.Ctx, addr sdk.Address) (exported.Account, error) {
+func (k Keeper) NewAccountWithAddress(ctx sdk.Ctx, addr sdk.Address) (*types.BaseAccount, error) {
 	acc := types.BaseAccount{}
 	err := acc.SetAddress(addr)
 	if err != nil {
@@ -176,7 +189,7 @@ func (k Keeper) NewAccountWithAddress(ctx sdk.Ctx, addr sdk.Address) (exported.A
 
 // GetPubKey Returns the PublicKey of the account at address
 func (k Keeper) GetPubKey(ctx sdk.Ctx, addr sdk.Address) (crypto.PublicKey, sdk.Error) {
-	acc := k.GetAccount(ctx, addr)
+	acc := k.GetAcc(ctx, addr)
 	if acc == nil {
 		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))
 	}

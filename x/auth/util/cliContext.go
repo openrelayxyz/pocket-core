@@ -220,7 +220,7 @@ func (ctx CLIContext) queryStore(key bytes.HexBytes, storeName, endPath string) 
 	return ctx.query(path, key)
 }
 
-// GetAccount queries for an account given an address and a block height. An
+// GetAcc queries for an account given an address and a block height. An
 // error is returned if the query or decoding fails.
 func (ctx CLIContext) GetAccount(addr sdk.Address) (exported.Account, error) {
 	account, _, err := ctx.GetAccountWithHeight(addr)

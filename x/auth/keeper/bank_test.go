@@ -22,7 +22,7 @@ var (
 
 func getCoinsByName(ctx sdk.Ctx, k Keeper, moduleName string) sdk.Coins {
 	moduleAddress := k.GetModuleAddress(moduleName)
-	macc := k.GetAccount(ctx, moduleAddress)
+	macc := k.GetAcc(ctx, moduleAddress)
 	if macc == nil {
 		return sdk.Coins(nil)
 	}
@@ -53,10 +53,10 @@ func TestSendCoins(t *testing.T) {
 	err = keeper.SendCoinsFromModuleToAccount(ctx, types.Burner, baseAcc.GetAddress(), initCoins)
 	require.NoError(t, err)
 	require.Equal(t, sdk.Coins(nil), getCoinsByName(ctx, keeper, types.Burner))
-	require.Equal(t, initCoins, keeper.GetAccount(ctx, baseAcc.GetAddress()).GetCoins())
+	require.Equal(t, initCoins, keeper.GetAcc(ctx, baseAcc.GetAddress()).GetCoins())
 	err = keeper.SendCoinsFromAccountToModule(ctx, baseAcc.GetAddress(), types.Burner, initCoins)
 	require.NoError(t, err)
-	require.Equal(t, sdk.Coins(nil), keeper.GetAccount(ctx, baseAcc.GetAddress()).GetCoins())
+	require.Equal(t, sdk.Coins(nil), keeper.GetAcc(ctx, baseAcc.GetAddress()).GetCoins())
 	require.Equal(t, initCoins, getCoinsByName(ctx, keeper, types.Burner))
 }
 

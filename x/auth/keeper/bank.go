@@ -144,7 +144,7 @@ func (k Keeper) SubtractCoins(ctx sdk.Ctx, addr sdk.Address, amt sdk.Coins) (sdk
 
 	oldCoins, spendableCoins := sdk.NewCoins(), sdk.NewCoins()
 
-	acc := k.GetAccount(ctx, addr)
+	acc := k.GetAcc(ctx, addr)
 	if acc != nil {
 		oldCoins = acc.GetCoins()
 		spendableCoins = acc.SpendableCoins(ctx.BlockHeader().Time)
@@ -192,7 +192,7 @@ func (k Keeper) SetCoins(ctx sdk.Ctx, addr sdk.Address, amt sdk.Coins) sdk.Error
 		return sdk.ErrInvalidCoins(amt.String())
 	}
 
-	acc := k.GetAccount(ctx, addr)
+	acc := k.GetAcc(ctx, addr)
 	if acc == nil {
 		var err error
 		acc, err = k.NewAccountWithAddress(ctx, addr)
@@ -211,7 +211,7 @@ func (k Keeper) SetCoins(ctx sdk.Ctx, addr sdk.Address, amt sdk.Coins) sdk.Error
 
 // GetCoins returns the coins at the addr.
 func (k Keeper) GetCoins(ctx sdk.Ctx, addr sdk.Address) sdk.Coins {
-	acc := k.GetAccount(ctx, addr)
+	acc := k.GetAcc(ctx, addr)
 	if acc == nil {
 		return sdk.NewCoins()
 	}

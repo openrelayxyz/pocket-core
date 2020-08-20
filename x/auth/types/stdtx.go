@@ -44,8 +44,12 @@ func NewStdTx(msgs sdk.Msg, fee sdk.Coins, sigs StdSignature, memo string, entro
 }
 
 // GetMsg returns the all the transaction's messages.
-func (tx StdTx) GetMsg() sdk.Msg {
-	return tx.Msg.GetCachedValue().(sdk.Msg)
+func (tx StdTx) GetMsg() (res sdk.Msg) {
+	err := ModuleCdc.UnpackAny(&tx.Msg, &res)
+	if err != nil {
+		panic("unable to retrive msg: " + err.Error())
+	}
+	return
 }
 
 // ValidateBasic does a simple and lightweight validation check that doesn't
@@ -103,13 +107,13 @@ func (tx StdTx) GetSignature() StdSignature { return tx.Signature }
 // as well as the ChainID (prevent cross chain replay)
 // and the Entropy numbers for each signature (prevent
 // inchain replay and enforce tx ordering per account).
-type StdSignDoc struct {
-	ChainID string          `json:"chain_id" yaml:"chain_id"`
-	Fee     json.RawMessage `json:"fee" yaml:"fee"`
-	Memo    string          `json:"memo" yaml:"memo"`
-	Msg     json.RawMessage `json:"msg" yaml:"msg"`
-	Entropy int64           `json:"entropy" yaml:"entropy"`
-}
+//type StdSignDoc struct {
+//	ChainID string          `json:"chain_id" yaml:"chain_id"`
+//	Fee     json.RawMessage `json:"fee" yaml:"fee"`
+//	Memo    string          `json:"memo" yaml:"memo"`
+//	Msg     json.RawMessage `json:"msg" yaml:"msg"`
+//	Entropy int64           `json:"entropy" yaml:"entropy"`
+//}
 
 // StdSignBytes returns the bytes to sign for a transaction.
 func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msg sdk.Msg, memo string) ([]byte, error) {
@@ -119,7 +123,7 @@ func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msg sdk.Msg, mem
 	if err != nil {
 		return nil, fmt.Errorf("could not marshal fee to json for StdSignBytes function: %v", err.Error())
 	}
-	bz, err := ModuleCdc.MarshalJSON(StdSignDoc{
+	bz, err := ModuleCdc.MarshalBinaryBare(&StdSignDoc{
 		ChainID: chainID,
 		Fee:     feeBytes,
 		Memo:    memo,
@@ -129,7 +133,7 @@ func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msg sdk.Msg, mem
 	if err != nil {
 		return nil, fmt.Errorf("could not marshal bytes to json for StdSignDoc function: %v", err.Error())
 	}
-	return sdk.MustSortJSON(bz), nil
+	return bz, nil
 }
 
 // StdSignature represents a sig
@@ -149,7 +153,7 @@ func DefaultTxDecoder(_ *codec.LegacyAmino, proto *codec.ProtoCodec) sdk.TxDecod
 		// are registered by MakeTxCodec
 		err := proto.UnmarshalBinaryLengthPrefixed(txBytes, &tx)
 		if err != nil {
-			return nil, sdk.ErrTxDecode("error decoding transaction").TraceSDK(err.Error())
+			return nil, sdk.ErrTxDecode("error decoding transaction: " + err.Error())
 		}
 		return tx, nil
 	}

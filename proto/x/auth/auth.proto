@@ -74,3 +74,12 @@ message StdSignature {
 	string publicKey = 1 [(gogoproto.jsontag) = "pub_key"];
 	bytes Signature = 2 [(gogoproto.jsontag) = "signature"];
 }
+
+message StdSignDoc {
+	option (gogoproto.goproto_getters) = false;
+	string ChainID = 1 [(gogoproto.jsontag) = "chain_id"];
+	bytes fee = 2 [(gogoproto.jsontag) = "signature"];
+	string memo = 3 [(gogoproto.jsontag) = "memo"];
+	bytes msg = 4 [(gogoproto.jsontag) = "msg"];
+	int64 entropy = 5 [(gogoproto.jsontag) = "msg"];
+}

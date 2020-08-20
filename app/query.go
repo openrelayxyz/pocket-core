@@ -118,8 +118,9 @@ func (app PocketCoreApp) QueryAccount(addr string, height int64) (res *exported.
 	if err != nil {
 		return
 	}
-	acc := app.accountKeeper.GetAccount(ctx, a)
-	return &acc, nil
+	acc := app.accountKeeper.GetAcc(ctx, a)
+	ea := exported.Account(acc)
+	return &ea, nil
 }
 
 func (app PocketCoreApp) QueryNodes(height int64, opts nodesTypes.QueryValidatorsParams) (res Page, err error) {

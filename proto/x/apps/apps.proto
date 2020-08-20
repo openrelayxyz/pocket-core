@@ -52,9 +52,6 @@ message ApplicationEncodable {
     (gogoproto.moretags) = "yaml:\"unstaking_time\""];
 }
 
-
-
-
 // Pool - tracking bonded and not-bonded token supply of the bond denomination
 message Pool {
   option (gogoproto.description) = true;
