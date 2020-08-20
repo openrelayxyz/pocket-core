@@ -186,14 +186,20 @@ func (k Keeper) GetPubKey(ctx sdk.Ctx, addr sdk.Address) (crypto.PublicKey, sdk.
 // "EncodeAccount" - encodes account interface into protobuf
 // custom logic is needed to convert public key (bytes) into interface type
 func (k Keeper) EncodeAccount(acc exported.Account) ([]byte, error) {
-	switch acc.(type) {
+	var pk string
+	if acc.GetPubKey() != nil {
+		pk = acc.GetPubKey().RawString()
+	}
+	switch x := acc.(type) {
 	case *types.BaseAccount:
 		ba := &types.BaseAccountEncodable{
 			Address: acc.GetAddress(),
-			PubKey:  acc.GetPubKey().RawString(),
+			PubKey:  pk,
 			Coins:   acc.GetCoins(),
 		}
 		return k.cdc.MarshalBinaryBare(ba)
+	case *types.ModuleAccount:
+		return k.EncodeModuleAccount(x)
 	default:
 		return nil, fmt.Errorf("unrecognized account type: %v", acc)
 	}
@@ -202,11 +208,15 @@ func (k Keeper) EncodeAccount(acc exported.Account) ([]byte, error) {
 // "EncodeModuleAccount" - encodes account interface into protobuf
 // custom logic is needed to convert public key (bytes) into interface type
 func (k Keeper) EncodeModuleAccount(acc exported.ModuleAccountI) ([]byte, error) {
+	var pk string
+	if acc.GetPubKey() != nil {
+		pk = acc.GetPubKey().RawString()
+	}
 	switch acc.(type) {
 	case *types.ModuleAccount:
 		ba := types.BaseAccountEncodable{
 			Address: acc.GetAddress(),
-			PubKey:  acc.GetPubKey().RawString(),
+			PubKey:  pk,
 			Coins:   acc.GetCoins(),
 		}
 		ma := &types.ModuleAccountEncodable{
@@ -224,14 +234,17 @@ func (k Keeper) EncodeModuleAccount(acc exported.ModuleAccountI) ([]byte, error)
 // custom logic is needed to convert public key (bytes) into interface type
 // TODO can use proto "one of" for interface
 func (k Keeper) DecodeAccount(bz []byte) (exported.Account, error) {
+	var pk crypto.PublicKey
 	ba := &types.BaseAccountEncodable{}
 	err := k.cdc.UnmarshalBinaryBare(bz, ba)
 	if err != nil {
 		return nil, err
 	}
-	pk, err := crypto.NewPublicKey(ba.PubKey)
-	if err != nil {
-		return nil, err
+	if ba.PubKey != "" {
+		pk, err = crypto.NewPublicKey(ba.PubKey)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return &types.BaseAccount{
 		Address: ba.Address,

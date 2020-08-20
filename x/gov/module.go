@@ -93,7 +93,7 @@ func (am AppModule) InitGenesis(ctx sdk.Ctx, data json.RawMessage) []abci.Valida
 	if data == nil {
 		genesisState = types.DefaultGenesisState()
 	} else {
-		types.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
+		types.LegacyModuleCdc.MustUnmarshalJSON(data, &genesisState)
 	}
 	return am.keeper.InitGenesis(ctx, genesisState)
 }

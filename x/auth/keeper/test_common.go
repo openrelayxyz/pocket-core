@@ -60,7 +60,7 @@ func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64)
 			},
 		},
 	)
-	_, proto := makeTestCodec()
+	amino, proto := makeTestCodec()
 	maccPerms := map[string][]string{
 		holder:       nil,
 		types.Minter: {types.Minter},
@@ -68,7 +68,7 @@ func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64)
 		multiPerm:    {types.Minter, types.Burner, types.Staking},
 		randomPerm:   {"random"},
 	}
-	keeper := NewKeeper(proto, keyAcc, sdk.NewSubspace(types.StoreKey), maccPerms)
+	keeper := NewKeeper(amino, proto, keyAcc, sdk.NewSubspace(types.StoreKey), maccPerms)
 	valTokens := sdk.TokensFromConsensusPower(initPower)
 	initialCoins := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, valTokens))
 	createTestAccs(ctx, int(nAccs), initialCoins, &keeper)

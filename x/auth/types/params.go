@@ -58,7 +58,7 @@ func DefaultParams() Params {
 	return Params{
 		MaxMemoCharacters: DefaultMaxMemoCharacters,
 		TxSigLimit:        DefaultTxSigLimit,
-		FeeMultiplier:     &DefaultFeeMultiplier,
+		FeeMultiplier:     DefaultFeeMultiplier,
 	}
 }
 

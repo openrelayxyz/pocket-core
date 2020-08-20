@@ -19,7 +19,7 @@ func (k Keeper) Subspace(s string) sdk.Subspace {
 		os.Exit(1)
 	}
 	space := sdk.NewSubspace(s)
-	space.SetCodec(k.cdc)
+	space.SetCodec(k.legacyCdc)
 	k.spaces[s] = space
 	return space
 }
@@ -35,7 +35,7 @@ func (k Keeper) AddSubspaces(subspaces ...sdk.Subspace) {
 			fmt.Println(fmt.Errorf("cannot use empty stirng for subspace"))
 			os.Exit(1)
 		}
-		space.SetCodec(k.cdc)
+		space.SetCodec(k.legacyCdc)
 		k.spaces[space.Name()] = space
 	}
 }

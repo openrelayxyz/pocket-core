@@ -39,7 +39,7 @@ message Params {
 
 	uint64 max_memo_characters = 1 [(gogoproto.jsontag) = "max_memo_characters"];
 	uint64 tx_sig_limit = 2 [(gogoproto.jsontag) = "tx_sig_limit"];
-	FeeMultipliers feeMultiplier = 3 [(gogoproto.jsontag) = "fee_multipliers"];
+	FeeMultipliers feeMultiplier = 3 [(gogoproto.nullable) = false, (gogoproto.jsontag) = "fee_multipliers"];
 }
 
 // Fee Multiplier derfines a key value multiplier for the fee of the

@@ -39,6 +39,7 @@ func NewPocketCoreApp(genState cfg.GenesisState, keybase keys.Keybase, tmClient 
 	pocketSubspace := sdk.NewSubspace(pocketTypes.DefaultParamspace)
 	// The AuthKeeper handles address -> account lookups
 	app.accountKeeper = auth.NewKeeper(
+		app.legacyAminoCodec,
 		app.protoCodec,
 		app.Keys[auth.StoreKey],
 		authSubspace,
@@ -46,6 +47,7 @@ func NewPocketCoreApp(genState cfg.GenesisState, keybase keys.Keybase, tmClient 
 	)
 	// The nodesKeeper keeper handles pocket core nodes
 	app.nodesKeeper = nodesKeeper.NewKeeper(
+		app.legacyAminoCodec,
 		app.protoCodec,
 		app.Keys[nodesTypes.StoreKey],
 		app.accountKeeper,
@@ -54,6 +56,7 @@ func NewPocketCoreApp(genState cfg.GenesisState, keybase keys.Keybase, tmClient 
 	)
 	// The apps keeper handles pocket core applications
 	app.appsKeeper = appsKeeper.NewKeeper(
+		app.legacyAminoCodec,
 		app.protoCodec,
 		app.Keys[appsTypes.StoreKey],
 		app.nodesKeeper,
@@ -64,6 +67,7 @@ func NewPocketCoreApp(genState cfg.GenesisState, keybase keys.Keybase, tmClient 
 	// The main pocket core
 	app.pocketKeeper = pocketKeeper.NewKeeper(
 		app.Keys[pocketTypes.StoreKey],
+		app.legacyAminoCodec,
 		app.protoCodec,
 		app.accountKeeper,
 		app.nodesKeeper,
@@ -73,6 +77,7 @@ func NewPocketCoreApp(genState cfg.GenesisState, keybase keys.Keybase, tmClient 
 	)
 	// The governance keeper
 	app.govKeeper = govKeeper.NewKeeper(
+		app.legacyAminoCodec,
 		app.protoCodec,
 		app.Keys[pocketTypes.StoreKey],
 		app.Tkeys[pocketTypes.StoreKey],

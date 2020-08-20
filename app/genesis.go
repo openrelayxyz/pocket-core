@@ -15454,7 +15454,7 @@ func newDefaultGenesisState() []byte {
 	// set address as application too
 	rawApps := defaultGenesis[appsTypes.ModuleName]
 	var appsGenesis appsTypes.GenesisState
-	types.ModuleCdc.MustUnmarshalJSON(rawApps, &appsGenesis)
+	types.LegacyModuleCdc.MustUnmarshalJSON(rawApps, &appsGenesis)
 	app := appsTypes.Application{
 		Address:                 cb.GetAddress(),
 		PublicKey:               cb.PublicKey,
@@ -15471,14 +15471,14 @@ func newDefaultGenesisState() []byte {
 	// set default governance in genesis
 	rawPocket := defaultGenesis[types.ModuleName]
 	var pocketGenesis types.GenesisState
-	types.ModuleCdc.MustUnmarshalJSON(rawPocket, &pocketGenesis)
+	types.LegacyModuleCdc.MustUnmarshalJSON(rawPocket, &pocketGenesis)
 	pocketGenesis.Params.SessionNodeCount = 1
 	res = aminoCodec.MustMarshalJSON(pocketGenesis)
 	defaultGenesis[types.ModuleName] = res
 	// setup pos genesis
 	rawPOS := defaultGenesis[nodesTypes.ModuleName]
 	var posGenesisState nodesTypes.GenesisState
-	types.ModuleCdc.MustUnmarshalJSON(rawPOS, &posGenesisState)
+	types.LegacyModuleCdc.MustUnmarshalJSON(rawPOS, &posGenesisState)
 	posGenesisState.Validators = append(posGenesisState.Validators,
 		nodesTypes.Validator{Address: sdk.Address(pubKey.Address()),
 			PublicKey:    pubKey,
@@ -15486,7 +15486,7 @@ func newDefaultGenesisState() []byte {
 			Chains:       []string{PlaceholderHash},
 			ServiceURL:   PlaceholderServiceURL,
 			StakedTokens: sdk.NewInt(10000000)})
-	res = types.ModuleCdc.MustMarshalJSON(posGenesisState)
+	res = types.LegacyModuleCdc.MustMarshalJSON(posGenesisState)
 	defaultGenesis[nodesTypes.ModuleName] = res
 	// set default governance in genesis
 	var govGenesisState govTypes.GenesisState
@@ -15500,8 +15500,8 @@ func newDefaultGenesisState() []byte {
 	res4 := aminoCodec.MustMarshalJSON(govGenesisState)
 	defaultGenesis[govTypes.ModuleName] = res4
 	// end genesis setup
-	j, _ := types.ModuleCdc.MarshalJSON(defaultGenesis)
-	j, _ = types.ModuleCdc.MarshalJSON(tmType.GenesisDoc{
+	j, _ := types.LegacyModuleCdc.MarshalJSONIndent(defaultGenesis, "", "  ")
+	j, _ = types.LegacyModuleCdc.MarshalJSONIndent(tmType.GenesisDoc{
 		GenesisTime: time.Now(),
 		ChainID:     "pocket-test",
 		ConsensusParams: &tmType.ConsensusParams{
@@ -15520,7 +15520,7 @@ func newDefaultGenesisState() []byte {
 		Validators: nil,
 		AppHash:    nil,
 		AppState:   j,
-	})
+	},"", "  ")
 	return j
 }
 

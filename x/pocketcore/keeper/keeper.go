@@ -18,10 +18,11 @@ type Keeper struct {
 	Paramstore        sdk.Subspace
 	storeKey          sdk.StoreKey      // Unexposed key to access store from sdk.Context
 	cdc               *codec.ProtoCodec // The wire codec for binary encoding/decoding.
+	legacyCdc         *codec.LegacyAmino
 }
 
 // NewKeeper creates new instances of the pocketcore module Keeper
-func NewKeeper(storeKey sdk.StoreKey, cdc *codec.ProtoCodec, authKeeper types.AuthKeeper, posKeeper types.PosKeeper, appKeeper types.AppsKeeper, hostedChains *types.HostedBlockchains, paramstore sdk.Subspace) Keeper {
+func NewKeeper(storeKey sdk.StoreKey, amino *codec.LegacyAmino, cdc *codec.ProtoCodec, authKeeper types.AuthKeeper, posKeeper types.PosKeeper, appKeeper types.AppsKeeper, hostedChains *types.HostedBlockchains, paramstore sdk.Subspace) Keeper {
 	return Keeper{
 		authKeeper:        authKeeper,
 		posKeeper:         posKeeper,
@@ -30,6 +31,7 @@ func NewKeeper(storeKey sdk.StoreKey, cdc *codec.ProtoCodec, authKeeper types.Au
 		Paramstore:        paramstore.WithKeyTable(ParamKeyTable()),
 		storeKey:          storeKey,
 		cdc:               cdc,
+		legacyCdc:         amino,
 	}
 }
 

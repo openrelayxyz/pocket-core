@@ -96,7 +96,7 @@ func (am AppModule) InitGenesis(ctx sdk.Ctx, data json.RawMessage) []abci.Valida
 	if data == nil {
 		genesisState = types.DefaultGenesisState()
 	} else {
-		types.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
+		types.LegacyModuleCdc.MustUnmarshalJSON(data, &genesisState)
 	}
 	InitGenesis(ctx, am.keeper, am.keeper.AccountsKeeper, am.keeper.POSKeeper, genesisState)
 	return []abci.ValidatorUpdate{}

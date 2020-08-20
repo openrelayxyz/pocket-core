@@ -15,12 +15,9 @@ func (k Keeper) GetSupply(ctx sdk.Ctx) (supply exported.SupplyI) {
 		ctx.Logger().Error(fmt.Sprintf("stored supply should not have been nil, at height: %d", ctx.BlockHeight()))
 		return
 	}
-	s, ok := supply.(*types.Supply)
-	if !ok {
-		return nil
-	}
-	k.cdc.MustUnmarshalBinaryLengthPrefixed(b, s)
-	return
+	var s types.Supply
+	k.cdc.MustUnmarshalBinaryLengthPrefixed(b, &s)
+	return &s
 }
 
 // SetSupply sets the Supply to store

@@ -69,8 +69,7 @@ func UnmarshalValidator(cdc *codec.ProtoCodec, valBytes []byte) (v Validator, er
 }
 
 func UnmarshalProtoValidator(cdc *codec.ProtoCodec, valBytes []byte) (v ValidatorProto, err error) {
-	var validator ValidatorProto
-	err = cdc.UnmarshalBinaryLengthPrefixed(valBytes, &validator)
+	err = cdc.UnmarshalBinaryLengthPrefixed(valBytes, &v)
 	if err != nil {
 		return
 	}
@@ -85,7 +84,7 @@ func (v Validators) JSON() (out []byte, err error) {
 
 // MarshalJSON marshals the validator to JSON using Hex
 func (v Validator) MarshalJSON() ([]byte, error) {
-	return ModuleCdc.MarshalJSON(ValidatorProto{
+	return LegacyModuleCdc.MarshalJSON(ValidatorProto{
 		Address:                 v.Address,
 		PublicKey:               v.PublicKey.RawString(),
 		Jailed:                  v.Jailed,
@@ -100,7 +99,7 @@ func (v Validator) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON unmarshals the validator from JSON using Hex
 func (v *Validator) UnmarshalJSON(data []byte) error {
 	bv := &ValidatorProto{}
-	if err := ModuleCdc.UnmarshalJSON(data, bv); err != nil {
+	if err := LegacyModuleCdc.UnmarshalJSON(data, bv); err != nil {
 		return err
 	}
 	publicKey, err := crypto.NewPublicKey(bv.PublicKey)

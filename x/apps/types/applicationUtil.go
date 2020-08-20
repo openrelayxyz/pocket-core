@@ -69,7 +69,7 @@ func (a Applications) JSON() (out []byte, err error) {
 
 // MarshalJSON marshals the application to JSON using raw Hex for the public key
 func (a Application) MarshalJSON() ([]byte, error) {
-	return ModuleCdc.MarshalJSON(hexApplication{
+	return LegacyModuleCdc.MarshalJSON(hexApplication{
 		Address:                 a.Address,
 		PublicKey:               a.PublicKey.RawString(),
 		Jailed:                  a.Jailed,
@@ -84,7 +84,7 @@ func (a Application) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON unmarshals the application from JSON using raw hex for the public key
 func (a *Application) UnmarshalJSON(data []byte) error {
 	bv := &hexApplication{}
-	if err := ModuleCdc.UnmarshalJSON(data, bv); err != nil {
+	if err := LegacyModuleCdc.UnmarshalJSON(data, bv); err != nil {
 		return err
 	}
 	consPubKey, err := crypto.NewPublicKey(bv.PublicKey)

@@ -16,6 +16,7 @@ var _ types.ValidatorSet = Keeper{}
 // Keeper of the staking store
 type Keeper struct {
 	storeKey      sdk.StoreKey
+	legacyCdc     *codec.LegacyAmino
 	cdc           *codec.ProtoCodec
 	AccountKeeper types.AuthKeeper
 	PocketKeeper  types.PocketKeeper // todo combine all modules
@@ -25,13 +26,14 @@ type Keeper struct {
 }
 
 // NewKeeper creates a new staking Keeper instance
-func NewKeeper(cdc *codec.ProtoCodec, key sdk.StoreKey, accountKeeper types.AuthKeeper,
+func NewKeeper(amino *codec.LegacyAmino, cdc *codec.ProtoCodec, key sdk.StoreKey, accountKeeper types.AuthKeeper,
 	paramstore sdk.Subspace, codespace sdk.CodespaceType) Keeper {
 	// ensure staked module accounts are set
 	if addr := accountKeeper.GetModuleAddress(types.StakedPoolName); addr == nil {
 		log2.Fatal(fmt.Errorf("%s module account has not been set", types.StakedPoolName))
 	}
 	return Keeper{
+		legacyCdc:     amino,
 		storeKey:      key,
 		cdc:           cdc,
 		AccountKeeper: accountKeeper,

@@ -23,7 +23,7 @@ var (
 // Transient store persists for a block, so we use it for
 // recording whether the parameter has been changed or not
 type Subspace struct {
-	cdc   *codec.ProtoCodec
+	cdc   *codec.LegacyAmino
 	key   StoreKey // []byte -> []byte, stores parameter
 	tkey  StoreKey // []byte -> bool, stores parameter change
 	name  []byte
@@ -33,7 +33,7 @@ type Subspace struct {
 // NewSubspace constructs a store with namestore
 func NewSubspace(name string) (res Subspace) {
 	res = Subspace{
-		cdc:  cdc,
+		cdc:  legacyCdc,
 		key:  ParamsKey,
 		tkey: ParamsTKey,
 		name: []byte(name),
@@ -44,7 +44,7 @@ func NewSubspace(name string) (res Subspace) {
 	return
 }
 
-func (s *Subspace) SetCodec(cdc *codec.ProtoCodec) {
+func (s *Subspace) SetCodec(cdc *codec.LegacyAmino) {
 	s.cdc = cdc
 }
 

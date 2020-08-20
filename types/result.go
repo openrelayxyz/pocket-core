@@ -14,6 +14,7 @@ import (
 )
 
 var cdc = codec.NewProtoCodec(types.NewInterfaceRegistry())
+var legacyCdc = codec.NewLegacyAminoCodec()
 
 // Result is the union of ResponseFormat and ResponseCheckTx.
 //type Result struct {
