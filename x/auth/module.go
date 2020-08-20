@@ -37,7 +37,7 @@ func (AppModuleBasic) DefaultGenesis() json.RawMessage {
 // ValidateGenesis module validate genesis
 func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 	var data types.GenesisState
-	err := types.ModuleCdc.UnmarshalJSON(bz, &data)
+	err := types.LegacyModuleCdc.UnmarshalJSON(bz, &data)
 	if err != nil {
 		return err
 	}
@@ -89,7 +89,7 @@ func (am AppModule) InitGenesis(ctx sdk.Ctx, data json.RawMessage) []abci.Valida
 	if data == nil {
 		genesisState = types.DefaultGenesisState()
 	} else {
-		ModuleCdc.MustUnmarshalJSON(data, &genesisState)
+		types.LegacyModuleCdc.MustUnmarshalJSON(data, &genesisState)
 	}
 	InitGenesis(ctx, am.accountKeeper, genesisState)
 	return []abci.ValidatorUpdate{}
@@ -98,7 +98,7 @@ func (am AppModule) InitGenesis(ctx sdk.Ctx, data json.RawMessage) []abci.Valida
 // ExportGenesis module export genesis
 func (am AppModule) ExportGenesis(ctx sdk.Ctx) json.RawMessage {
 	gs := ExportGenesis(ctx, am.accountKeeper)
-	return types.ModuleCdc.MustMarshalJSON(gs)
+	return types.LegacyModuleCdc.MustMarshalJSON(gs)
 }
 
 // BeginBlock module begin-block
