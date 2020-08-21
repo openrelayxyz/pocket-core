@@ -14,15 +14,15 @@ func TestAppendEvents(t *testing.T) {
 	b := Events{e2}
 	c := a.AppendEvents(b)
 	require.Equal(t, c, Events{e1, e2})
-	require.Equal(t, c, Events{e1}.AppendEvent(NewEvent("transfer", NewAttribute("sender", "bar"))))
+	require.Equal(t, c, Events{e1}.AppendEvent(Event(NewEvent("transfer", NewAttribute("sender", "bar")))))
 	require.Equal(t, c, Events{e1}.AppendEvents(Events{e2}))
 }
 
 func TestAppendAttributes(t *testing.T) {
-	e := NewEvent("transfer", NewAttribute("sender", "foo"))
+	e := Event(NewEvent("transfer", NewAttribute("sender", "foo")))
 	e = e.AppendAttributes(NewAttribute("recipient", "bar"))
 	require.Len(t, e.Attributes, 2)
-	require.Equal(t, e, NewEvent("transfer", NewAttribute("sender", "foo"), NewAttribute("recipient", "bar")))
+	require.Equal(t, e, Event(NewEvent("transfer", NewAttribute("sender", "foo"), NewAttribute("recipient", "bar"))))
 }
 
 func TestEmptyEvents(t *testing.T) {
@@ -43,7 +43,7 @@ func TestToABCIEvents(t *testing.T) {
 
 func TestEventManager(t *testing.T) {
 	em := NewEventManager()
-	event := NewEvent("reward", NewAttribute("x", "y"))
+	event := Event(NewEvent("reward", NewAttribute("x", "y")))
 	events := Events{NewEvent("transfer", NewAttribute("sender", "foo"))}
 
 	em.EmitEvents(events)
