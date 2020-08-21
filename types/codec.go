@@ -6,6 +6,6 @@ import "github.com/pokt-network/pocket-core/codec"
 func RegisterCodec(amino *codec.LegacyAmino, proto *codec.ProtoCodec) {
 	amino.RegisterInterface((*Msg)(nil), nil)
 	amino.RegisterInterface((*Tx)(nil), nil)
-	cdc.Register("types/msg", (*Msg)(nil))
-	cdc.Register("types/tx", (*Tx)(nil))
+	proto.Register("types/msg", (*Msg)(nil))
+	proto.Register("types/tx", (*Tx)(nil))
 }
