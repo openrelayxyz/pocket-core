@@ -42,8 +42,8 @@ func (msg MsgChangeParam) GetSigner() sdk.Address {
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgChangeParam) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
+	return bz
 }
 
 // ValidateBasic quick validity check
@@ -88,8 +88,8 @@ func (msg MsgDAOTransfer) GetSigner() sdk.Address {
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgDAOTransfer) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
+	return bz
 }
 
 // ValidateBasic quick validity check
@@ -136,8 +136,8 @@ func (msg MsgUpgrade) GetSigner() sdk.Address {
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgUpgrade) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
+	return bz
 }
 
 // ValidateBasic quick validity check

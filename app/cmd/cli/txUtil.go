@@ -269,7 +269,7 @@ func ChangeParam(fromAddr, paramACLKey string, paramValue json.RawMessage, passp
 		return nil, err
 	}
 
-	valueBytes, err := app.CodecP().MarshalJSON(paramValue)
+	valueBytes, err := json.Marshal(paramValue)
 	if err != nil {
 		return nil, err
 

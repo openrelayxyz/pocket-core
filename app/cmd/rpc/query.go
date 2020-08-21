@@ -572,7 +572,7 @@ func ACL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, err := app.CodecP().MarshalJSON(res)
+	j, err := json.Marshal(res)
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 		return
@@ -591,7 +591,7 @@ func AllParams(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, err := app.CodecP().MarshalJSON(res)
+	j, err := json.Marshal(res)
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 		return
@@ -609,7 +609,7 @@ func Param(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, err := app.CodecP().MarshalJSON(res)
+	j, err := json.Marshal(res)
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 		return
