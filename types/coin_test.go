@@ -646,6 +646,7 @@ func TestFindDup(t *testing.T) {
 
 func TestMarshalJSONCoins(t *testing.T) {
 	cdc := codec.NewLegacyAminoCodec()
+	// Coins is no longer marshalled through protobuff, its converted to bytes with MarshalJSON and processed on StdSignDoc
 	protoCodec := codec.NewProtoCodec(types.NewInterfaceRegistry())
 	RegisterCodec(cdc, protoCodec)
 
@@ -667,18 +668,6 @@ func TestMarshalJSONCoins(t *testing.T) {
 
 			var newCoins Coins
 			require.NoError(t, cdc.UnmarshalJSON(bz, &newCoins))
-
-			if tc.input.Empty() {
-				require.Nil(t, newCoins)
-			} else {
-				require.Equal(t, tc.input, newCoins)
-			}
-			bz, err = protoCodec.MarshalJSON(tc.input)
-			require.NoError(t, err)
-			require.Equal(t, tc.strOutput, string(bz))
-
-			newCoins = Coins{}
-			require.NoError(t, protoCodec.UnmarshalJSON(bz, &newCoins))
 
 			if tc.input.Empty() {
 				require.Nil(t, newCoins)
