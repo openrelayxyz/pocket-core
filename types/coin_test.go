@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/pokt-network/pocket-core/codec"
+	types "github.com/pokt-network/pocket-core/codec/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -645,7 +646,8 @@ func TestFindDup(t *testing.T) {
 
 func TestMarshalJSONCoins(t *testing.T) {
 	cdc := codec.NewLegacyAminoCodec()
-	RegisterCodec(cdc)
+	protoCodec := codec.NewProtoCodec(types.NewInterfaceRegistry())
+	RegisterCodec(cdc, protoCodec)
 
 	testCases := []struct {
 		name      string
@@ -665,6 +667,18 @@ func TestMarshalJSONCoins(t *testing.T) {
 
 			var newCoins Coins
 			require.NoError(t, cdc.UnmarshalJSON(bz, &newCoins))
+
+			if tc.input.Empty() {
+				require.Nil(t, newCoins)
+			} else {
+				require.Equal(t, tc.input, newCoins)
+			}
+			bz, err = protoCodec.MarshalJSON(tc.input)
+			require.NoError(t, err)
+			require.Equal(t, tc.strOutput, string(bz))
+
+			newCoins = Coins{}
+			require.NoError(t, protoCodec.UnmarshalJSON(bz, &newCoins))
 
 			if tc.input.Empty() {
 				require.Nil(t, newCoins)
