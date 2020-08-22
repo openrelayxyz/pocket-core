@@ -359,7 +359,8 @@ func (i Int) Marshal() ([]byte, error) {
 	if i.i == nil {
 		i.i = new(big.Int)
 	}
-	return i.i.MarshalText()
+	t, err := i.i.MarshalText()
+	return t, err
 }
 
 // MarshalTo implements the gogo proto custom type interface.
