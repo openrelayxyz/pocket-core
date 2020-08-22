@@ -3,31 +3,30 @@ package types
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/pokt-network/pocket-core/codec/types"
-	"log"
-	"os"
-
 	"github.com/pokt-network/pocket-core/codec"
+	"github.com/pokt-network/pocket-core/codec/types"
 	posCrypto "github.com/pokt-network/pocket-core/crypto"
 	sdk "github.com/pokt-network/pocket-core/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/multisig"
 	"gopkg.in/yaml.v2"
+	"log"
+	"os"
 )
 
 var (
 	_ sdk.Tx = (*StdTx)(nil)
 )
 
-// StdTx is a standard way to wrap a Msg with Fee and Sigs.
-// NOTE: the first signature is the fee payer (Sigs must not be nil).
-//type StdTx struct {
-//	Msg       sdk.Msg      `json:"msg" yaml:"msg"`
-//	Fee       sdk.Coins    `json:"fee" yaml:"fee"`
-//	Signature StdSignature `json:"signature" yaml:"signature"`
-//	Memo      string       `json:"memo" yaml:"memo"`
-//	Entropy   int64        `json:"entropy" yaml:"entropy"`
-//}
+//StdTx is a standard way to wrap a Msg with Fee and Sigs.
+//NOTE: the first signature is the fee payer (Sigs must not be nil).
+type stdTx struct {
+	Msg       sdk.Msg      `json:"msg" yaml:"msg"`
+	Fee       sdk.Coins    `json:"fee" yaml:"fee"`
+	Signature StdSignature `json:"signature" yaml:"signature"`
+	Memo      string       `json:"memo" yaml:"memo"`
+	Entropy   int64        `json:"entropy" yaml:"entropy"`
+}
 
 func NewStdTx(msgs sdk.Msg, fee sdk.Coins, sigs StdSignature, memo string, entropy int64) StdTx {
 	any, err := types.NewAnyWithValue(msgs)
@@ -63,6 +62,18 @@ func (tx StdTx) ValidateBasic() sdk.Error {
 		return sdk.ErrUnauthorized("empty signature")
 	}
 	return nil
+}
+
+func (tx *StdTx) MarshalJSON() ([]byte, error) {
+	res := stdTx{
+		Msg:       tx.GetMsg(),
+		Fee:       tx.Fee,
+		Signature: tx.GetSignature(),
+		Memo:      tx.GetMemo(),
+		Entropy:   tx.Entropy,
+	}
+
+	return json.Marshal(&res)
 }
 
 // CountSubKeys counts the total number of keys for a multi-sig public key.
