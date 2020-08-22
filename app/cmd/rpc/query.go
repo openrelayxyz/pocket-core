@@ -126,7 +126,7 @@ func ResultTxSearchToRPC(res *core_types.ResultTxSearch) RPCResultTxSearch {
 		return RPCResultTxSearch{}
 	}
 	rpcTxSearch := RPCResultTxSearch{
-		Txs:        make([]*RPCResultTx, res.TotalCount),
+		Txs:        make([]*RPCResultTx, 0),
 		TotalCount: res.TotalCount,
 	}
 	for _, result := range res.Txs {
