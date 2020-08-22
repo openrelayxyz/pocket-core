@@ -38,8 +38,8 @@ func (msg MsgAppStake) GetSigner() sdk.Address {
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgAppStake) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
+	return bz
 }
 
 // ValidateBasic quick validity check for staking an application
@@ -90,8 +90,8 @@ func (msg MsgBeginAppUnstake) GetSigner() sdk.Address {
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgBeginAppUnstake) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
+	return bz
 }
 
 // ValidateBasic quick validity check for staking an application
@@ -138,8 +138,8 @@ func (msg MsgAppUnjail) GetSigner() sdk.Address {
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgAppUnjail) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
+	return bz
 }
 
 // ValidateBasic quick validity check for staking an application
