@@ -94,8 +94,9 @@ func Tx(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 	}
-	rpcResponse := ResultTxToRPC(res)
-	s, er := json.MarshalIndent(rpcResponse, "", "  ")
+	//commenting this out, still problems with .Any proto unmarshal
+	//rpcResponse := ResultTxToRPC(res)
+	s, er := json.MarshalIndent(res, "", "  ")
 	if er != nil {
 		WriteErrorResponse(w, 400, er.Error())
 		return
