@@ -74,7 +74,7 @@ func NewABCIMessageLog(i uint32, success bool, log string, events Events) ABCIMe
 // String implements the fmt.Stringer interface for the ABCIMessageLogs type.
 func (logs ABCIMessageLogs) String() (str string) {
 	if logs != nil {
-		raw, err := cdc.MarshalJSON(logs)
+		raw, err := json.Marshal(logs)
 		if err == nil {
 			str = string(raw)
 		}
