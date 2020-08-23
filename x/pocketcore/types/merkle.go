@@ -103,7 +103,7 @@ func (mp MerkleProof) Validate(root HashRange, leaf Proof, totalRelays int64) (i
 			mp.Target.Range.Lower = sibling.Range.Lower
 			// **upper stays the same**
 			// generate the parent merkleHash and store it where the child used to be
-			mp.Target.Hash = parentHash(sibling.Hash, mp.Target.Hash, *mp.Target.Range)
+			mp.Target.Hash = parentHash(sibling.Hash, mp.Target.Hash, mp.Target.Range)
 		} else { // even index
 			// target upper should be LTE sibling lower
 			if mp.Target.Range.Upper != sibling.Range.Lower {
@@ -113,7 +113,7 @@ func (mp MerkleProof) Validate(root HashRange, leaf Proof, totalRelays int64) (i
 			mp.Target.Range.Upper = sibling.Range.Upper
 			// **lower stays the same**
 			// generate the parent merkleHash and store it where the child used to be
-			mp.Target.Hash = parentHash(mp.Target.Hash, sibling.Hash, *mp.Target.Range)
+			mp.Target.Hash = parentHash(mp.Target.Hash, sibling.Hash, mp.Target.Range)
 		}
 		// half the indices as we are going up one level
 		mp.TargetIndex /= 2
@@ -223,7 +223,7 @@ func levelUp(data []HashRange) (nextLevelData []HashRange, atRoot bool) {
 		// the left child lower is new lower
 		data[i/2].Range.Lower = data[i].Range.Lower
 		// calculate the parent merkleHash
-		data[i/2].Hash = parentHash(d.Hash, data[i+1].Hash, *data[i/2].Range)
+		data[i/2].Hash = parentHash(d.Hash, data[i+1].Hash, data[i/2].Range)
 	}
 	// check to see if at root
 	dataLen := len(data) / 2
@@ -270,7 +270,7 @@ func sortAndStructure(proofs []Proof) (d []HashRange, sortedProofs []Proof) {
 	for i := numberOfProofs; i < int(properLength); i++ {
 		hashRanges[i] = HashRange{
 			Hash:  merkleHash([]byte(strconv.Itoa(i))),
-			Range: &Range{Lower: lower, Upper: lower + 1},
+			Range: Range{Lower: lower, Upper: lower + 1},
 		}
 		lower = hashRanges[i].Range.Upper
 	}
@@ -309,7 +309,7 @@ func structureProofs(proofs []Proof) (d []HashRange, sortedProofs []Proof) {
 	for i := numberOfProofs; i < int(properLength); i++ {
 		hashRanges[i] = HashRange{
 			Hash:  merkleHash([]byte(strconv.Itoa(i))),
-			Range: &Range{Lower: lower, Upper: lower + 1},
+			Range: Range{Lower: lower, Upper: lower + 1},
 		}
 		lower = hashRanges[i].Range.Upper
 	}

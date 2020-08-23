@@ -115,5 +115,5 @@ message Range {
 
 message HashRange {
 	bytes hash = 1 [(gogoproto.jsontag) = "hash"];
-	Range range = 2 [(gogoproto.jsontag) = "range"];
+	Range range = 2 [(gogoproto.jsontag) = "range", (gogoproto.nullable) = false];
 }

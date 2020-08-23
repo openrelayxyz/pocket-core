@@ -216,7 +216,13 @@ func (sn SessionNodes) ContainsAddress(addr sdk.Address) bool {
 
 func (sn SessionNodes) ToSessionNodesEncodable() (res SessionNodesEncodable) {
 	for _, vp := range sn {
-		res = append(res, vp.(types.Validator).ToProto())
+		//TODO check as this should not happen
+		v, ok := vp.(types.Validator)
+		if ok {
+			res = append(res, v.ToProto())
+		} else {
+			res = append(res, vp.(types.ValidatorProto))
+		}
 	}
 	return
 }

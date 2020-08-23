@@ -32,7 +32,7 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 type ValidatorProto struct {
 	Address                 github_com_pokt_network_pocket_core_types.Address     `protobuf:"bytes,1,opt,name=Address,proto3,casttype=github.com/pokt-network/pocket-core/types.Address" json:"address" yaml:"address"`
 	PublicKey               string                                                `protobuf:"bytes,2,opt,name=PublicKey,proto3" json:"public_key" yaml:"public_key"`
-	Jailed                  bool                                                  `protobuf:"varint,3,opt,name=jailed,proto3" json:"jailed,omitempty"`
+	Jailed                  bool                                                  `protobuf:"varint,3,opt,name=jailed,proto3" json:"jailed"`
 	Status                  github_com_pokt_network_pocket_core_types.StakeStatus `protobuf:"varint,4,opt,name=status,proto3,casttype=github.com/pokt-network/pocket-core/types.StakeStatus" json:"status,omitempty"`
 	Chains                  []string                                              `protobuf:"bytes,5,rep,name=Chains,proto3" json:"chains"`
 	ServiceURL              string                                                `protobuf:"bytes,6,opt,name=ServiceURL,proto3" json:"service_url"`

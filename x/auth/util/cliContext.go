@@ -1,6 +1,7 @@
 package util
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/pokt-network/pocket-core/crypto"
@@ -231,7 +232,7 @@ func (ctx CLIContext) GetAccount(addr sdk.Address) (exported.Account, error) {
 // height of the query with the account. An error is returned if the query
 // or decoding fails.
 func (ctx CLIContext) GetAccountWithHeight(addr sdk.Address) (exported.Account, int64, error) {
-	bs, err := auth.ModuleCdc.MarshalJSON(types.NewQueryAccountParams(addr))
+	bs, err := json.Marshal(types.NewQueryAccountParams(addr))
 	if err != nil {
 		return nil, 0, err
 	}
@@ -240,7 +241,7 @@ func (ctx CLIContext) GetAccountWithHeight(addr sdk.Address) (exported.Account, 
 		return nil, height, err
 	}
 	var account exported.Account
-	if err := auth.ModuleCdc.UnmarshalJSON(res, &account); err != nil {
+	if err := types.LegacyModuleCdc.UnmarshalJSON(res, &account); err != nil {
 		return nil, height, err
 	}
 	return account, height, nil
