@@ -22,12 +22,14 @@ func ElemKey(index uint64) []byte {
 // List defines an integer indexable mapper
 // It panics when the element type cannot be (un/)marshalled by the codec
 type List struct {
-	cdc   *codec.Codec
+	cdc   *codec.LegacyAmino
 	store types.KVStore
 }
 
+// TODO: list is not really being used, should be completely removed from source
+
 // NewList constructs new List
-func NewList(cdc *codec.Codec, store types.KVStore) List {
+func NewList(cdc *codec.LegacyAmino, store types.KVStore) List {
 	return List{
 		cdc:   cdc,
 		store: store,
