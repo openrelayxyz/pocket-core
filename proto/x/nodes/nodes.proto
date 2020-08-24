@@ -17,7 +17,7 @@ message ValidatorProto {
 		(gogoproto.jsontag) = "address"
 	];
 	string PublicKey = 2 [(gogoproto.moretags) = "yaml:\"public_key\"", (gogoproto.jsontag) = "public_key"];
-	bool   jailed           = 3;
+	bool   jailed    = 3 [ (gogoproto.jsontag) = "jailed"];
 	int32  status = 4 [(gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.StakeStatus"];
 	repeated string Chains = 5 [ (gogoproto.jsontag) = "chains"];
 	string ServiceURL = 6 [(gogoproto.jsontag)="service_url"];
