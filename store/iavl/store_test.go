@@ -2,8 +2,9 @@ package iavl
 
 import (
 	"fmt"
-	rand2 "github.com/tendermint/tendermint/libs/rand"
 	"testing"
+
+	rand2 "github.com/tendermint/tendermint/libs/rand"
 
 	"github.com/stretchr/testify/require"
 
@@ -31,7 +32,8 @@ var (
 
 // make a tree with data from above and save it
 func newAlohaTree(t *testing.T, db dbm.DB) (*iavl.MutableTree, types.CommitID) {
-	tree, _ := iavl.NewMutableTree(db, cacheSize)
+	tree, err := iavl.NewMutableTree(db, cacheSize)
+	require.NoError(t, err)
 	for k, v := range treeData {
 		tree.Set([]byte(k), []byte(v))
 	}
@@ -52,8 +54,8 @@ func TestGetImmutable(t *testing.T) {
 
 	require.True(t, tree.Set([]byte("hello"), []byte("adios")))
 	hash, ver, err := tree.SaveVersion()
+	require.NoError(t, err)
 	cID = types.CommitID{Version: ver, Hash: hash}
-	require.Nil(t, err)
 
 	_, err = store.GetImmutable(cID.Version + 1)
 	require.Error(t, err)
@@ -107,19 +109,22 @@ func TestIAVLStoreGetSetHasDelete(t *testing.T) {
 
 	key := "hello"
 
-	exists, _ := iavlStore.Has([]byte(key))
+	exists, err := iavlStore.Has([]byte(key))
+	require.NoError(t, err)
 	require.True(t, exists)
 
 	value, _ := iavlStore.Get([]byte(key))
 	require.EqualValues(t, value, treeData[key])
 
 	value2 := "notgoodbye"
-	_ = iavlStore.Set([]byte(key), []byte(value2))
+	err = iavlStore.Set([]byte(key), []byte(value2))
+	require.NoError(t, err)
 
 	value, _ = iavlStore.Get([]byte(key))
 	require.EqualValues(t, value, value2)
 
-	_ = iavlStore.Delete([]byte(key))
+	err = iavlStore.Delete([]byte(key))
+	require.NoError(t, err)
 
 	exists, _ = iavlStore.Has([]byte(key))
 	require.False(t, exists)
@@ -160,7 +165,8 @@ func TestIAVLIterator(t *testing.T) {
 	}
 	require.Equal(t, len(expected), i)
 
-	iter, _ = iavlStore.Iterator(nil, []byte("golang"))
+	iter, err := iavlStore.Iterator(nil, []byte("golang"))
+	require.NoError(t, err)
 	expected = []string{"aloha"}
 	for i = 0; iter.Valid(); iter.Next() {
 		expectedKey := expected[i]
@@ -171,7 +177,8 @@ func TestIAVLIterator(t *testing.T) {
 	}
 	require.Equal(t, len(expected), i)
 
-	iter, _ = iavlStore.Iterator(nil, []byte("shalom"))
+	iter, err = iavlStore.Iterator(nil, []byte("shalom"))
+	require.NoError(t, err)
 	expected = []string{"aloha", "hello"}
 	for i = 0; iter.Valid(); iter.Next() {
 		expectedKey := expected[i]
@@ -182,7 +189,8 @@ func TestIAVLIterator(t *testing.T) {
 	}
 	require.Equal(t, len(expected), i)
 
-	iter, _ = iavlStore.Iterator(nil, nil)
+	iter, err = iavlStore.Iterator(nil, nil)
+	require.NoError(t, err)
 	expected = []string{"aloha", "hello"}
 	for i = 0; iter.Valid(); iter.Next() {
 		expectedKey := expected[i]
@@ -193,7 +201,8 @@ func TestIAVLIterator(t *testing.T) {
 	}
 	require.Equal(t, len(expected), i)
 
-	iter, _ = iavlStore.Iterator([]byte("golang"), nil)
+	iter, err = iavlStore.Iterator([]byte("golang"), nil)
+	require.NoError(t, err)
 	expected = []string{"hello"}
 	for i = 0; iter.Valid(); iter.Next() {
 		expectedKey := expected[i]
@@ -207,17 +216,24 @@ func TestIAVLIterator(t *testing.T) {
 
 func TestIAVLReverseIterator(t *testing.T) {
 	db := dbm.NewMemDB()
-	tree, _ := iavl.NewMutableTree(db, cacheSize)
+	tree, err := iavl.NewMutableTree(db, cacheSize)
+	require.NoError(t, err)
 	iavlStore := UnsafeNewStore(tree, numRecent, storeEvery)
 
-	_ = iavlStore.Set([]byte{0x00}, []byte("0"))
-	_ = iavlStore.Set([]byte{0x00, 0x00}, []byte("0 0"))
-	_ = iavlStore.Set([]byte{0x00, 0x01}, []byte("0 1"))
-	_ = iavlStore.Set([]byte{0x00, 0x02}, []byte("0 2"))
-	_ = iavlStore.Set([]byte{0x01}, []byte("1"))
+	err = iavlStore.Set([]byte{0x00}, []byte("0"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte{0x00, 0x00}, []byte("0 0"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte{0x00, 0x01}, []byte("0 1"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte{0x00, 0x02}, []byte("0 2"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte{0x01}, []byte("1"))
+	require.NoError(t, err)
 
 	var testReverseIterator = func(t *testing.T, start []byte, end []byte, expected []string) {
-		iter, _ := iavlStore.ReverseIterator(start, end)
+		iter, err := iavlStore.ReverseIterator(start, end)
+		require.NoError(t, err)
 		var i int
 		for i = 0; iter.Valid(); iter.Next() {
 			expectedValue := expected[i]
@@ -238,18 +254,28 @@ func TestIAVLReverseIterator(t *testing.T) {
 
 func TestIAVLPrefixIterator(t *testing.T) {
 	db := dbm.NewMemDB()
-	tree, _ := iavl.NewMutableTree(db, cacheSize)
+	tree, err := iavl.NewMutableTree(db, cacheSize)
+	require.NoError(t, err)
 	iavlStore := UnsafeNewStore(tree, numRecent, storeEvery)
 
-	_ = iavlStore.Set([]byte("test1"), []byte("test1"))
-	_ = iavlStore.Set([]byte("test2"), []byte("test2"))
-	_ = iavlStore.Set([]byte("test3"), []byte("test3"))
-	_ = iavlStore.Set([]byte{byte(55), byte(255), byte(255), byte(0)}, []byte("test4"))
-	_ = iavlStore.Set([]byte{byte(55), byte(255), byte(255), byte(1)}, []byte("test4"))
-	_ = iavlStore.Set([]byte{byte(55), byte(255), byte(255), byte(255)}, []byte("test4"))
-	_ = iavlStore.Set([]byte{byte(255), byte(255), byte(0)}, []byte("test4"))
-	_ = iavlStore.Set([]byte{byte(255), byte(255), byte(1)}, []byte("test4"))
-	_ = iavlStore.Set([]byte{byte(255), byte(255), byte(255)}, []byte("test4"))
+	err = iavlStore.Set([]byte("test1"), []byte("test1"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte("test2"), []byte("test2"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte("test3"), []byte("test3"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte{byte(55), byte(255), byte(255), byte(0)}, []byte("test4"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte{byte(55), byte(255), byte(255), byte(1)}, []byte("test4"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte{byte(55), byte(255), byte(255), byte(255)}, []byte("test4"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte{byte(255), byte(255), byte(0)}, []byte("test4"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte{byte(255), byte(255), byte(1)}, []byte("test4"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte{byte(255), byte(255), byte(255)}, []byte("test4"))
+	require.NoError(t, err)
 
 	var i int
 
@@ -265,7 +291,8 @@ func TestIAVLPrefixIterator(t *testing.T) {
 	iter.Close()
 	require.Equal(t, len(expected), i)
 
-	iter, _ = types.KVStorePrefixIterator(iavlStore, []byte{byte(55), byte(255), byte(255)})
+	iter, err = types.KVStorePrefixIterator(iavlStore, []byte{byte(55), byte(255), byte(255)})
+	require.NoError(t, err)
 	expected2 := [][]byte{
 		{byte(55), byte(255), byte(255), byte(0)},
 		{byte(55), byte(255), byte(255), byte(1)},
@@ -281,7 +308,8 @@ func TestIAVLPrefixIterator(t *testing.T) {
 	iter.Close()
 	require.Equal(t, len(expected), i)
 
-	iter, _ = types.KVStorePrefixIterator(iavlStore, []byte{byte(255), byte(255)})
+	iter, err = types.KVStorePrefixIterator(iavlStore, []byte{byte(255), byte(255)})
+	require.NoError(t, err)
 	expected2 = [][]byte{
 		{byte(255), byte(255), byte(0)},
 		{byte(255), byte(255), byte(1)},
@@ -300,22 +328,33 @@ func TestIAVLPrefixIterator(t *testing.T) {
 
 func TestIAVLReversePrefixIterator(t *testing.T) {
 	db := dbm.NewMemDB()
-	tree, _ := iavl.NewMutableTree(db, cacheSize)
+	tree, err := iavl.NewMutableTree(db, cacheSize)
+	require.NoError(t, err)
 	iavlStore := UnsafeNewStore(tree, numRecent, storeEvery)
 
-	_ = iavlStore.Set([]byte("test1"), []byte("test1"))
-	_ = iavlStore.Set([]byte("test2"), []byte("test2"))
-	_ = iavlStore.Set([]byte("test3"), []byte("test3"))
-	_ = iavlStore.Set([]byte{byte(55), byte(255), byte(255), byte(0)}, []byte("test4"))
-	_ = iavlStore.Set([]byte{byte(55), byte(255), byte(255), byte(1)}, []byte("test4"))
-	_ = iavlStore.Set([]byte{byte(55), byte(255), byte(255), byte(255)}, []byte("test4"))
-	_ = iavlStore.Set([]byte{byte(255), byte(255), byte(0)}, []byte("test4"))
-	_ = iavlStore.Set([]byte{byte(255), byte(255), byte(1)}, []byte("test4"))
-	_ = iavlStore.Set([]byte{byte(255), byte(255), byte(255)}, []byte("test4"))
+	err = iavlStore.Set([]byte("test1"), []byte("test1"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte("test2"), []byte("test2"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte("test3"), []byte("test3"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte{byte(55), byte(255), byte(255), byte(0)}, []byte("test4"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte{byte(55), byte(255), byte(255), byte(1)}, []byte("test4"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte{byte(55), byte(255), byte(255), byte(255)}, []byte("test4"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte{byte(255), byte(255), byte(0)}, []byte("test4"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte{byte(255), byte(255), byte(1)}, []byte("test4"))
+	require.NoError(t, err)
+	err = iavlStore.Set([]byte{byte(255), byte(255), byte(255)}, []byte("test4"))
+	require.NoError(t, err)
 
 	var i int
 
-	iter, _ := types.KVStoreReversePrefixIterator(iavlStore, []byte("test"))
+	iter, err := types.KVStoreReversePrefixIterator(iavlStore, []byte("test"))
+	require.NoError(t, err)
 	expected := []string{"test3", "test2", "test1"}
 	for i = 0; iter.Valid(); iter.Next() {
 		expectedKey := expected[i]
@@ -326,7 +365,8 @@ func TestIAVLReversePrefixIterator(t *testing.T) {
 	}
 	require.Equal(t, len(expected), i)
 
-	iter, _ = types.KVStoreReversePrefixIterator(iavlStore, []byte{byte(55), byte(255), byte(255)})
+	iter, err = types.KVStoreReversePrefixIterator(iavlStore, []byte{byte(55), byte(255), byte(255)})
+	require.NoError(t, err)
 	expected2 := [][]byte{
 		{byte(55), byte(255), byte(255), byte(255)},
 		{byte(55), byte(255), byte(255), byte(1)},
@@ -341,7 +381,8 @@ func TestIAVLReversePrefixIterator(t *testing.T) {
 	}
 	require.Equal(t, len(expected), i)
 
-	iter, _ = types.KVStoreReversePrefixIterator(iavlStore, []byte{byte(255), byte(255)})
+	iter, err = types.KVStoreReversePrefixIterator(iavlStore, []byte{byte(255), byte(255)})
+	require.NoError(t, err)
 	expected2 = [][]byte{
 		{byte(255), byte(255), byte(255)},
 		{byte(255), byte(255), byte(1)},
@@ -447,7 +488,8 @@ func TestIAVLNoPrune(t *testing.T) {
 
 func TestIAVLStoreQuery(t *testing.T) {
 	db := dbm.NewMemDB()
-	tree, _ := iavl.NewMutableTree(db, cacheSize)
+	tree, err := iavl.NewMutableTree(db, cacheSize)
+	require.NoError(t, err)
 	iavlStore := UnsafeNewStore(tree, numRecent, storeEvery)
 
 	k1, v1 := []byte("key1"), []byte("val1")
@@ -479,8 +521,10 @@ func TestIAVLStoreQuery(t *testing.T) {
 	require.Equal(t, valExpSubEmpty, qres.Value)
 
 	// set data
-	_ = iavlStore.Set(k1, v1)
-	_ = iavlStore.Set(k2, v2)
+	err = iavlStore.Set(k1, v1)
+	require.NoError(t, err)
+	err = iavlStore.Set(k2, v2)
+	require.NoError(t, err)
 
 	// set data without commit, doesn't show up
 	qres = iavlStore.Query(query)

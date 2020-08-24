@@ -2,9 +2,10 @@ package iavl
 
 import (
 	"fmt"
-	"github.com/tendermint/tendermint/libs/kv"
 	"io"
 	"sync"
+
+	"github.com/tendermint/tendermint/libs/kv"
 
 	"github.com/pokt-network/pocket-core/store/cachekv"
 	serrors "github.com/pokt-network/pocket-core/store/errors"

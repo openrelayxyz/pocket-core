@@ -229,13 +229,13 @@ func TestMultiStoreQuery(t *testing.T) {
 	require.EqualValues(t, errors.CodespaceRoot, qres.Codespace)
 
 	// Test valid query with data.
-	query.Path = "/store1/Key"
+	query.Path = "/store1/key"
 	qres = multi.Query(query)
-	require.EqualValues(t, errors.CodeOK, qres.Code)
+	require.EqualValues(t, uint32(errors.CodeOK), qres.Code)
 	require.Equal(t, v, qres.Value)
 
 	// Test valid but empty query.
-	query.Path = "/store2/Key"
+	query.Path = "/store2/key"
 	query.Prove = true
 	qres = multi.Query(query)
 	require.EqualValues(t, errors.CodeOK, qres.Code)
