@@ -11,9 +11,9 @@ import (
 // "ClaimTx" - A transaction that sends the total number of proofs (claim), the merkle root (for data integrity), and the header (for identification)
 func ClaimTx(kp crypto.PrivateKey, cliCtx util.CLIContext, txBuilder auth.TxBuilder, header types.SessionHeader, totalProofs int64, root types.HashRange, evidenceType types.EvidenceType) (*sdk.TxResponse, error) {
 	msg := types.MsgClaim{
-		SessionHeader:    &header,
+		SessionHeader:    header,
 		TotalProofs:      totalProofs,
-		MerkleRoot:       &root,
+		MerkleRoot:       root,
 		FromAddress:      sdk.Address(kp.PublicKey().Address()),
 		EvidenceType:     evidenceType,
 		ExpirationHeight: 0, // leave as zero

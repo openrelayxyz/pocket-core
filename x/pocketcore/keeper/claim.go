@@ -121,7 +121,7 @@ func (k Keeper) ValidateClaim(ctx sdk.Ctx, claim pc.MsgClaim) (err sdk.Error) {
 	// get the session node count for the time of the session
 	sessionNodeCount := int(k.SessionNodeCount(sessionContext))
 	// check cache
-	session, found := pc.GetSession(*claim.SessionHeader)
+	session, found := pc.GetSession(claim.SessionHeader)
 	// if not found generate the session
 	if !found {
 		// use the session end context to ensure that people who were jailed mid session do not get to submit claims
@@ -130,7 +130,7 @@ func (k Keeper) ValidateClaim(ctx sdk.Ctx, claim pc.MsgClaim) (err sdk.Error) {
 			return sdk.ErrInternal("could not get prev context: " + er.Error())
 		}
 		// create a new session to validate
-		session, err = pc.NewSession(sessionContext, sessionEndCtx, k.posKeeper, *claim.SessionHeader, pc.BlockHash(sessionContext), sessionNodeCount)
+		session, err = pc.NewSession(sessionContext, sessionEndCtx, k.posKeeper, claim.SessionHeader, pc.BlockHash(sessionContext), sessionNodeCount)
 		if err != nil {
 			ctx.Logger().Error(fmt.Errorf("could not generate session with public key: %s, for chain: %s", app.GetPublicKey().RawString(), claim.SessionHeader.Chain).Error())
 			return err
@@ -153,7 +153,7 @@ func (k Keeper) SetClaim(ctx sdk.Ctx, msg pc.MsgClaim) error {
 	// retrieve the store
 	store := ctx.KVStore(k.storeKey)
 	// generate the store key
-	key, err := pc.KeyForClaim(ctx, msg.FromAddress, *msg.SessionHeader, msg.EvidenceType)
+	key, err := pc.KeyForClaim(ctx, msg.FromAddress, msg.SessionHeader, msg.EvidenceType)
 	if err != nil {
 		return err
 	}

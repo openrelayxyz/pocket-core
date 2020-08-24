@@ -52,10 +52,10 @@ func handleProofMsg(ctx sdk.Ctx, k keeper.Keeper, proof types.MsgProof) sdk.Resu
 	if err != nil {
 		if err.Code() == types.CodeReplayAttackError && !claim.IsEmpty() {
 			// delete local evidence
-			processSelf(ctx, k, proof.GetSigner(), *claim.SessionHeader, claim.EvidenceType, sdk.ZeroInt())
+			processSelf(ctx, k, proof.GetSigner(), claim.SessionHeader, claim.EvidenceType, sdk.ZeroInt())
 			// if is a replay attack, handle accordingly
 			k.HandleReplayAttack(ctx, addr, sdk.NewInt(claim.TotalProofs))
-			err := k.DeleteClaim(ctx, addr, *claim.SessionHeader, claim.EvidenceType)
+			err := k.DeleteClaim(ctx, addr, claim.SessionHeader, claim.EvidenceType)
 			if err != nil {
 				ctx.Logger().Error("Could not delete claim from world state after replay attack detected", "Address", claim.FromAddress)
 			}
@@ -68,7 +68,7 @@ func handleProofMsg(ctx sdk.Ctx, k keeper.Keeper, proof types.MsgProof) sdk.Resu
 		return err.Result()
 	}
 	// delete local evidence
-	processSelf(ctx, k, proof.GetSigner(), *claim.SessionHeader, claim.EvidenceType, tokens)
+	processSelf(ctx, k, proof.GetSigner(), claim.SessionHeader, claim.EvidenceType, tokens)
 	// create the event
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(

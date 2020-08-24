@@ -160,7 +160,7 @@ func GenerateProofs(p []Proof, index int) (mProof MerkleProof, leaf Proof) {
 	// get the leaf
 	leaf = proofs[index]
 	// get the targetHashRange
-	mProof.Target = &dataCopy[index]
+	mProof.Target = dataCopy[index]
 	// return merkleProofs object
 	return
 }
@@ -168,9 +168,9 @@ func GenerateProofs(p []Proof, index int) (mProof MerkleProof, leaf Proof) {
 // "merkleProof" - recursive Proof function that generates the Proof object one level at a time
 func merkleProof(data []HashRange, index int, p *MerkleProof) MerkleProof {
 	if index%2 == 1 { // odd index so sibling to the left
-		p.HashRanges = append(p.HashRanges, &data[index-1])
+		p.HashRanges = append(p.HashRanges, data[index-1])
 	} else { // even index so sibling to the right
-		p.HashRanges = append(p.HashRanges, &data[index+1])
+		p.HashRanges = append(p.HashRanges, data[index+1])
 	}
 	data, atRoot := levelUp(data)
 	if !atRoot {
