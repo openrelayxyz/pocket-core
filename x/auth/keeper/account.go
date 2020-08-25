@@ -2,11 +2,12 @@ package keeper
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/pokt-network/pocket-core/crypto"
 	sdk "github.com/pokt-network/pocket-core/types"
 	"github.com/pokt-network/pocket-core/x/auth/exported"
 	"github.com/pokt-network/pocket-core/x/auth/types"
-	"os"
 )
 
 // GetModuleAddress returns an address based on the module name
@@ -233,11 +234,12 @@ func (k Keeper) EncodeModuleAccount(acc exported.ModuleAccountI) ([]byte, error)
 			Coins:   acc.GetCoins(),
 		}
 		ma := &types.ModuleAccountEncodable{
-			BaseAccountEncodable: &ba,
+			BaseAccountEncodable: ba,
 			Name:                 acc.GetName(),
 			Permissions:          acc.GetPermissions(),
 		}
-		return k.cdc.MarshalBinaryBare(ma)
+		bz, err := k.cdc.MarshalBinaryBare(ma)
+		return bz, err
 	default:
 		return nil, fmt.Errorf("unrecognized module account type: %v", acc)
 	}

@@ -27,7 +27,7 @@ message ModuleAccountEncodable {
 	option (gogoproto.goproto_stringer) = true;
 	option (cosmos_proto.implements_interface) = "ModuleAccount";
 
-	BaseAccountEncodable base_account = 1 [(gogoproto.embed) = true, (gogoproto.moretags) = "yaml:\"base_account\""];
+	bytes base_account_encodable = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true, (gogoproto.moretags) = "yaml:\"base_account\""];
 	string name = 2;
 	repeated string permissions = 3;
 }
