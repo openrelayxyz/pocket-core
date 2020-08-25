@@ -42,9 +42,9 @@ func setupTestInput() testInput {
 	_ = ms.LoadLatestVersion()
 	akSubspace := sdk.NewSubspace(authTypes.DefaultCodespace)
 	ak := NewKeeper(
-		proto, authCapKey, akSubspace, nil,
+		cdc, proto, authCapKey, akSubspace, nil,
 	)
-	govKeeper.NewKeeper(proto, sdk.ParamsKey, sdk.ParamsTKey, govTypes.DefaultCodespace, ak, akSubspace)
+	govKeeper.NewKeeper(cdc, proto, sdk.ParamsKey, sdk.ParamsTKey, govTypes.DefaultCodespace, ak, akSubspace)
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 	ak.SetParams(ctx, authTypes.DefaultParams())
 	return testInput{Keeper: ak, cdc: proto, ctx: ctx}
