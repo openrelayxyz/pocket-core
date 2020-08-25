@@ -25,11 +25,11 @@ func TestSetAndGetAccounts(t *testing.T) {
 	err = baseAcc.SetCoins(initCoins)
 	require.NoError(t, err)
 	keeper.SetModuleAccount(ctx, holderAcc)
-	// keeper.SetAccount(ctx, baseAcc)
+	keeper.SetAccount(ctx, baseAcc)
 
 	gotHold := keeper.GetModuleAccount(ctx, holderAcc.GetName())
 	assert.Equal(t, holderAcc, gotHold)
 
-	// gotAcc := keeper.GetAccount(ctx, baseAcc.GetAddress())
-	// assert.Equal(t, baseAcc, gotAcc)
+	gotAcc := keeper.GetAccount(ctx, baseAcc.GetAddress())
+	assert.Equal(t, baseAcc, gotAcc)
 }

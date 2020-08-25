@@ -278,15 +278,18 @@ func (k Keeper) DecodeModuleAccount(bz []byte) (exported.ModuleAccountI, error) 
 		return nil, err
 	}
 	pk, err := crypto.NewPublicKey(ma.PubKey)
-	if err != nil {
-		return nil, err
+	if ma.BaseAccountEncodable.PubKey != "" {
+		pk, err = crypto.NewPublicKey(ma.BaseAccountEncodable.PubKey)
+		if err != nil {
+			return nil, err
+		}
 	}
 	ba := types.BaseAccount{
 		Address: ma.Address,
 		Coins:   ma.Coins,
 		PubKey:  pk,
 	}
-	return types.ModuleAccount{
+	return &types.ModuleAccount{
 		BaseAccount: &ba,
 		Name:        ma.Name,
 		Permissions: ma.Permissions,
