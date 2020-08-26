@@ -16,7 +16,7 @@ func RegisterCodec(amino *codec.LegacyAmino, proto *codec.ProtoCodec) {
 	amino.RegisterConcrete(Upgrade{}, "gov/upgrade", nil)
 	amino.RegisterConcrete(MsgUpgrade{}, "gov/msg_upgrade", nil)
 
-	proto.RegisterImplementation((*sdk.Msg)(nil), &MsgChangeParam{}, &MsgDAOTransfer{})
+	proto.RegisterImplementation((*sdk.Msg)(nil), &MsgChangeParam{}, &MsgDAOTransfer{}, &MsgUpgrade{})
 	ModuleCdc = proto
 }
 
