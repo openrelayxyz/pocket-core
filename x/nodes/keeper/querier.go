@@ -58,13 +58,13 @@ func paginate(page, limit int, validators []types.Validator, MaxValidators int) 
 
 func queryValidators(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error) {
 	var params types.QueryValidatorsParams
-	err := types.ModuleCdc.UnmarshalJSON(req.Data, &params)
+	err := types.LegacyModuleCdc.UnmarshalJSON(req.Data, &params)
 	if err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 	validators := k.GetAllValidatorsWithOpts(ctx, params)
 	validatorsPage := paginate(params.Page, params.Limit, validators, int(k.GetParams(ctx).MaxValidators))
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, validatorsPage)
+	res, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, validatorsPage)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("failed to JSON marshal result: %s", err.Error()))
 	}
@@ -73,12 +73,12 @@ func queryValidators(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.
 
 func queryAccountBalance(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error) {
 	var params types.QueryAccountBalanceParams
-	err := types.ModuleCdc.UnmarshalJSON(req.Data, &params)
+	err := types.LegacyModuleCdc.UnmarshalJSON(req.Data, &params)
 	if err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 	balance := k.GetBalance(ctx, params.Address)
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, balance)
+	res, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, balance)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("failed to JSON marshal result: %s", err.Error()))
 	}
@@ -87,12 +87,12 @@ func queryAccountBalance(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, 
 
 func queryAccount(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error) {
 	var params types.QueryAccountParams
-	err := types.ModuleCdc.UnmarshalJSON(req.Data, &params)
+	err := types.LegacyModuleCdc.UnmarshalJSON(req.Data, &params)
 	if err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 	acc := k.GetAccount(ctx, params.Address)
-	res, err := k.cdc.MarshalJSON(acc)
+	res, err := k.legacyCdc.MarshalJSON(acc)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("failed to JSON marshal result: %s", err.Error()))
 	}
@@ -101,7 +101,7 @@ func queryAccount(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.Err
 
 func queryValidator(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error) {
 	var params types.QueryValidatorParams
-	err := types.ModuleCdc.UnmarshalJSON(req.Data, &params)
+	err := types.LegacyModuleCdc.UnmarshalJSON(req.Data, &params)
 	if err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
@@ -109,7 +109,7 @@ func queryValidator(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.E
 	if !found {
 		return nil, types.ErrNoValidatorFound(types.DefaultCodespace)
 	}
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, validator)
+	res, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, validator)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}
@@ -119,7 +119,7 @@ func queryValidator(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.E
 
 func queryStakedPool(ctx sdk.Ctx, k Keeper) ([]byte, sdk.Error) {
 	stakedTokens := k.GetStakedTokens(ctx)
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, stakedTokens)
+	res, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, stakedTokens)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}
@@ -128,7 +128,7 @@ func queryStakedPool(ctx sdk.Ctx, k Keeper) ([]byte, sdk.Error) {
 
 func queryTotalSupply(ctx sdk.Ctx, k Keeper) ([]byte, sdk.Error) {
 	stakedTokens := k.TotalTokens(ctx)
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, stakedTokens)
+	res, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, stakedTokens)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}
@@ -137,7 +137,7 @@ func queryTotalSupply(ctx sdk.Ctx, k Keeper) ([]byte, sdk.Error) {
 
 func queryParameters(ctx sdk.Ctx, k Keeper) ([]byte, sdk.Error) {
 	params := k.GetParams(ctx)
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, params)
+	res, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, params)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}
@@ -146,7 +146,7 @@ func queryParameters(ctx sdk.Ctx, k Keeper) ([]byte, sdk.Error) {
 
 func querySigningInfo(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error) {
 	var params types.QuerySigningInfoParams
-	err := types.ModuleCdc.UnmarshalJSON(req.Data, &params)
+	err := types.LegacyModuleCdc.UnmarshalJSON(req.Data, &params)
 	if err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
@@ -154,7 +154,7 @@ func querySigningInfo(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk
 	if !found {
 		return nil, types.ErrNoSigningInfoFound(types.DefaultCodespace, params.Address)
 	}
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, signingInfo)
+	res, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, signingInfo)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("failed to JSON marshal result: %s", err.Error()))
 	}
@@ -164,7 +164,7 @@ func querySigningInfo(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk
 
 func querySigningInfos(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error) {
 	var params types.QuerySigningInfosParams
-	err := types.ModuleCdc.UnmarshalJSON(req.Data, &params)
+	err := types.LegacyModuleCdc.UnmarshalJSON(req.Data, &params)
 	if err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
@@ -179,7 +179,7 @@ func querySigningInfos(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sd
 	} else {
 		signingInfos = signingInfos[start:end]
 	}
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, signingInfos)
+	res, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, signingInfos)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("failed to JSON marshal result: %s", err.Error()))
 	}

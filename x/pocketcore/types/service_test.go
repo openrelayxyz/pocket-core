@@ -233,7 +233,7 @@ func TestRelayResponse_BytesAndHash(t *testing.T) {
 	relayResp := RelayResponse{
 		Signature: "",
 		Response:  "foo",
-		Proof: RelayProof{
+		Proof: &RelayProof{
 			Entropy:            230942034,
 			SessionBlockHeight: 1,
 			RequestHash:        nodePubKey,

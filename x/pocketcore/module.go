@@ -126,5 +126,5 @@ func (am AppModule) InitGenesis(ctx sdk.Ctx, data json.RawMessage) []abci.Valida
 // "ExportGenesis" - Exports the genesis from raw json
 func (am AppModule) ExportGenesis(ctx sdk.Ctx) json.RawMessage {
 	gs := ExportGenesis(ctx, am.keeper)
-	return types.ModuleCdc.MustMarshalJSON(gs)
+	return types.LegacyModuleCdc.MustMarshalJSON(gs)
 }

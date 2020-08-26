@@ -38,7 +38,7 @@ func NewQuerier(k Keeper) sdk.Querier {
 func queryChallenge(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error) {
 	// unmarshal data into a query params object
 	var params types.QueryChallengeParams
-	err := types.ModuleCdc.UnmarshalJSON(req.Data, &params)
+	err := types.LegacyModuleCdc.UnmarshalJSON(req.Data, &params)
 	if err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
@@ -48,7 +48,7 @@ func queryChallenge(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.E
 		return nil, er
 	}
 	// marshal the response data into amino-json
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, response)
+	res, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, response)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("failed to JSON marshal result: %s", err.Error()))
 	}
@@ -60,7 +60,7 @@ func queryChallenge(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.E
 func queryRelay(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error) {
 	// unmarshal data into a query params object
 	var params types.QueryRelayParams
-	err := types.ModuleCdc.UnmarshalJSON(req.Data, &params)
+	err := types.LegacyModuleCdc.UnmarshalJSON(req.Data, &params)
 	if err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
@@ -70,7 +70,7 @@ func queryRelay(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error
 		return nil, er
 	}
 	// marshals the response data into amino-json
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, response)
+	res, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, response)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("failed to JSON marshal result: %s", err.Error()))
 	}
@@ -82,7 +82,7 @@ func queryRelay(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error
 func queryDispatch(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error) {
 	// unmarshal data into a query params object
 	var params types.QueryDispatchParams
-	err := types.ModuleCdc.UnmarshalJSON(req.Data, &params)
+	err := types.LegacyModuleCdc.UnmarshalJSON(req.Data, &params)
 	if err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
@@ -92,7 +92,7 @@ func queryDispatch(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.Er
 		return nil, er
 	}
 	// marshals the response data into amino-json
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, *response)
+	res, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, *response)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("failed to JSON marshal result: %s", err.Error()))
 	}
@@ -105,7 +105,7 @@ func queryParameters(ctx sdk.Ctx, k Keeper) ([]byte, sdk.Error) {
 	// get the params
 	params := k.GetParams(ctx)
 	// marshal response data into amino-json
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, params)
+	res, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, params)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}
@@ -116,7 +116,7 @@ func queryParameters(ctx sdk.Ctx, k Keeper) ([]byte, sdk.Error) {
 // Returns the non native chains supported on pocket network
 func querySupportedBlockchains(ctx sdk.Ctx, _ abci.RequestQuery, k Keeper) ([]byte, sdk.Error) {
 	// marshal supported blockchains into amino-json
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, k.SupportedBlockchains(ctx))
+	res, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, k.SupportedBlockchains(ctx))
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("failed to JSON marshal result: %s", err.Error()))
 	}

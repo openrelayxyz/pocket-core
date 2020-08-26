@@ -77,7 +77,7 @@ func TestHandleValidatorSignature(t *testing.T) {
 					context.WithBlockHeight(101)
 					signingInfo.MissedBlocksCounter = test.args.maxMissed
 				}
-				keeper.SetValidatorSigningInfo(context, sdk.Address(cryptoAddr), signingInfo)
+				keeper.SetValidatorSigningInfo(context, sdk.Address(cryptoAddr), &signingInfo)
 				keeper.handleValidatorSignature(context, sdk.Address(cryptoAddr), test.args.power, test.args.signed)
 				signedInfo, found := keeper.GetValidatorSigningInfo(context, sdk.Address(cryptoAddr))
 				if !found {
@@ -155,7 +155,7 @@ func TestValidateDoubleSign(t *testing.T) {
 				JailedUntil: time.Unix(0, 0),
 			}
 			infractionHeight := context.BlockHeight()
-			keeper.SetValidatorSigningInfo(context, cryptoAddr, signingInfo)
+			keeper.SetValidatorSigningInfo(context, cryptoAddr, &signingInfo)
 			signingInfo, found := keeper.GetValidatorSigningInfo(context, cryptoAddr)
 			if !found {
 				t.FailNow()
@@ -213,7 +213,7 @@ func TestHandleDoubleSign(t *testing.T) {
 				JailedUntil: time.Unix(0, 0),
 			}
 			infractionHeight := context.BlockHeight()
-			keeper.SetValidatorSigningInfo(context, sdk.Address(cryptoAddr), signingInfo)
+			keeper.SetValidatorSigningInfo(context, sdk.Address(cryptoAddr), &signingInfo)
 			keeper.handleDoubleSign(context, cryptoAddr, infractionHeight, time.Unix(0, 0), test.args.power)
 
 			_, found := keeper.GetValidatorSigningInfo(context, sdk.Address(cryptoAddr))
@@ -322,7 +322,7 @@ func TestValidateSlash(t *testing.T) {
 			}
 			infractionHeight := context.BlockHeight()
 
-			keeper.SetValidatorSigningInfo(context, sdk.Address(cryptoAddr), signingInfo)
+			keeper.SetValidatorSigningInfo(context, sdk.Address(cryptoAddr), &signingInfo)
 			_, found := keeper.GetValidatorSigningInfo(context, sdk.Address(cryptoAddr))
 			if !found {
 				t.FailNow()
@@ -409,7 +409,7 @@ func TestSlash(t *testing.T) {
 			}
 			infractionHeight := context.BlockHeight()
 
-			keeper.SetValidatorSigningInfo(context, sdk.Address(cryptoAddr), signingInfo)
+			keeper.SetValidatorSigningInfo(context, sdk.Address(cryptoAddr), &signingInfo)
 			_, found := keeper.GetValidatorSigningInfo(context, sdk.Address(cryptoAddr))
 			if !found {
 				t.FailNow()

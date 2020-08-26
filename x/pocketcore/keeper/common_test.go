@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	types2 "github.com/pokt-network/pocket-core/codec/types"
 	"math"
 	"math/big"
 	"testing"
@@ -56,14 +57,15 @@ func NewTestKeybase() keys.Keybase {
 }
 
 // create a codec used only for testing
-func makeTestCodec() *codec.Codec {
+func makeTestCodec() (*codec.LegacyAmino, *codec.ProtoCodec) {
 	var cdc = codec.NewLegacyAminoCodec()
-	auth.RegisterCodec(cdc)
-	gov.RegisterCodec(cdc)
-	sdk.RegisterCodec(cdc)
-	crypto.RegisterCrypto(cdc)
+	var proto = codec.NewProtoCodec(types2.NewInterfaceRegistry())
+	auth.RegisterCodec(cdc, proto)
+	gov.RegisterCodec(cdc, proto)
+	sdk.RegisterCodec(cdc, proto)
+	crypto.RegisterCrypto(cdc, nil)
 
-	return cdc
+	return cdc, proto
 }
 
 // : deadcode unused
@@ -121,7 +123,7 @@ func createTestInput(t *testing.T, isCheckTx bool) (sdk.Ctx, []nodesTypes.Valida
 			Hash: types.Hash([]byte("fake")),
 		},
 	})
-	cdc := makeTestCodec()
+	amino, proto := makeTestCodec()
 
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName:     nil,
@@ -148,11 +150,11 @@ func createTestInput(t *testing.T, isCheckTx bool) (sdk.Ctx, []nodesTypes.Valida
 	nodesSubspace := sdk.NewSubspace(nodesTypes.DefaultParamspace)
 	appSubspace := sdk.NewSubspace(appsTypes.DefaultParamspace)
 	pocketSubspace := sdk.NewSubspace(types.DefaultParamspace)
-	ak := auth.NewKeeper(cdc, keyAcc, authSubspace, maccPerms)
-	nk := nodesKeeper.NewKeeper(cdc, nodesKey, ak, nodesSubspace, nodesTypes.ModuleName)
-	appk := appsKeeper.NewKeeper(cdc, appsKey, nk, ak, appSubspace, appsTypes.ModuleName)
+	ak := auth.NewKeeper(amino, proto, keyAcc, authSubspace, maccPerms)
+	nk := nodesKeeper.NewKeeper(amino, proto, nodesKey, ak, nodesSubspace, nodesTypes.ModuleName)
+	appk := appsKeeper.NewKeeper(amino, proto, appsKey, nk, ak, appSubspace, appsTypes.ModuleName)
 	appk.SetApplication(ctx, getTestApplication())
-	keeper := NewKeeper(pocketKey, cdc, ak, nk, appk, &hb, pocketSubspace)
+	keeper := NewKeeper(pocketKey, amino, proto, ak, nk, appk, &hb, pocketSubspace)
 	assert.Nil(t, err)
 	moduleManager := module.NewManager(
 		auth.NewAppModule(ak),
@@ -248,7 +250,7 @@ func createTestValidators(ctx sdk.Ctx, numAccs int, valCoins sdk.Int, nk *nodesK
 				StartHeight: ctx.BlockHeight(),
 				JailedUntil: time.Unix(0, 0),
 			}
-			nk.SetValidatorSigningInfo(ctx, val.GetAddress(), signingInfo)
+			nk.SetValidatorSigningInfo(ctx, val.GetAddress(), &signingInfo)
 		}
 		accs = append(accs, val)
 	}
@@ -269,7 +271,7 @@ func createTestValidators(ctx sdk.Ctx, numAccs int, valCoins sdk.Int, nk *nodesK
 			StartHeight: ctx.BlockHeight(),
 			JailedUntil: time.Unix(0, 0),
 		}
-		nk.SetValidatorSigningInfo(ctx, val.GetAddress(), signingInfo)
+		nk.SetValidatorSigningInfo(ctx, val.GetAddress(), &signingInfo)
 	}
 	accs = append(accs, val)
 	// end self node logic

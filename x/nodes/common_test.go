@@ -84,7 +84,7 @@ func createTestInput(t *testing.T, isCheckTx bool) (sdk.Context, []auth.Account,
 			},
 		},
 	)
-	_, proto := makeTestCodec()
+	amino, proto := makeTestCodec()
 
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName:   nil,
@@ -100,7 +100,7 @@ func createTestInput(t *testing.T, isCheckTx bool) (sdk.Context, []auth.Account,
 	accSubspace := sdk.NewSubspace(auth.DefaultParamspace)
 	posSubspace := sdk.NewSubspace(types.DefaultParamspace)
 
-	ak := auth.NewKeeper(proto, keyAcc, accSubspace, maccPerms)
+	ak := auth.NewKeeper(amino, proto, keyAcc, accSubspace, maccPerms)
 	moduleManager := module.NewManager(
 		auth.NewAppModule(ak),
 	)
@@ -111,7 +111,7 @@ func createTestInput(t *testing.T, isCheckTx bool) (sdk.Context, []auth.Account,
 	initialCoins := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, valTokens))
 	accs := createTestAccs(ctx, int(nAccs), initialCoins, &ak)
 
-	keeper := keeper.NewKeeper(proto, keyPOS, ak, posSubspace, sdk.CodespaceType("pos"))
+	keeper := keeper.NewKeeper(amino, proto, keyPOS, ak, posSubspace, sdk.CodespaceType("pos"))
 
 	params := types.DefaultParams()
 	keeper.SetParams(ctx, params)
@@ -187,24 +187,24 @@ func getGenesisStateForTest(ctx sdk.Ctx, keeper keeper.Keeper, defaultparams boo
 		prm = keeper.GetParams(ctx)
 	}
 	prevStateTotalPower := keeper.PrevStateValidatorsPower(ctx)
-	validators := keeper.GetAllValidatorsProto(ctx)
-	var prevStateValidatorPowers []*types.PrevStatePowerMapping
+	validators := keeper.GetAllValidators(ctx)
+	var prevStateValidatorPowers []types.PrevStatePowerMapping
 	keeper.IterateAndExecuteOverPrevStateValsByPower(ctx, func(addr sdk.Address, power int64) (stop bool) {
-		prevStateValidatorPowers = append(prevStateValidatorPowers, &types.PrevStatePowerMapping{Address: addr, Power: power})
+		prevStateValidatorPowers = append(prevStateValidatorPowers, types.PrevStatePowerMapping{Address: addr, Power: power})
 		return false
 	})
-	signingInfos := make(map[string]*types.ValidatorSigningInfo)
-	missedBlocks := make(map[string]*types.MissedBlockArray)
+	signingInfos := make(map[string]types.ValidatorSigningInfo)
+	missedBlocks := make(map[string][]types.MissedBlock)
 	keeper.IterateAndExecuteOverValSigningInfo(ctx, func(address sdk.Address, info types.ValidatorSigningInfo) (stop bool) {
 		addrstring := address.String()
-		signingInfos[addrstring] = &info
-		localMissedBlocks := types.MissedBlockArray{MissedBlocks: []*types.MissedBlock{}}
+		signingInfos[addrstring] = info
+		localMissedBlocks := []types.MissedBlock{}
 
 		keeper.IterateAndExecuteOverMissedArray(ctx, address, func(index int64, missed bool) (stop bool) {
-			localMissedBlocks.MissedBlocks = append(localMissedBlocks.MissedBlocks, &types.MissedBlock{Index: index, Missed: missed})
+			localMissedBlocks = append(localMissedBlocks, types.MissedBlock{Index: index, Missed: missed})
 			return false
 		})
-		missedBlocks[addrstring] = &localMissedBlocks
+		missedBlocks[addrstring] = localMissedBlocks
 
 		return false
 	})

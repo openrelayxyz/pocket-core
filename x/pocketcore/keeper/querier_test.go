@@ -17,7 +17,8 @@ func TestQuerySupportedBlockchains(t *testing.T) {
 	sbbz, err := querySupportedBlockchains(ctx, abci.RequestQuery{}, k)
 	assert.Nil(t, err)
 	var sb []string
-	er := makeTestCodec().UnmarshalJSON(sbbz, &sb)
+	amino, _ := makeTestCodec()
+	er := amino.UnmarshalJSON(sbbz, &sb)
 	assert.Nil(t, er)
 	assert.Equal(t, sb, []string{"ethereum"})
 }
@@ -31,7 +32,8 @@ func TestQueryParameters(t *testing.T) {
 	sbbz, err := queryParameters(ctx, k)
 	assert.Nil(t, err)
 	var params types.Params
-	er := makeTestCodec().UnmarshalJSON(sbbz, &params)
+	amino, _ := makeTestCodec()
+	er := amino.UnmarshalJSON(sbbz, &params)
 	assert.Nil(t, er)
 	assert.Equal(t, params, p)
 }

@@ -76,8 +76,8 @@ message RelayProof {
 message ChallengeProofInvalidData {
 	option (gogoproto.goproto_getters) = false;
 
-	repeated RelayResponse majorityResponses = 1 [(gogoproto.jsontag) = "majority_responses"];
-	RelayResponse minorityResponse = 2 [(gogoproto.jsontag) = "minority_response"];
+	repeated RelayResponse majorityResponses = 1 [(gogoproto.jsontag) = "majority_responses", (gogoproto.nullable) = false];
+	RelayResponse minorityResponse = 2 [(gogoproto.jsontag) = "minority_response",(gogoproto.nullable) = false];
 	bytes reporterAddress = 3 [(gogoproto.jsontag) = "reporters_address", (gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.Address"];
 }
 

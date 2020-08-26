@@ -50,7 +50,7 @@ func TestKeeper_ValidateProof(t *testing.T) { // happy path only todo
 	// create proof message
 	proofMsg := types.MsgProof{
 		MerkleProof:  merkleProofs,
-		Leaf:         leafNode.(types.RelayProof),
+		Leaf:         leafNode.ToProto(),
 		EvidenceType: types.RelayEvidence,
 	}
 	err = keeper.SetClaim(mockCtx, claimMsg)
