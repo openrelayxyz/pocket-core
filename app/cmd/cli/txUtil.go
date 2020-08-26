@@ -242,7 +242,7 @@ func DAOTx(fromAddr, toAddr, passphrase string, amount sdk.Int, action, chainID 
 	msg := govTypes.MsgDAOTransfer{
 		FromAddress: fa,
 		ToAddress:   ta,
-		Amount:      &amount,
+		Amount:      amount,
 		Action:      action,
 	}
 	err = msg.ValidateBasic()
@@ -304,7 +304,7 @@ func Upgrade(fromAddr string, upgrade govTypes.Upgrade, passphrase, chainID stri
 	}
 	msg := govTypes.MsgUpgrade{
 		Address: fa,
-		Upgrade: &upgrade,
+		Upgrade: upgrade,
 	}
 	err = msg.ValidateBasic()
 	if err != nil {

@@ -35,9 +35,9 @@ func handleMsgDaoTransfer(ctx sdk.Ctx, msg types.MsgDAOTransfer, k keeper.Keeper
 	}
 	switch da {
 	case types.DAOTransfer:
-		return k.DAOTransferFrom(ctx, msg.FromAddress, msg.ToAddress, *msg.Amount)
+		return k.DAOTransferFrom(ctx, msg.FromAddress, msg.ToAddress, msg.Amount)
 	case types.DAOBurn:
-		return k.DAOBurn(ctx, msg.FromAddress, *msg.Amount)
+		return k.DAOBurn(ctx, msg.FromAddress, msg.Amount)
 	}
 	return sdk.Result{}
 }

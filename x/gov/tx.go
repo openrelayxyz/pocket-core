@@ -36,7 +36,7 @@ func DAOTransferTx(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Key
 	msg := types.MsgDAOTransfer{
 		FromAddress: fromAddress,
 		ToAddress:   toAddress,
-		Amount:      &amount,
+		Amount:      amount,
 		Action:      action,
 	}
 	txBuilder, cliCtx := newTx(cdc, &msg, fromAddress, tmNode, keybase, passphrase, fee)
@@ -50,7 +50,7 @@ func DAOTransferTx(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Key
 func UpgradeTx(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase, fromAddress sdk.Address, upgrade types.Upgrade, passphrase string, fee int64) (*sdk.TxResponse, error) {
 	msg := types.MsgUpgrade{
 		Address: fromAddress,
-		Upgrade: &upgrade,
+		Upgrade: upgrade,
 	}
 	txBuilder, cliCtx := newTx(cdc, &msg, fromAddress, tmNode, keybase, passphrase, fee)
 	err := msg.ValidateBasic()

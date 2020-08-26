@@ -21,7 +21,7 @@ func SplitACLKey(aclKey string) (subspaceName, paramName string) {
 	return
 }
 
-type ACL []*ACLPair // cant use map cause of amino concrete marshal in tx
+type ACL []ACLPair // cant use map cause of amino concrete marshal in tx
 
 func (a ACL) Validate(adjacencyMap map[string]bool) error {
 	for _, aclPair := range a {
@@ -65,7 +65,7 @@ func (a *ACL) SetOwner(permKey string, ownerValue sdk.Address) {
 			return
 		}
 	}
-	temp := append(*a, &ACLPair{
+	temp := append(*a, ACLPair{
 		Key:     permKey,
 		Address: ownerValue,
 	})

@@ -193,9 +193,9 @@ type s struct {
 	I int
 }
 
-func testComponents(t *testing.T) (*codec.Codec, sdk.Context, sdk.StoreKey, sdk.StoreKey, Keeper) {
+func testComponents(t *testing.T) (*codec.LegacyAmino, sdk.Context, sdk.StoreKey, sdk.StoreKey, Keeper) {
 	mkey := sdk.ParamsKey
 	tkey := sdk.ParamsTKey
 	ctx, keeper := createTestKeeperAndContext(t, false)
-	return keeper.cdc, ctx, mkey, tkey, keeper
+	return keeper.legacyCdc, ctx, mkey, tkey, keeper
 }

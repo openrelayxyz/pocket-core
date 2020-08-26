@@ -15520,14 +15520,14 @@ func newDefaultGenesisState() []byte {
 		Validators: nil,
 		AppHash:    nil,
 		AppState:   j,
-	},"", "  ")
+	}, "", "  ")
 	return j
 }
 
 func createDummyACL(kp crypto.PublicKey) govTypes.ACL {
 	addr := sdk.Address(kp.Address())
 	acl := govTypes.ACL{}
-	acl = make([]*govTypes.ACLPair, 0)
+	acl = make([]govTypes.ACLPair, 0)
 	acl.SetOwner("application/ApplicationStakeMinimum", addr)
 	acl.SetOwner("application/AppUnstakingTime", addr)
 	acl.SetOwner("application/BaseRelaysPerPOKT", addr)

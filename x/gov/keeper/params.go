@@ -18,17 +18,16 @@ func (k Keeper) GetACL(ctx sdk.Ctx) (res types.ACL) {
 
 // Get all parameteras as types.Params
 func (k Keeper) GetParams(ctx sdk.Ctx) types.Params {
-	u := k.GetUpgrade(ctx)
 	return types.Params{
 		ACL:      k.GetACL(ctx),
-		Upgrade:  u,
+		Upgrade:  k.GetUpgrade(ctx),
 		DAOOwner: k.GetDAOOwner(ctx),
 	}
 }
 
 // set the params
-func (k Keeper) SetParams(ctx sdk.Ctx, params *types.Params) {
-	k.paramstore.SetParamSet(ctx, params)
+func (k Keeper) SetParams(ctx sdk.Ctx, params types.Params) {
+	k.paramstore.SetParamSet(ctx, &params)
 }
 
 func (k Keeper) GetDAOOwner(ctx sdk.Ctx) (res sdk.Address) {
