@@ -170,7 +170,7 @@ func TestMsgProof_GetSigners(t *testing.T) {
 			Blockchain:         "",
 			Token:              AAT{},
 			Signature:          "",
-		},
+		}.ToProto(),
 	}.GetSigner()
 	assert.Equal(t, signers, addr)
 }
@@ -218,49 +218,49 @@ func TestMsgProof_ValidateBasic(t *testing.T) {
 				ApplicationSignature: "",
 			},
 			Signature: "",
-		},
+		}.ToProto(),
 		EvidenceType: RelayEvidence,
 	}
-	vprLeaf := validProofMessage.Leaf.(RelayProof)
+	vprLeaf := validProofMessage.Leaf.FromProto().(*RelayProof)
 	signature, er := appPrivKey.Sign(vprLeaf.Token.Hash())
 	if er != nil {
 		t.Fatalf(er.Error())
 	}
 	vprLeaf.Token.ApplicationSignature = hex.EncodeToString(signature)
-	clientSig, er := clientPrivKey.Sign(validProofMessage.Leaf.Hash())
+	clientSig, er := clientPrivKey.Sign(validProofMessage.Leaf.FromProto().(*RelayProof).Hash())
 	if er != nil {
 		t.Fatalf(er.Error())
 	}
 	vprLeaf.Signature = hex.EncodeToString(clientSig)
-	validProofMessage.Leaf = vprLeaf
+	validProofMessage.Leaf = vprLeaf.ToProto()
 	// invalid entropy
 	invalidProofMsgIndex := validProofMessage
-	vprLeaf = validProofMessage.Leaf.(RelayProof)
+	//vprLeaf = validProofMessage.Leaf.FromProto().(*RelayProof)
 	vprLeaf.Entropy = 0
-	invalidProofMsgIndex.Leaf = vprLeaf
+	invalidProofMsgIndex.Leaf = vprLeaf.ToProto()
 	// invalid merkleHash sum
 	invalidProofMsgHashes := validProofMessage
 	invalidProofMsgHashes.MerkleProof.HashRanges = []HashRange{}
 	// invalid session block height
 	invalidProofMsgSessionBlkHeight := validProofMessage
-	vprLeaf = validProofMessage.Leaf.(RelayProof)
+	//vprLeaf = validProofMessage.Leaf.FromProto().(*RelayProof)
 	vprLeaf.SessionBlockHeight = -1
-	invalidProofMsgSessionBlkHeight.Leaf = vprLeaf
+	invalidProofMsgSessionBlkHeight.Leaf = vprLeaf.ToProto()
 	// invalid token
 	invalidProofMsgToken := validProofMessage
-	vprLeaf = validProofMessage.Leaf.(RelayProof)
+	//vprLeaf = validProofMessage.Leaf.FromProto().(*RelayProof)
 	vprLeaf.Token.ApplicationSignature = ""
-	invalidProofMsgToken.Leaf = vprLeaf
+	invalidProofMsgToken.Leaf = vprLeaf.ToProto()
 	// invalid blockchain
 	invalidProofMsgBlkchn := validProofMessage
-	vprLeaf = validProofMessage.Leaf.(RelayProof)
+	//vprLeaf = validProofMessage.Leaf.FromProto().(*RelayProof)
 	vprLeaf.Blockchain = ""
-	invalidProofMsgBlkchn.Leaf = vprLeaf
+	invalidProofMsgBlkchn.Leaf = vprLeaf.ToProto()
 	// invalid signature
 	invalidProofMsgSignature := validProofMessage
-	vprLeaf = validProofMessage.Leaf.(RelayProof)
+	//vprLeaf = validProofMessage.Leaf.FromProto().(*RelayProof)
 	vprLeaf.Signature = hex.EncodeToString([]byte("foobar"))
-	invalidProofMsgSignature.Leaf = vprLeaf
+	invalidProofMsgSignature.Leaf = vprLeaf.ToProto()
 	tests := []struct {
 		name     string
 		msg      MsgProof

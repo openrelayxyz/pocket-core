@@ -3,6 +3,7 @@ package pocketcore
 import (
 	"encoding/hex"
 	"fmt"
+	types2 "github.com/pokt-network/pocket-core/codec/types"
 	"testing"
 	"time"
 
@@ -44,14 +45,15 @@ func NewTestKeybase() keys.Keybase {
 
 // : deadcode unused
 // create a codec used only for testing
-func makeTestCodec() *codec.Codec {
-	var cdc = codec.NewLegacyAminoCodec()
-	auth.RegisterCodec(cdc)
-	gov.RegisterCodec(cdc)
-	sdk.RegisterCodec(cdc)
-	crypto.RegisterCrypto(cdc, nil)
+func makeTestCodec() (*codec.LegacyAmino, *codec.ProtoCodec) {
+	var amino = codec.NewLegacyAminoCodec()
+	var proto = codec.NewProtoCodec(types2.NewInterfaceRegistry())
+	auth.RegisterCodec(amino, proto)
+	gov.RegisterCodec(amino, proto)
+	sdk.RegisterCodec(amino, proto)
+	crypto.RegisterCrypto(amino, nil)
 
-	return cdc
+	return amino, proto
 }
 
 // : deadcode unused
@@ -92,7 +94,7 @@ func createTestInput(t *testing.T, isCheckTx bool) (sdk.Ctx, nodesKeeper.Keeper,
 			Hash: types.Hash([]byte("fake")),
 		},
 	})
-	cdc := makeTestCodec()
+	amino, proto := makeTestCodec()
 
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName:     nil,
@@ -120,10 +122,10 @@ func createTestInput(t *testing.T, isCheckTx bool) (sdk.Ctx, nodesKeeper.Keeper,
 	nodesSubspace := sdk.NewSubspace(nodesTypes.DefaultParamspace)
 	appSubspace := sdk.NewSubspace(types.DefaultParamspace)
 	pocketSubspace := sdk.NewSubspace(types.DefaultParamspace)
-	ak := auth.NewKeeper(cdc, keyAcc, accSubspace, maccPerms)
-	nk := nodesKeeper.NewKeeper(cdc, nodesKey, ak, nodesSubspace, "pos")
-	appk := appsKeeper.NewKeeper(cdc, appsKey, nk, ak, appSubspace, appsTypes.ModuleName)
-	keeper := keep.NewKeeper(pocketKey, cdc, ak, nk, appk, &hb, pocketSubspace)
+	ak := auth.NewKeeper(amino, proto, keyAcc, accSubspace, maccPerms)
+	nk := nodesKeeper.NewKeeper(amino, proto, nodesKey, ak, nodesSubspace, "pos")
+	appk := appsKeeper.NewKeeper(amino, proto, appsKey, nk, ak, appSubspace, appsTypes.ModuleName)
+	keeper := keep.NewKeeper(pocketKey, amino, proto, ak, nk, appk, &hb, pocketSubspace)
 	kb := NewTestKeybase()
 	_, err = kb.Create("test")
 	assert.Nil(t, err)
@@ -178,7 +180,7 @@ func createTestValidators(ctx sdk.Ctx, numAccs int, valCoins sdk.Int, daoCoins s
 				StartHeight: ctx.BlockHeight(),
 				JailedUntil: time.Unix(0, 0),
 			}
-			nk.SetValidatorSigningInfo(ctx, val.GetAddress(), signingInfo)
+			nk.SetValidatorSigningInfo(ctx, val.GetAddress(), &signingInfo)
 		}
 		accs = append(accs, val)
 	}
@@ -198,7 +200,7 @@ func createTestValidators(ctx sdk.Ctx, numAccs int, valCoins sdk.Int, daoCoins s
 			StartHeight: ctx.BlockHeight(),
 			JailedUntil: time.Unix(0, 0),
 		}
-		nk.SetValidatorSigningInfo(ctx, val.GetAddress(), signingInfo)
+		nk.SetValidatorSigningInfo(ctx, val.GetAddress(), &signingInfo)
 	}
 	accs = append(accs, val)
 	// end self node logic
