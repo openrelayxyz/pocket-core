@@ -49,8 +49,12 @@ func (k Keeper) SendCoinsFromModuleToModule(ctx sdk.Ctx, senderModule, recipient
 func (k Keeper) SendCoinsFromAccountToModule(ctx sdk.Ctx, senderAddr sdk.Address,
 	recipientModule string, amt sdk.Coins) sdk.Error {
 	sender := k.GetAcc(ctx, senderAddr)
-	if sender == nil || sender.GetAddress() == nil {
-		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", senderAddr))
+	if sender == nil {
+		var err error
+		sender, err = k.NewAccountWithAddress(ctx, senderAddr)
+		if err != nil {
+			return sdk.ErrInternal(err.Error())
+		}
 	}
 
 	// create the account if it doesn't yet exist
@@ -128,13 +132,16 @@ func (k Keeper) BurnCoins(ctx sdk.Ctx, moduleName string, amt sdk.Coins) sdk.Err
 
 // SendCoins moves coins from one account to another
 func (k Keeper) SendCoins(ctx sdk.Ctx, fromAddr sdk.Address, toAddress sdk.Address, amt sdk.Coins) sdk.Error {
-	sender := k.GetAccount(ctx, fromAddr)
-	if sender == nil || sender.GetAddress() == nil {
-		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", fromAddr.String()))
+	sender := k.GetAcc(ctx, fromAddr)
+	if sender == nil {
+		var err error
+		sender, err = k.NewAccountWithAddress(ctx, toAddress)
+		if err != nil {
+			return sdk.ErrInternal(err.Error())
+		}
 	}
 	recipient := k.GetAcc(ctx, toAddress)
-	t := recipient == nil
-	if t {
+	if recipient == nil {
 		var err error
 		recipient, err = k.NewAccountWithAddress(ctx, toAddress)
 		if err != nil {
