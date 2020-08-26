@@ -29,6 +29,7 @@ func TestSetAndGetAccounts(t *testing.T) {
 
 	gotHold := keeper.GetModuleAccount(ctx, holderAcc.GetName())
 	assert.Equal(t, holderAcc, gotHold)
+	assert.Equal(t, initCoins, gotHold.GetCoins())
 
 	gotAcc := keeper.GetAccount(ctx, baseAcc.GetAddress())
 	assert.Equal(t, baseAcc, gotAcc)
