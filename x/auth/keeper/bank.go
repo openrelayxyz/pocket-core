@@ -17,7 +17,7 @@ func (k Keeper) SendCoinsFromModuleToAccount(ctx sdk.Ctx, senderModule string,
 	if sender == nil || sender.GetAddress() == nil {
 		return sdk.ErrUnknownAddress(fmt.Sprintf("module account %s does not exist", senderModule))
 	}
-	recipient := k.GetAccount(ctx, recipientAddr)
+	recipient := k.GetAcc(ctx, recipientAddr)
 	if recipient == nil {
 		var err error
 		recipient, err = k.NewAccountWithAddress(ctx, recipientAddr)
