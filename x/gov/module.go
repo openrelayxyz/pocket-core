@@ -102,7 +102,7 @@ func (am AppModule) InitGenesis(ctx sdk.Ctx, data json.RawMessage) []abci.Valida
 // module.
 func (am AppModule) ExportGenesis(ctx sdk.Ctx) json.RawMessage {
 	gs := am.keeper.ExportGenesis(ctx)
-	return types.ModuleCdc.MustMarshalJSON(gs)
+	return types.LegacyModuleCdc.MustMarshalJSON(gs)
 }
 
 // module begin-block
