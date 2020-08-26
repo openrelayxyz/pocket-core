@@ -48,7 +48,7 @@ func (k Keeper) SendCoinsFromModuleToModule(ctx sdk.Ctx, senderModule, recipient
 // SendCoinsFromAccountToModule transfers coins from an Address to a ModuleAccount
 func (k Keeper) SendCoinsFromAccountToModule(ctx sdk.Ctx, senderAddr sdk.Address,
 	recipientModule string, amt sdk.Coins) sdk.Error {
-	sender := k.GetAccount(ctx, senderAddr)
+	sender := k.GetAcc(ctx, senderAddr)
 	if sender == nil || sender.GetAddress() == nil {
 		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", senderAddr))
 	}
