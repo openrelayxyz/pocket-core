@@ -495,7 +495,7 @@ func TestParams_String(t *testing.T) {
 
 func TestUnmarshalParams(t *testing.T) {
 	type args struct {
-		cdc   *codec.Codec
+		cdc   *codec.LegacyAmino
 		value []byte
 	}
 
