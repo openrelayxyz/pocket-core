@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"github.com/pokt-network/pocket-core/codec/types"
 	"math/rand"
 	"reflect"
 	"testing"
@@ -23,13 +24,16 @@ func init() {
 		_ = err
 	}
 
-	moduleCdc = codec.NewLegacyAminoCodec()
-	RegisterCodec(moduleCdc, nil)
-	crypto.RegisterCrypto(moduleCdc, nil)
-	moduleCdc.Seal()
+	pk = pub
+
+	amino = codec.NewLegacyAminoCodec()
+	proto := codec.NewProtoCodec(types.NewInterfaceRegistry())
+	RegisterCodec(amino, proto)
+	crypto.RegisterCrypto(amino, nil)
+	amino.Seal()
 
 	msgAppStake = MsgAppStake{
-		PubKey: pub.String(),
+		PubKey: pub.RawString(),
 		Chains: []string{"0001"},
 		Value:  sdk.NewInt(10),
 	}
@@ -72,7 +76,7 @@ func TestMsgApp_GetSignBytes(t *testing.T) {
 		{
 			name: "return signers",
 			args: args{msgAppStake},
-			want: sdk.MustSortJSON(moduleCdc.MustMarshalJSON(msgAppStake)),
+			want: protoCdc.MustMarshalBinaryLengthPrefixed(&msgAppStake),
 		},
 	}
 	for _, tt := range tests {
@@ -210,7 +214,7 @@ func TestMsgBeginAppUnstake_GetSignBytes(t *testing.T) {
 		{
 			name: "return signers",
 			args: args{msgBeginAppUnstake},
-			want: sdk.MustSortJSON(moduleCdc.MustMarshalJSON(msgBeginAppUnstake)),
+			want: protoCdc.MustMarshalBinaryLengthPrefixed(&msgBeginAppUnstake),
 		},
 	}
 	for _, tt := range tests {
@@ -379,7 +383,7 @@ func TestMsgAppUnjail_GetSignBytes(t *testing.T) {
 		{
 			name: "return signers",
 			args: args{msgAppUnjail},
-			want: sdk.MustSortJSON(moduleCdc.MustMarshalJSON(msgAppUnjail)),
+			want: protoCdc.MustMarshalBinaryLengthPrefixed(&msgAppUnjail),
 		},
 	}
 	for _, tt := range tests {

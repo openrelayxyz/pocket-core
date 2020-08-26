@@ -44,6 +44,9 @@ func (msg MsgAppStake) GetSignBytes() []byte {
 
 // ValidateBasic quick validity check for staking an application
 func (msg MsgAppStake) ValidateBasic() sdk.Error {
+	if msg.PubKey == "" {
+		return ErrNilApplicationAddr(DefaultCodespace)
+	}
 	pk, err := crypto.NewPublicKey(msg.PubKey)
 	if err != nil {
 		return sdk.ErrInvalidPubKey(err.Error())

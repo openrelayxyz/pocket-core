@@ -17,7 +17,7 @@ import (
 )
 
 var application Application
-var moduleCdc *codec.LegacyAmino
+var amino *codec.LegacyAmino
 var protoCdc *codec.ProtoCodec
 
 func init() {
@@ -28,11 +28,11 @@ func init() {
 		return
 	}
 
-	moduleCdc = codec.NewLegacyAminoCodec()
+	amino = codec.NewLegacyAminoCodec()
 	protoCdc = codec.NewProtoCodec(types2.NewInterfaceRegistry())
-	RegisterCodec(moduleCdc, protoCdc)
-	crypto.RegisterCrypto(moduleCdc, nil)
-	moduleCdc.Seal()
+	RegisterCodec(amino, protoCdc)
+	crypto.RegisterCrypto(amino, nil)
+	amino.Seal()
 
 	application = Application{
 		Address:                 sdk.Address(pub.Address()),
@@ -59,7 +59,7 @@ func TestApplicationUtil_MarshalJSON(t *testing.T) {
 		UnstakingCompletionTime: application.UnstakingCompletionTime,
 		MaxRelays:               application.MaxRelays,
 	}
-	bz, _ := moduleCdc.MarshalJSON(hexApp)
+	bz, _ := amino.MarshalJSON(hexApp)
 
 	tests := []struct {
 		name string
@@ -68,7 +68,7 @@ func TestApplicationUtil_MarshalJSON(t *testing.T) {
 	}{
 		{
 			name: "marshals application",
-			args: args{application: application, codec: moduleCdc},
+			args: args{application: application, codec: amino},
 			want: bz,
 		},
 	}

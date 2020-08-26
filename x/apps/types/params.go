@@ -1,6 +1,7 @@
 package types
 
 import (
+	"bytes"
 	"fmt"
 	"math"
 	"time"
@@ -84,6 +85,13 @@ func (p Params) Validate() error {
 	}
 	// todo
 	return nil
+}
+
+// Checks the equality of two param objects
+func (p Params) Equal(p2 Params) bool {
+	bz1 := LegacyModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
+	bz2 := LegacyModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
+	return bytes.Equal(bz1, bz2)
 }
 
 // String returns a human readable string representation of the parameters.
