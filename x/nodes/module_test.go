@@ -17,7 +17,7 @@ func TestAppModuleBasic_DefaultGenesis(t *testing.T) {
 		name string
 		want json.RawMessage
 	}{
-		{"Test DefaultGenesis", types.ModuleCdc.MustMarshalJSON(types.DefaultGenesisState())},
+		{"Test DefaultGenesis", types.LegacyModuleCdc.MustMarshalJSON(types.DefaultGenesisState())},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -75,7 +75,7 @@ func TestAppModuleBasic_ValidateGenesis(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"Test ValidateGenesis", args{bz: types.ModuleCdc.MustMarshalJSON(types.DefaultGenesisState())}, false},
+		{"Test ValidateGenesis", args{bz: types.LegacyModuleCdc.MustMarshalJSON(types.DefaultGenesisState())}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -193,7 +193,7 @@ func TestAppModule_ExportGenesis(t *testing.T) {
 			keeper:         k,
 			accountKeeper:  nil,
 			supplyKeeper:   nil,
-		}, args{ctx: context}, types.ModuleCdc.MustMarshalJSON(ExportGenesis(context, k))},
+		}, args{ctx: context}, types.LegacyModuleCdc.MustMarshalJSON(ExportGenesis(context, k))},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

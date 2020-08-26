@@ -629,7 +629,7 @@ func NewValidChallengeProof(t *testing.T) (challenge ChallengeProofInvalidData, 
 	majResp1 := RelayResponse{
 		Signature: "",
 		Response:  majorityResponsePayload,
-		Proof:     &validProof,
+		Proof:     validProof,
 	}
 	sig, er := servicerPrivKey1.Sign(majResp1.Hash())
 	if er != nil {
@@ -640,7 +640,7 @@ func NewValidChallengeProof(t *testing.T) (challenge ChallengeProofInvalidData, 
 	majResp2 := RelayResponse{
 		Signature: "",
 		Response:  majorityResponsePayload,
-		Proof:     &validProof2,
+		Proof:     validProof2,
 	}
 	sig, er = servicerPrivKey2.Sign(majResp2.Hash())
 	if er != nil {
@@ -651,7 +651,7 @@ func NewValidChallengeProof(t *testing.T) (challenge ChallengeProofInvalidData, 
 	minResp := RelayResponse{
 		Signature: "",
 		Response:  minorityResponsePayload,
-		Proof:     &validProof3,
+		Proof:     validProof3,
 	}
 	sig, er = servicerPrivKey3.Sign(minResp.Hash())
 	if er != nil {

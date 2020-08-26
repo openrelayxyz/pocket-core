@@ -273,8 +273,8 @@ func (c ChallengeProofInvalidData) Validate(appSupportedBlockchains []string, se
 	majResponse := c.MajorityResponses[0]
 	majResponse2 := c.MajorityResponses[1]
 	// check for duplicates
-	if majResponse.Proof.ServicerPubKey == (*majResponse2.Proof).ServicerPubKey ||
-		majResponse2.Proof.ServicerPubKey == (*c.MinorityResponse.Proof).ServicerPubKey ||
+	if majResponse.Proof.ServicerPubKey == majResponse2.Proof.ServicerPubKey ||
+		majResponse2.Proof.ServicerPubKey == c.MinorityResponse.Proof.ServicerPubKey ||
 		c.MinorityResponse.Proof.ServicerPubKey == majResponse.Proof.ServicerPubKey {
 		return NewDuplicatePublicKeyError(ModuleName)
 	}

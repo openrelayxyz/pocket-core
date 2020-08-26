@@ -48,7 +48,7 @@ func (k Keeper) HandleRelay(ctx sdk.Ctx, relay pc.Relay) (*pc.RelayResponse, sdk
 	// generate response object
 	resp := &pc.RelayResponse{
 		Response: respPayload,
-		Proof:    &relay.Proof,
+		Proof:    relay.Proof,
 	}
 	// get the private key from the private validator file
 	pk, er := k.GetPKFromFile(ctx)

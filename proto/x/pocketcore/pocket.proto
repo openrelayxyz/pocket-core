@@ -86,7 +86,7 @@ message RelayResponse {
 
 	string signature = 1 [(gogoproto.jsontag) = "signature"];
 	string response = 2 [(gogoproto.jsontag) = "payload"];
-	RelayProof proof = 3 [(gogoproto.jsontag) = "proof"];
+	RelayProof proof = 3 [(gogoproto.jsontag) = "proof", (gogoproto.nullable) = false];
 }
 
 message AAT {
