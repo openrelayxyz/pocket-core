@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	types2 "github.com/pokt-network/pocket-core/codec/types"
 	"io"
 	"os"
 	"testing"
@@ -39,6 +40,9 @@ import (
 	dbm "github.com/tendermint/tm-db"
 )
 
+func init() {
+	memCodec()
+}
 func NewInMemoryTendermintNode(t *testing.T, genesisState []byte) (tendermintNode *node.Node, keybase keys.Keybase, cleanup func()) {
 	app.MakeCodec() // needed for queries and tx
 	// create the in memory tendermint node and keybase
@@ -84,9 +88,10 @@ func TestNewInMemory(t *testing.T) {
 }
 
 var (
-	memCDC  *codec.Codec
-	inMemKB keys.Keybase
-	memCLI  client.Client
+	memCDC   *codec.LegacyAmino
+	memProto *codec.ProtoCodec
+	inMemKB  keys.Keybase
+	memCLI   client.Client
 )
 
 const (
@@ -207,20 +212,21 @@ func inMemTendermintNode(genesisState []byte) (*node.Node, keys.Keybase) {
 	return tmNode, kb
 }
 
-func memCodec() *codec.Codec {
-	if memCDC == nil {
+func memCodec() (*codec.LegacyAmino, *codec.ProtoCodec) {
+	if memCDC == nil || memProto == nil {
 		memCDC = codec.NewLegacyAminoCodec()
+		memProto = codec.NewProtoCodec(types2.NewInterfaceRegistry())
 		module.NewBasicManager(
 			apps.AppModuleBasic{},
 			auth.AppModuleBasic{},
 			gov.AppModuleBasic{},
 			nodes.AppModuleBasic{},
 			pocket.AppModuleBasic{},
-		).RegisterCodec(memCDC)
-		sdk.RegisterCodec(memCDC)
-		crypto.RegisterCrypto(memCDC)
+		).RegisterCodec(memCDC, memProto)
+		sdk.RegisterCodec(memCDC, memProto)
+		crypto.RegisterCrypto(memCDC, memProto)
 	}
-	return memCDC
+	return memCDC, memProto
 }
 
 func getInMemoryTMClient() client.Client {
@@ -294,7 +300,7 @@ func oneValTwoNodeGenesisState() []byte {
 	// set coinbase as a validator
 	rawPOS := defaultGenesis[nodesTypes.ModuleName]
 	var posGenesisState nodesTypes.GenesisState
-	memCodec().MustUnmarshalJSON(rawPOS, &posGenesisState)
+	memCDC.MustUnmarshalJSON(rawPOS, &posGenesisState)
 	posGenesisState.Validators = append(posGenesisState.Validators,
 		nodesTypes.Validator{Address: sdk.Address(pubKey.Address()),
 			PublicKey:    pubKey,
@@ -302,12 +308,12 @@ func oneValTwoNodeGenesisState() []byte {
 			Chains:       []string{dummyChainsHash},
 			ServiceURL:   dummyServiceURL,
 			StakedTokens: sdk.NewInt(1000000000000000)})
-	res := memCodec().MustMarshalJSON(posGenesisState)
+	res := memCDC.MustMarshalJSON(posGenesisState)
 	defaultGenesis[nodesTypes.ModuleName] = res
 	// set coinbase as account holding coins
 	rawAccounts := defaultGenesis[auth.ModuleName]
 	var authGenState auth.GenesisState
-	memCodec().MustUnmarshalJSON(rawAccounts, &authGenState)
+	memCDC.MustUnmarshalJSON(rawAccounts, &authGenState)
 	authGenState.Accounts = append(authGenState.Accounts, &auth.BaseAccount{
 		Address: sdk.Address(pubKey.Address()),
 		Coins:   sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(1000000000))),
@@ -319,29 +325,29 @@ func oneValTwoNodeGenesisState() []byte {
 		Coins:   sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(1000000000))),
 		PubKey:  pubKey,
 	})
-	res2 := memCodec().MustMarshalJSON(authGenState)
+	res2 := memCDC.MustMarshalJSON(authGenState)
 	defaultGenesis[auth.ModuleName] = res2
 	// set default chain for module
 	rawPocket := defaultGenesis[pocketTypes.ModuleName]
 	var pocketGenesisState pocketTypes.GenesisState
-	memCodec().MustUnmarshalJSON(rawPocket, &pocketGenesisState)
+	memCDC.MustUnmarshalJSON(rawPocket, &pocketGenesisState)
 	pocketGenesisState.Params.SupportedBlockchains = []string{dummyChainsHash}
-	res3 := memCodec().MustMarshalJSON(pocketGenesisState)
+	res3 := memCDC.MustMarshalJSON(pocketGenesisState)
 	defaultGenesis[pocketTypes.ModuleName] = res3
 	// set default governance in genesis
 	var govGenesisState govTypes.GenesisState
 	rawGov := defaultGenesis[govTypes.ModuleName]
-	memCodec().MustUnmarshalJSON(rawGov, &govGenesisState)
+	memCDC.MustUnmarshalJSON(rawGov, &govGenesisState)
 	mACL := createTestACL(kp1)
 	govGenesisState.Params.ACL = mACL
 	govGenesisState.Params.DAOOwner = kp1.GetAddress()
 	govGenesisState.Params.Upgrade = govTypes.NewUpgrade(10000, "2.0.0")
-	res4 := memCodec().MustMarshalJSON(govGenesisState)
+	res4 := memCDC.MustMarshalJSON(govGenesisState)
 	defaultGenesis[govTypes.ModuleName] = res4
 	pocketGenesisState.Params.SupportedBlockchains = []string{dummyChainsHash}
 	// end genesis setup
 	app.GenState = defaultGenesis
-	j, _ := memCodec().MarshalJSONIndent(defaultGenesis, "", "    ")
+	j, _ := memCDC.MarshalJSONIndent(defaultGenesis, "", "    ")
 	return j
 }
 
@@ -429,7 +435,7 @@ func fiveValidatorsOneAppGenesis() (genBz []byte, keys []crypto.PrivateKey, vali
 	// setup validators
 	rawPOS := defaultGenesis[nodesTypes.ModuleName]
 	var posGenesisState nodesTypes.GenesisState
-	memCodec().MustUnmarshalJSON(rawPOS, &posGenesisState)
+	memCDC.MustUnmarshalJSON(rawPOS, &posGenesisState)
 	// validator 1
 	posGenesisState.Validators = append(posGenesisState.Validators,
 		nodesTypes.Validator{Address: sdk.Address(pubKey.Address()),
@@ -471,12 +477,12 @@ func fiveValidatorsOneAppGenesis() (genBz []byte, keys []crypto.PrivateKey, vali
 			ServiceURL:   PlaceholderServiceURL,
 			StakedTokens: sdk.NewInt(10000000)})
 	// marshal into json
-	res := memCodec().MustMarshalJSON(posGenesisState)
+	res := memCDC.MustMarshalJSON(posGenesisState)
 	defaultGenesis[nodesTypes.ModuleName] = res
 	// setup applications
 	rawApps := defaultGenesis[appsTypes.ModuleName]
 	var appsGenesisState appsTypes.GenesisState
-	memCodec().MustUnmarshalJSON(rawApps, &appsGenesisState)
+	memCDC.MustUnmarshalJSON(rawApps, &appsGenesisState)
 	// application 1
 	appsGenesisState.Applications = append(appsGenesisState.Applications, appsTypes.Application{
 		Address:                 kp2.GetAddress(),
@@ -488,41 +494,41 @@ func fiveValidatorsOneAppGenesis() (genBz []byte, keys []crypto.PrivateKey, vali
 		MaxRelays:               sdk.NewInt(100000),
 		UnstakingCompletionTime: time.Time{},
 	})
-	res2 := memCodec().MustMarshalJSON(appsGenesisState)
+	res2 := memCDC.MustMarshalJSON(appsGenesisState)
 	defaultGenesis[appsTypes.ModuleName] = res2
 	// accounts
 	rawAccounts := defaultGenesis[auth.ModuleName]
 	var authGenState auth.GenesisState
-	memCodec().MustUnmarshalJSON(rawAccounts, &authGenState)
+	memCDC.MustUnmarshalJSON(rawAccounts, &authGenState)
 	authGenState.Accounts = append(authGenState.Accounts, &auth.BaseAccount{
 		Address: sdk.Address(pubKey.Address()),
 		Coins:   sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(1000000000))),
 		PubKey:  pubKey,
 	})
-	res = memCodec().MustMarshalJSON(authGenState)
+	res = memCDC.MustMarshalJSON(authGenState)
 	defaultGenesis[auth.ModuleName] = res
 	// setup supported blockchains
 	rawPocket := defaultGenesis[pocketTypes.ModuleName]
 	var pocketGenesisState pocketTypes.GenesisState
-	memCodec().MustUnmarshalJSON(rawPocket, &pocketGenesisState)
+	memCDC.MustUnmarshalJSON(rawPocket, &pocketGenesisState)
 	pocketGenesisState.Params.SupportedBlockchains = []string{dummyChainsHash}
 	pocketGenesisState.Params.ClaimSubmissionWindow = 10
-	res3 := memCodec().MustMarshalJSON(pocketGenesisState)
+	res3 := memCDC.MustMarshalJSON(pocketGenesisState)
 	defaultGenesis[pocketTypes.ModuleName] = res3
 	// set default governance in genesis
 	var govGenesisState govTypes.GenesisState
 	rawGov := defaultGenesis[govTypes.ModuleName]
-	memCodec().MustUnmarshalJSON(rawGov, &govGenesisState)
+	memCDC.MustUnmarshalJSON(rawGov, &govGenesisState)
 	nMACL := createTestACL(kp1)
 	govGenesisState.Params.Upgrade = govTypes.NewUpgrade(10000, "2.0.0")
 	govGenesisState.Params.ACL = nMACL
 	govGenesisState.Params.DAOOwner = kp1.GetAddress()
 	govGenesisState.DAOTokens = sdk.NewInt(1000)
-	res4 := memCodec().MustMarshalJSON(govGenesisState)
+	res4 := memCDC.MustMarshalJSON(govGenesisState)
 	defaultGenesis[govTypes.ModuleName] = res4
 	// end genesis setup
 	app.GenState = defaultGenesis
-	j, _ := memCodec().MarshalJSONIndent(defaultGenesis, "", "    ")
+	j, _ := memCDC.MarshalJSONIndent(defaultGenesis, "", "    ")
 	return j, kys, posGenesisState.Validators, appsGenesisState.Applications[0]
 }
 
