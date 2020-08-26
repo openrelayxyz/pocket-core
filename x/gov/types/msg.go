@@ -8,6 +8,7 @@ import (
 var (
 	_ sdk.Msg = &MsgChangeParam{}
 	_ sdk.Msg = &MsgDAOTransfer{}
+	_ sdk.Msg = &MsgUpgrade{}
 )
 
 const (
