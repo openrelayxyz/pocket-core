@@ -103,7 +103,7 @@ func (app PocketCoreApp) QueryBalance(addr string, height int64) (res sdk.Int, e
 	if err != nil {
 		return
 	}
-	if (*acc) == nil {
+	if (acc) == nil {
 		return sdk.NewInt(0), nil
 	}
 	return (*acc).GetCoins().AmountOf(sdk.DefaultStakeDenom), nil
@@ -119,6 +119,9 @@ func (app PocketCoreApp) QueryAccount(addr string, height int64) (res *exported.
 		return
 	}
 	acc := app.accountKeeper.GetAcc(ctx, a)
+	if acc == nil {
+		return nil, nil
+	}
 	ea := exported.Account(acc)
 	return &ea, nil
 }

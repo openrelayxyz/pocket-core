@@ -26,11 +26,11 @@ var (
 var _ sdk.ParamSet = &Params{}
 
 // Params defines the parameters for the auth module.
-//type Params struct {
-//	MaxMemoCharacters uint64         `json:"max_memo_characters" yaml:"max_memo_characters"`
-//	TxSigLimit        uint64         `json:"tx_sig_limit" yaml:"tx_sig_limit"`
-//	FeeMultiplier     FeeMultipliers `json:"fee_multipliers"`
-//}
+type Params struct {
+	MaxMemoCharacters uint64         `json:"max_memo_characters" yaml:"max_memo_characters"`
+	TxSigLimit        uint64         `json:"tx_sig_limit" yaml:"tx_sig_limit"`
+	FeeMultiplier     FeeMultipliers `json:"fee_multipliers"`
+}
 
 // ParamKeyTable for auth module
 func ParamKeyTable() sdk.KeyTable {

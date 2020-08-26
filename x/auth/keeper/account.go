@@ -81,7 +81,7 @@ func (k Keeper) GetAccount(ctx sdk.Ctx, addr sdk.Address) exported.Account {
 }
 
 // GetAcc implements sdk.Keeper.
-func (k Keeper) GetAcc(ctx sdk.Ctx, addr sdk.Address) *types.BaseAccount {
+func (k Keeper) GetAcc(ctx sdk.Ctx, addr sdk.Address) exported.Account {
 	store := ctx.KVStore(k.storeKey)
 	bz, _ := store.Get(types.AddressStoreKey(addr))
 	if bz == nil {
@@ -91,7 +91,7 @@ func (k Keeper) GetAcc(ctx sdk.Ctx, addr sdk.Address) *types.BaseAccount {
 	if err != nil {
 		return nil // Could not decode account
 	}
-	return acc.(*types.BaseAccount)
+	return acc
 }
 
 // GetAcc implements sdk.Keeper.
@@ -249,23 +249,52 @@ func (k Keeper) EncodeModuleAccount(acc exported.ModuleAccountI) ([]byte, error)
 // custom logic is needed to convert public key (bytes) into interface type
 // TODO can use proto "one of" for interface
 func (k Keeper) DecodeAccount(bz []byte) (exported.Account, error) {
-	var pk crypto.PublicKey
 	ba := &types.BaseAccountEncodable{}
-	err := k.cdc.UnmarshalBinaryBare(bz, ba)
-	if err != nil {
-		return nil, err
-	}
-	if ba.PubKey != "" {
-		pk, err = crypto.NewPublicKey(ba.PubKey)
+	ma := &types.ModuleAccountEncodable{}
+	err1 := k.cdc.UnmarshalBinaryBare(bz, ba)
+	if err1 != nil {
+		err := k.cdc.UnmarshalBinaryBare(bz, ma)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return &types.BaseAccount{
-		Address: ba.Address,
-		Coins:   ba.Coins,
-		PubKey:  pk,
-	}, nil
+
+	if err1 == nil {
+		var pk crypto.PublicKey
+
+		if ba.PubKey != "" {
+			pk, err1 = crypto.NewPublicKey(ba.PubKey)
+			if err1 != nil {
+				return nil, err1
+			}
+		}
+
+		return &types.BaseAccount{
+			Address: ba.Address,
+			Coins:   ba.Coins,
+			PubKey:  pk,
+		}, nil
+	} else {
+		pk, err := crypto.NewPublicKey(ma.PubKey)
+		if ma.BaseAccountEncodable.PubKey != "" {
+			pk, err = crypto.NewPublicKey(ma.BaseAccountEncodable.PubKey)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		ba := types.BaseAccount{
+			Address: ma.Address,
+			Coins:   ma.Coins,
+			PubKey:  pk,
+		}
+		return &types.ModuleAccount{
+			BaseAccount: &ba,
+			Name:        ma.Name,
+			Permissions: ma.Permissions,
+		}, nil
+	}
+
 }
 
 // "DecodeModuleAccount" - encodes account interface into protobuf

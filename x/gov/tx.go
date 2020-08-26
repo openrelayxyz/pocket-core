@@ -14,7 +14,7 @@ import (
 
 func ChangeParamsTx(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase, fromAddress sdk.Address, aclKey string, paramValue interface{}, passphrase string, fee int64) (*sdk.TxResponse, error) {
 	//valueBytes, err := json.MarshalObject(paramValue)
-	valueBytes, err := cdc.MarshalJSON(paramValue)
+	valueBytes, err := types.LegacyModuleCdc.MarshalJSON(paramValue)
 	if err != nil {
 		return nil, err
 	}
