@@ -1,9 +1,8 @@
 module github.com/pokt-network/pocket-core
 
-go 1.13
+go 1.14
 
 require (
-	github.com/cosmos/cosmos-sdk v0.39.1 // indirect
 	github.com/go-kit/kit v0.10.0
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.4.1
@@ -14,7 +13,8 @@ require (
 	github.com/prometheus/client_golang v1.5.1
 	github.com/regen-network/cosmos-proto v0.3.0
 	github.com/spf13/cobra v1.0.0
-	github.com/src-d/proteus v1.3.3 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.6.1
 	github.com/tendermint/go-amino v0.15.1
 	github.com/tendermint/iavl v0.14.0
@@ -23,11 +23,10 @@ require (
 	github.com/willf/bitset v1.1.10 // indirect
 	github.com/willf/bloom v2.0.3+incompatible
 	golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79
+	google.golang.org/grpc v1.30.0 // indirect
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/h2non/gock.v1 v1.0.15
-	gopkg.in/src-d/go-parse-utils.v1 v1.1.2 // indirect
-	gopkg.in/src-d/proteus.v1 v1.3.3 // indirect
 	gopkg.in/yaml.v2 v2.3.0
 )
 
-replace github.com/tendermint/tendermint => github.com/pokt-network/tendermint v0.32.11-0.20200813180226-426e34f7a488
+replace github.com/tendermint/tendermint => github.com/pokt-network/tendermint v0.32.11-0.20200818005101-e8ebd51893ab
