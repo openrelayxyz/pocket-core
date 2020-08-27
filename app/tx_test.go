@@ -4,12 +4,13 @@ package app
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/tendermint/tendermint/libs/log"
-	rand2 "github.com/tendermint/tendermint/libs/rand"
 	"math/rand"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/tendermint/tendermint/libs/log"
+	rand2 "github.com/tendermint/tendermint/libs/rand"
 
 	appsTypes "github.com/pokt-network/pocket-core/x/apps/types"
 
