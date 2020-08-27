@@ -27,13 +27,13 @@ func (AppModuleBasic) Name() string {
 }
 
 // register module codec
-func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
-	types.RegisterCodec(cdc)
+func (AppModuleBasic) RegisterCodec(amino *codec.LegacyAmino, proto *codec.ProtoCodec) {
+	types.RegisterCodec(amino, proto)
 }
 
 // default genesis state
 func (AppModuleBasic) DefaultGenesis() json.RawMessage {
-	return types.ModuleCdc.MustMarshalJSON(types.DefaultGenesisState())
+	return types.LegacyModuleCdc.MustMarshalJSON(types.DefaultGenesisState())
 }
 
 // module validate genesis
@@ -93,7 +93,7 @@ func (am AppModule) InitGenesis(ctx sdk.Ctx, data json.RawMessage) []abci.Valida
 	if data == nil {
 		genesisState = types.DefaultGenesisState()
 	} else {
-		types.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
+		types.LegacyModuleCdc.MustUnmarshalJSON(data, &genesisState)
 	}
 	return am.keeper.InitGenesis(ctx, genesisState)
 }
@@ -102,7 +102,7 @@ func (am AppModule) InitGenesis(ctx sdk.Ctx, data json.RawMessage) []abci.Valida
 // module.
 func (am AppModule) ExportGenesis(ctx sdk.Ctx) json.RawMessage {
 	gs := am.keeper.ExportGenesis(ctx)
-	return types.ModuleCdc.MustMarshalJSON(gs)
+	return types.LegacyModuleCdc.MustMarshalJSON(gs)
 }
 
 // module begin-block
@@ -110,8 +110,8 @@ func (am AppModule) BeginBlock(ctx sdk.Ctx, req abci.RequestBeginBlock) {
 	u := am.keeper.GetUpgrade(ctx)
 	if ctx.AppVersion() < u.Version && ctx.BlockHeight() == u.UpgradeHeight() && ctx.BlockHeight() != 0 {
 		ctx.Logger().Error("MUST UPGRADE TO NEXT VERSION: ", u.Version)
-		ctx.EventManager().EmitEvent(sdk.NewEvent(types.EventMustUpgrade,
-			sdk.NewAttribute("VERSION:", u.UpgradeVersion())))
+		ctx.EventManager().EmitEvent(sdk.Event(sdk.NewEvent(types.EventMustUpgrade,
+			sdk.NewAttribute("VERSION:", u.UpgradeVersion()))))
 		ctx.Logger().Error(fmt.Sprintf("GRACEFULLY EXITING FOR UPGRADE, AT HEIGHT: %d", ctx.BlockHeight()))
 		p, err := os.FindProcess(os.Getpid())
 		if err != nil {

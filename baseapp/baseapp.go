@@ -9,6 +9,7 @@ package baseapp
 
 import (
 	"fmt"
+	"github.com/pokt-network/pocket-core/codec/types"
 	"github.com/tendermint/tendermint/evidence"
 	"github.com/tendermint/tendermint/node"
 	"github.com/tendermint/tendermint/state/txindex"
@@ -36,6 +37,8 @@ import (
 	sdk "github.com/pokt-network/pocket-core/types"
 )
 
+var cdc = codec.NewProtoCodec(types.NewInterfaceRegistry())
+
 // Key to store the consensus params in the main store.
 var mainConsensusParamsKey = []byte("consensus_params")
 
@@ -58,16 +61,16 @@ const (
 type BaseApp struct {
 	// initialized on creation
 	logger       log.Logger
-	name         string                 // application name from abci.Info
-	db           dbm.DB                 // common DB backend
-	tmNode       *node.Node             // <---- todo updated here
-	txIndexer    *txindex.TxIndexer     // <---- todo updated here
-	blockstore   *tmStore.BlockStore    // <---- todo updated here
-	evidencePool *evidence.EvidencePool // <---- todo updated here
-	cms          sdk.CommitMultiStore   // Main (uncached) state
-	router       sdk.Router             // handle any kind of message
-	queryRouter  sdk.QueryRouter        // router for redirecting query calls
-	txDecoder    sdk.TxDecoder          // unmarshal []byte into sdk.Tx
+	name         string               // application name from abci.Info
+	db           dbm.DB               // common DB backend
+	tmNode       *node.Node           // <---- todo updated here
+	txIndexer    txindex.TxIndexer    // <---- todo updated here
+	blockstore   *tmStore.BlockStore  // <---- todo updated here
+	evidencePool *evidence.Pool       // <---- todo updated here
+	cms          sdk.CommitMultiStore // Main (uncached) state
+	router       sdk.Router           // handle any kind of message
+	queryRouter  sdk.QueryRouter      // router for redirecting query calls
+	txDecoder    sdk.TxDecoder        // unmarshal []byte into sdk.Tx
 
 	// set upon RollbackVersion or LoadLatestVersion.
 	baseKey *sdk.KVStoreKey // Main KVStore in cms
@@ -135,11 +138,11 @@ func (app *BaseApp) SetTendermintNode(node *node.Node) {
 	app.tmNode = node
 }
 
-func (app *BaseApp) SetTxIndexer(txindexer *txindex.TxIndexer) {
+func (app *BaseApp) SetTxIndexer(txindexer txindex.TxIndexer) {
 	app.txIndexer = txindexer
 }
 
-func (app *BaseApp) Txindexer() (txindexer *txindex.TxIndexer) {
+func (app *BaseApp) Txindexer() (txindexer txindex.TxIndexer) {
 	return app.txIndexer
 }
 
@@ -151,11 +154,11 @@ func (app *BaseApp) Blockstore() (blockstore *tmStore.BlockStore) {
 	return app.blockstore
 }
 
-func (app *BaseApp) SetEvidencePool(evidencePool *evidence.EvidencePool) {
+func (app *BaseApp) SetEvidencePool(evidencePool *evidence.Pool) {
 	app.evidencePool = evidencePool
 }
 
-func (app *BaseApp) EvidencePool() (evidencePool *evidence.EvidencePool) {
+func (app *BaseApp) EvidencePool() (evidencePool *evidence.Pool) {
 	return app.evidencePool
 }
 
@@ -288,7 +291,7 @@ func (app *BaseApp) initFromMainStore(baseKey *sdk.KVStoreKey) error {
 	// nil, it will be saved later during InitChain.
 	//
 	// TODO: assert that InitChain hasn't yet been called.
-	consensusParamsBz := mainStore.Get(mainConsensusParamsKey)
+	consensusParamsBz, _ := mainStore.Get(mainConsensusParamsKey)
 	if consensusParamsBz != nil {
 		var consensusParams = &abci.ConsensusParams{}
 
@@ -367,7 +370,7 @@ func (app *BaseApp) storeConsensusParams(consensusParams *abci.ConsensusParams) 
 		return
 	}
 	mainStore := app.cms.GetKVStore(app.baseKey)
-	mainStore.Set(mainConsensusParamsKey, consensusParamsBz)
+	_ = mainStore.Set(mainConsensusParamsKey, consensusParamsBz)
 }
 
 // getMaximumBlockGas gets the maximum gas from the consensus params. It panics
@@ -395,7 +398,7 @@ func (app *BaseApp) getMaximumBlockGas() uint64 {
 // ABCI
 
 // Info implements the ABCI interface.
-func (app *BaseApp) Info(req abci.RequestInfo) abci.ResponseInfo {
+func (app *BaseApp) Info(_ abci.RequestInfo) abci.ResponseInfo {
 	lastCommitID := app.cms.LastCommitID()
 
 	return abci.ResponseInfo{
@@ -406,7 +409,7 @@ func (app *BaseApp) Info(req abci.RequestInfo) abci.ResponseInfo {
 }
 
 // SetOption implements the ABCI interface.
-func (app *BaseApp) SetOption(req abci.RequestSetOption) (res abci.ResponseSetOption) {
+func (app *BaseApp) SetOption(_ abci.RequestSetOption) (res abci.ResponseSetOption) {
 	// TODO: Implement!
 	return
 }
@@ -540,7 +543,7 @@ func handleQueryApp(app *BaseApp, path []string, req abci.RequestQuery) (res abc
 			result = sdk.ErrUnknownRequest(fmt.Sprintf("Unknown query: %s", path)).Result()
 		}
 
-		value := codec.Cdc.MustMarshalBinaryLengthPrefixed(result)
+		value := cdc.MustMarshalBinaryLengthPrefixed(&result)
 		return abci.ResponseQuery{
 			Code:      uint32(sdk.CodeOK),
 			Codespace: string(sdk.CodespaceRoot),
@@ -727,7 +730,6 @@ func (app *BaseApp) BeginBlock(req abci.RequestBeginBlock) (res abci.ResponseBeg
 // NOTE:CheckTx does not run the actual Msg handler function(s).
 func (app *BaseApp) CheckTx(req abci.RequestCheckTx) (res abci.ResponseCheckTx) {
 	var result sdk.Result
-
 	tx, err := app.txDecoder(req.Tx)
 	if err != nil {
 		result = err.Result()
@@ -821,16 +823,16 @@ func (app *BaseApp) runMsg(ctx sdk.Ctx, msg sdk.Msg, mode runTxMode) (result sdk
 	// each result.
 	data = append(data, msgResult.Data...)
 	// append events from the message's execution and a message action event
-	events = events.AppendEvent(sdk.NewEvent(sdk.EventTypeMessage, sdk.NewAttribute(sdk.AttributeKeyAction, msg.Type())))
+	events = events.AppendEvent(sdk.Event(sdk.NewEvent(sdk.EventTypeMessage, sdk.NewAttribute(sdk.AttributeKeyAction, msg.Type()))))
 	events = events.AppendEvents(msgResult.Events)
 	// stop execution and return on first failed message
 	if !msgResult.IsOK() {
-		msgLogs = append(msgLogs, sdk.NewABCIMessageLog(uint16(0), false, msgResult.Log, events))
+		msgLogs = append(msgLogs, sdk.NewABCIMessageLog(uint32(0), false, msgResult.Log, events))
 
 		code = msgResult.Code
 		codespace = msgResult.Codespace
 	}
-	msgLogs = append(msgLogs, sdk.NewABCIMessageLog(uint16(0), true, msgResult.Log, events))
+	msgLogs = append(msgLogs, sdk.NewABCIMessageLog(uint32(0), true, msgResult.Log, events))
 
 	result = sdk.Result{
 		Code:      code,

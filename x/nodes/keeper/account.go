@@ -11,7 +11,7 @@ func (k Keeper) GetBalance(ctx sdk.Ctx, addr sdk.Address) sdk.Int {
 	return coins.AmountOf(k.StakeDenom(ctx))
 }
 
-// GetAccount - Retrieve account info
+// GetAcc - Retrieve account info
 func (k Keeper) GetAccount(ctx sdk.Ctx, addr sdk.Address) (acc *auth.BaseAccount) {
 	a := k.AccountKeeper.GetAccount(ctx, addr)
 	if a == nil {

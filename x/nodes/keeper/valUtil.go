@@ -22,11 +22,15 @@ func (k Keeper) Validator(ctx sdk.Ctx, address sdk.Address) exported.ValidatorI 
 // AllValidators - Retrieve a list of all validators
 func (k Keeper) AllValidators(ctx sdk.Ctx) (validators []exported.ValidatorI) {
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
 	defer iterator.Close()
 
 	for ; iterator.Valid(); iterator.Next() {
-		validator := types.MustUnmarshalValidator(k.cdc, iterator.Value())
+		validator, err := types.UnmarshalValidator(k.cdc, iterator.Value())
+		if err != nil {
+			ctx.Logger().Error("could not unmarshal validator in AllValidators: ", err.Error())
+			continue
+		}
 		validators = append(validators, validator)
 	}
 	return validators
@@ -35,7 +39,7 @@ func (k Keeper) AllValidators(ctx sdk.Ctx) (validators []exported.ValidatorI) {
 // GetStakedValidators - Retreive StakedValidators
 func (k Keeper) GetStakedValidators(ctx sdk.Ctx) (validators []exported.ValidatorI) {
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.StakedValidatorsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.StakedValidatorsKey)
 	defer iterator.Close()
 
 	for ; iterator.Valid(); iterator.Next() {
@@ -56,7 +60,7 @@ type valPowerMap map[[sdk.AddrLen]byte][]byte
 func (k Keeper) getPrevStatePowerMap(ctx sdk.Ctx) valPowerMap {
 	prevState := make(valPowerMap)
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.PrevStateValidatorsPowerKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.PrevStateValidatorsPowerKey)
 	defer iterator.Close()
 	// iterate over the prevState validator set index
 	for ; iterator.Valid(); iterator.Next() {

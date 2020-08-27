@@ -495,7 +495,7 @@ func TestParams_String(t *testing.T) {
 
 func TestUnmarshalParams(t *testing.T) {
 	type args struct {
-		cdc   *codec.Codec
+		cdc   *codec.LegacyAmino
 		value []byte
 	}
 
@@ -509,7 +509,7 @@ func TestUnmarshalParams(t *testing.T) {
 		wantErr    bool
 	}{
 		{"Unmarshall Test", args{
-			cdc:   codec.New(),
+			cdc:   codec.NewLegacyAminoCodec(),
 			value: value,
 		}, defaultParams, false},
 	}

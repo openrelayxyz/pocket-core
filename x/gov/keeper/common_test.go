@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"github.com/pokt-network/pocket-core/codec"
+	"github.com/pokt-network/pocket-core/codec/types"
 	"github.com/pokt-network/pocket-core/crypto"
 	"github.com/pokt-network/pocket-core/store"
 	sdk "github.com/pokt-network/pocket-core/types"
@@ -26,13 +27,14 @@ var (
 
 // nolint: deadcode unused
 // create a codec used only for testing
-func makeTestCodec() *codec.Codec {
-	var cdc = codec.New()
-	auth.RegisterCodec(cdc)
-	govTypes.RegisterCodec(cdc)
-	sdk.RegisterCodec(cdc)
-	codec.RegisterCrypto(cdc)
-	return cdc
+func makeTestCodec() (*codec.LegacyAmino, *codec.ProtoCodec) {
+	var amino = codec.NewLegacyAminoCodec()
+	var proto = codec.NewProtoCodec(types.NewInterfaceRegistry())
+	auth.RegisterCodec(amino, proto)
+	govTypes.RegisterCodec(amino, proto)
+	sdk.RegisterCodec(amino, proto)
+	crypto.RegisterCrypto(amino, nil)
+	return amino, proto
 }
 
 func getRandomPubKey() crypto.Ed25519PublicKey {
@@ -67,7 +69,7 @@ func createTestKeeperAndContext(t *testing.T, isCheckTx bool) (sdk.Context, Keep
 			},
 		},
 	)
-	cdc := makeTestCodec()
+	amino, proto := makeTestCodec()
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName:   nil,
 		govTypes.DAOAccountName: {"burner", "staking", "minter"},
@@ -78,9 +80,9 @@ func createTestKeeperAndContext(t *testing.T, isCheckTx bool) (sdk.Context, Keep
 		modAccAddrs[auth.NewModuleAddress(acc).String()] = true
 	}
 	akSubspace := sdk.NewSubspace(auth.DefaultParamspace)
-	ak := keeper.NewKeeper(cdc, keyAcc, akSubspace, maccPerms)
+	ak := keeper.NewKeeper(amino, proto, keyAcc, akSubspace, maccPerms)
 	ak.GetModuleAccount(ctx, "FAKE")
-	pk := NewKeeper(cdc, sdk.ParamsKey, sdk.ParamsTKey, govTypes.DefaultParamspace, ak, akSubspace)
+	pk := NewKeeper(amino, proto, sdk.ParamsKey, sdk.ParamsTKey, govTypes.DefaultParamspace, ak, akSubspace)
 	moduleManager := module.NewManager(
 		auth.NewAppModule(ak),
 	)

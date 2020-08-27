@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/pokt-network/pocket-core/codec"
 	sdk "github.com/pokt-network/pocket-core/types"
 	appsTypes "github.com/pokt-network/pocket-core/x/apps/types"
 	"github.com/pokt-network/pocket-core/x/auth/exported"
@@ -32,7 +31,8 @@ func (app PocketCoreApp) QueryBlock(height *int64) (blockJSON []byte, err error)
 	if err != nil {
 		return nil, err
 	}
-	return codec.Cdc.MarshalJSONIndent(b, "", "  ")
+	legacyAminoCodec, _ := Codec()
+	return legacyAminoCodec.MarshalJSONIndent(b, "", "  ")
 }
 
 func (app PocketCoreApp) QueryTx(hash string, prove bool) (res *core_types.ResultTx, err error) {
@@ -55,7 +55,7 @@ func (app PocketCoreApp) QueryAccountTxs(addr string, page, perPage int, prove b
 	}
 	query := fmt.Sprintf(messageSenderQuery, addr)
 	page, perPage = checkPagination(page, perPage)
-	res, err = tmClient.TxSearch(query, prove, page, perPage)
+	res, err = tmClient.TxSearch(query, prove, page, perPage, "asc")
 	return
 }
 func (app PocketCoreApp) QueryRecipientTxs(addr string, page, perPage int, prove bool) (res *core_types.ResultTxSearch, err error) {
@@ -67,7 +67,7 @@ func (app PocketCoreApp) QueryRecipientTxs(addr string, page, perPage int, prove
 	}
 	query := fmt.Sprintf(transferRecipientQuery, addr)
 	page, perPage = checkPagination(page, perPage)
-	res, err = tmClient.TxSearch(query, prove, page, perPage)
+	res, err = tmClient.TxSearch(query, prove, page, perPage, "asc")
 	return
 }
 
@@ -76,7 +76,7 @@ func (app PocketCoreApp) QueryBlockTxs(height int64, page, perPage int, prove bo
 	defer func() { _ = tmClient.Stop() }()
 	query := fmt.Sprintf(txHeightQuery, height)
 	page, perPage = checkPagination(page, perPage)
-	res, err = tmClient.TxSearch(query, prove, page, perPage)
+	res, err = tmClient.TxSearch(query, prove, page, perPage, "asc")
 	return
 }
 
@@ -103,7 +103,7 @@ func (app PocketCoreApp) QueryBalance(addr string, height int64) (res sdk.Int, e
 	if err != nil {
 		return
 	}
-	if (*acc) == nil {
+	if (acc) == nil {
 		return sdk.NewInt(0), nil
 	}
 	return (*acc).GetCoins().AmountOf(sdk.DefaultStakeDenom), nil
@@ -118,8 +118,12 @@ func (app PocketCoreApp) QueryAccount(addr string, height int64) (res *exported.
 	if err != nil {
 		return
 	}
-	acc := app.accountKeeper.GetAccount(ctx, a)
-	return &acc, nil
+	acc := app.accountKeeper.GetAcc(ctx, a)
+	if acc == nil {
+		return nil, nil
+	}
+	ea := exported.Account(acc)
+	return &ea, nil
 }
 
 func (app PocketCoreApp) QueryNodes(height int64, opts nodesTypes.QueryValidatorsParams) (res Page, err error) {

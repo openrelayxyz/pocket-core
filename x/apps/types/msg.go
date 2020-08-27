@@ -21,26 +21,37 @@ const (
 //----------------------------------------------------------------------------------------------------------------------
 
 // MsgAppStake - struct for staking transactions
-type MsgAppStake struct {
-	PubKey crypto.PublicKey `json:"pubkey" yaml:"pubkey"`
-	Chains []string         `json:"chains" yaml:"chains"`
-	Value  sdk.Int          `json:"value" yaml:"value"`
-}
+// type MsgAppStake struct {
+// 	PubKey crypto.PublicKey `json:"pubkey" yaml:"pubkey"`
+// 	Chains []string         `json:"chains" yaml:"chains"`
+// 	Value  sdk.Int          `json:"value" yaml:"value"`
+// }
 
 // GetSigners return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgAppStake) GetSigner() sdk.Address {
-	return sdk.Address(msg.PubKey.Address())
+	res, err := crypto.NewPublicKey(msg.PubKey)
+	if err != nil {
+		return nil
+	}
+	return sdk.Address(res.Address())
 }
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgAppStake) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
+	return bz
 }
 
 // ValidateBasic quick validity check for staking an application
 func (msg MsgAppStake) ValidateBasic() sdk.Error {
-	if msg.PubKey == nil || msg.PubKey.RawString() == "" {
+	if msg.PubKey == "" {
+		return ErrNilApplicationAddr(DefaultCodespace)
+	}
+	pk, err := crypto.NewPublicKey(msg.PubKey)
+	if err != nil {
+		return sdk.ErrInvalidPubKey(err.Error())
+	}
+	if pk == nil || pk.RawString() == "" {
 		return ErrNilApplicationAddr(DefaultCodespace)
 	}
 	if msg.Value.LTE(sdk.ZeroInt()) {
@@ -71,9 +82,9 @@ func (msg MsgAppStake) GetFee() sdk.Int {
 //----------------------------------------------------------------------------------------------------------------------
 
 // MsgBeginAppUnstake - struct for unstaking transaciton
-type MsgBeginAppUnstake struct {
-	Address sdk.Address `json:"application_address" yaml:"application_address"`
-}
+// type MsgBeginAppUnstake struct {
+// 	Address sdk.Address `json:"application_address" yaml:"application_address"`
+// }
 
 // GetSigners address(es) that must sign over msg.GetSignBytes()
 func (msg MsgBeginAppUnstake) GetSigner() sdk.Address {
@@ -82,8 +93,8 @@ func (msg MsgBeginAppUnstake) GetSigner() sdk.Address {
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgBeginAppUnstake) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
+	return bz
 }
 
 // ValidateBasic quick validity check for staking an application
@@ -108,9 +119,9 @@ func (msg MsgBeginAppUnstake) GetFee() sdk.Int {
 //----------------------------------------------------------------------------------------------------------------------
 
 // MsgAppUnjail - struct for unjailing jailed application
-type MsgAppUnjail struct {
-	AppAddr sdk.Address `json:"address" yaml:"address"` // address of the application operator
-}
+// type MsgAppUnjail struct {
+// 	AppAddr sdk.Address `json:"address" yaml:"address"` // address of the application operator
+// }
 
 // Route provides router key for msg
 func (msg MsgAppUnjail) Route() string { return RouterKey }
@@ -130,8 +141,8 @@ func (msg MsgAppUnjail) GetSigner() sdk.Address {
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgAppUnjail) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
+	return bz
 }
 
 // ValidateBasic quick validity check for staking an application

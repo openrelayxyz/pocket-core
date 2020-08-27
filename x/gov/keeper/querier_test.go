@@ -48,7 +48,7 @@ func Test_queryACL(t *testing.T) {
 	}
 	ctx, k := createTestKeeperAndContext(t, false)
 	acl := k.GetACL(ctx)
-	jsonresponse, err := codec.MarshalJSONIndent(types.ModuleCdc, acl)
+	jsonresponse, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, acl)
 	if err != nil {
 		t.Fatalf("failed to JSON marshal result: " + err.Error())
 	}
@@ -67,7 +67,7 @@ func Test_queryACL(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, got1 := queryACL(tt.args.ctx, tt.args.k)
 			var acl1 types.ACL
-			err := k.cdc.UnmarshalJSON(got, &acl1)
+			err := k.legacyCdc.UnmarshalJSON(got, &acl1)
 			assert.Nil(t, err)
 			assert.Equal(t, acl.String(), acl1.String())
 			if !reflect.DeepEqual(got1, tt.want1) {
@@ -84,7 +84,7 @@ func Test_queryUpgrade(t *testing.T) {
 	}
 	ctx, k := createTestKeeperAndContext(t, false)
 	upgrade := k.GetUpgrade(ctx)
-	jsonresponse, err := codec.MarshalJSONIndent(types.ModuleCdc, upgrade)
+	jsonresponse, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, upgrade)
 	if err != nil {
 		t.Fatalf("failed to JSON marshal result: " + err.Error())
 	}
@@ -103,7 +103,7 @@ func Test_queryUpgrade(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var u types.Upgrade
 			got, got1 := queryUpgrade(tt.args.ctx, tt.args.k)
-			err := k.cdc.UnmarshalJSON(got, &u)
+			err := k.legacyCdc.UnmarshalJSON(got, &u)
 			assert.Nil(t, err)
 			assert.Equal(t, upgrade, u)
 			if !reflect.DeepEqual(got1, tt.want1) {

@@ -1,22 +1,23 @@
 package keeper
 
 import (
-	sdk "github.com/pokt-network/pocket-core/types"
-	"github.com/pokt-network/pocket-core/x/apps/exported"
-	"github.com/pokt-network/pocket-core/x/apps/types"
 	"math"
 	"math/big"
 	"os"
+
+	sdk "github.com/pokt-network/pocket-core/types"
+	"github.com/pokt-network/pocket-core/x/apps/exported"
+	"github.com/pokt-network/pocket-core/x/apps/types"
 )
 
 // GetApplication - Retrieve a single application from the main store
 func (k Keeper) GetApplication(ctx sdk.Ctx, addr sdk.Address) (application types.Application, found bool) {
 	store := ctx.KVStore(k.storeKey)
-	value := store.Get(types.KeyForAppByAllApps(addr))
+	value, _ := store.Get(types.KeyForAppByAllApps(addr))
 	if value == nil {
 		return application, false
 	}
-	application, err := types.UnmarshalApplication(k.cdc, value)
+	application, err := k.DecodeApp(value)
 	if err != nil {
 		k.Logger(ctx).Error("could not unmarshal application from store")
 		return application, false
@@ -27,12 +28,12 @@ func (k Keeper) GetApplication(ctx sdk.Ctx, addr sdk.Address) (application types
 // SetApplication - Add a single application the main store
 func (k Keeper) SetApplication(ctx sdk.Ctx, application types.Application) {
 	store := ctx.KVStore(k.storeKey)
-	bz, err := k.cdc.MarshalBinaryLengthPrefixed(application)
+	bz, err := k.EncodeApp(application)
 	if err != nil {
 		k.Logger(ctx).Error("could not marshal application object")
 		os.Exit(1)
 	}
-	store.Set(types.KeyForAppByAllApps(application.Address), bz)
+	_ = store.Set(types.KeyForAppByAllApps(application.Address), bz)
 	ctx.Logger().Info("Setting App on Main Store " + application.Address.String())
 }
 
@@ -40,11 +41,12 @@ func (k Keeper) SetApplication(ctx sdk.Ctx, application types.Application) {
 func (k Keeper) GetAllApplications(ctx sdk.Ctx) (applications types.Applications) {
 	applications = make([]types.Application, 0)
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.AllApplicationsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllApplicationsKey)
 	defer iterator.Close()
 
 	for ; iterator.Valid(); iterator.Next() {
-		application, err := types.UnmarshalApplication(k.cdc, iterator.Value())
+		application, err := k.DecodeApp(iterator.Value())
+		// application, err := types.UnmarshalApplication(k.cdc, iterator.Value())
 		if err != nil {
 			k.Logger(ctx).Error("couldn't unmarshal application in GetAllApplications call: " + string(iterator.Value()) + "\n" + err.Error())
 			continue
@@ -58,11 +60,12 @@ func (k Keeper) GetAllApplications(ctx sdk.Ctx) (applications types.Applications
 func (k Keeper) GetAllApplicationsWithOpts(ctx sdk.Ctx, opts types.QueryApplicationsWithOpts) (applications types.Applications) {
 	applications = make([]types.Application, 0)
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.AllApplicationsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllApplicationsKey)
 	defer iterator.Close()
 
 	for ; iterator.Valid(); iterator.Next() {
-		application, err := types.UnmarshalApplication(k.cdc, iterator.Value())
+		application, err := k.DecodeApp(iterator.Value())
+		// application, err := types.UnmarshalApplication(k.cdc, iterator.Value())
 		if err != nil {
 			k.Logger(ctx).Error("couldn't unmarshal application in GetAllApplicationsWithOpts call: " + string(iterator.Value()) + "\n" + err.Error())
 			continue
@@ -79,12 +82,13 @@ func (k Keeper) GetApplications(ctx sdk.Ctx, maxRetrieve uint16) (applications t
 	store := ctx.KVStore(k.storeKey)
 	applications = make([]types.Application, maxRetrieve)
 
-	iterator := sdk.KVStorePrefixIterator(store, types.AllApplicationsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllApplicationsKey)
 	defer iterator.Close()
 
 	i := 0
 	for ; iterator.Valid() && i < int(maxRetrieve); iterator.Next() {
-		application, err := types.UnmarshalApplication(k.cdc, iterator.Value())
+		application, err := k.DecodeApp(iterator.Value())
+		// application, err := types.UnmarshalApplication(k.cdc, iterator.Value())
 		if err != nil {
 			k.Logger(ctx).Error("couldn't unmarshal application in GetApplications call: " + string(iterator.Value()) + "\n" + err.Error())
 			continue
@@ -99,11 +103,12 @@ func (k Keeper) GetApplications(ctx sdk.Ctx, maxRetrieve uint16) (applications t
 func (k Keeper) IterateAndExecuteOverApps(
 	ctx sdk.Ctx, fn func(index int64, application exported.ApplicationI) (stop bool)) {
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.AllApplicationsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllApplicationsKey)
 	defer iterator.Close()
 	i := int64(0)
 	for ; iterator.Valid(); iterator.Next() {
-		application, err := types.UnmarshalApplication(k.cdc, iterator.Value())
+		application, err := k.DecodeApp(iterator.Value())
+		// application, err := types.UnmarshalApplication(k.cdc, iterator.Value())
 		if err != nil {
 			k.Logger(ctx).Error("couldn't unmarshal application in IterateAndExecuteOverApps call: " + string(iterator.Value()) + "\n" + err.Error())
 			continue

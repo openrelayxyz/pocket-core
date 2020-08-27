@@ -9,67 +9,52 @@ import (
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
 )
 
-func QueryACL(cdc *codec.Codec, tmNode rpcclient.Client, height int64) (acl types.ACL, err error) {
+func QueryACL(cdc *codec.ProtoCodec, tmNode rpcclient.Client, height int64) (acl types.ACL, err error) {
 	cliCtx := util.NewCLIContext(tmNode, nil, "").WithCodec(cdc).WithHeight(height)
-	params := types.QueryACLParams{}
-	bz, err := cdc.MarshalBinaryBare(params)
+	balanceBz, _, err := cliCtx.Query(fmt.Sprintf("custom/%s/%s", types.StoreKey, types.QueryACL))
 	if err != nil {
 		return nil, err
 	}
-	balanceBz, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", types.StoreKey, types.QueryACL), bz)
-	if err != nil {
-		return nil, err
-	}
-	err = cdc.UnmarshalJSON(balanceBz, &acl)
+	err = types.LegacyModuleCdc.UnmarshalJSON(balanceBz, &acl)
 	if err != nil {
 		return nil, err
 	}
 	return acl, nil
 }
 
-func QueryDAOOwner(cdc *codec.Codec, tmNode rpcclient.Client, height int64) (daoOwner sdk.Address, err error) {
+func QueryDAOOwner(cdc *codec.ProtoCodec, tmNode rpcclient.Client, height int64) (daoOwner sdk.Address, err error) {
 	cliCtx := util.NewCLIContext(tmNode, nil, "").WithCodec(cdc).WithHeight(height)
-	daoPoolBytes, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", types.StoreKey, types.QueryDAOOwner), nil)
+	daoPoolBytes, _, err := cliCtx.Query(fmt.Sprintf("custom/%s/%s", types.StoreKey, types.QueryDAOOwner))
 	if err != nil {
 		return nil, err
 	}
-	if err := cdc.UnmarshalJSON(daoPoolBytes, &daoOwner); err != nil {
+	if err := types.LegacyModuleCdc.UnmarshalJSON(daoPoolBytes, &daoOwner); err != nil {
 		return nil, err
 	}
 	return daoOwner, err
 }
 
-func QueryDAO(cdc *codec.Codec, tmNode rpcclient.Client, height int64) (daoCoins sdk.Int, err error) {
+func QueryDAO(cdc *codec.ProtoCodec, tmNode rpcclient.Client, height int64) (daoCoins sdk.Int, err error) {
 	cliCtx := util.NewCLIContext(tmNode, nil, "").WithCodec(cdc).WithHeight(height)
-	params := types.QueryDAOParams{}
-	bz, err := cdc.MarshalBinaryBare(params)
-	if err != nil {
-		return sdk.ZeroInt(), err
-	}
-	daoPoolBytes, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", types.StoreKey, types.QueryDAO), bz)
+	daoPoolBytes, _, err := cliCtx.Query(fmt.Sprintf("custom/%s/%s", types.StoreKey, types.QueryDAO))
 	if err != nil {
 		return sdk.Int{}, err
 	}
 	var daoPool sdk.Int
-	if err := cdc.UnmarshalJSON(daoPoolBytes, &daoPool); err != nil {
+	if err := types.LegacyModuleCdc.UnmarshalJSON(daoPoolBytes, &daoPool); err != nil {
 		return sdk.Int{}, err
 	}
 	return daoPool, err
 }
 
-func QueryUpgrade(cdc *codec.Codec, tmNode rpcclient.Client, height int64) (upgrade types.Upgrade, err error) {
+func QueryUpgrade(cdc *codec.ProtoCodec, tmNode rpcclient.Client, height int64) (upgrade types.Upgrade, err error) {
 	cliCtx := util.NewCLIContext(tmNode, nil, "").WithCodec(cdc).WithHeight(height)
-	params := types.QueryUpgradeParams{}
-	bz, err := cdc.MarshalBinaryBare(params)
-	if err != nil {
-		return upgrade, err
-	}
-	upgradeBz, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", types.StoreKey, types.QueryUpgrade), bz)
+	upgradeBz, _, err := cliCtx.Query(fmt.Sprintf("custom/%s/%s", types.StoreKey, types.QueryUpgrade))
 	if err != nil {
 		return upgrade, err
 	}
 	var u types.Upgrade
-	if err := cdc.UnmarshalJSON(upgradeBz, &u); err != nil {
+	if err := types.LegacyModuleCdc.UnmarshalJSON(upgradeBz, &u); err != nil {
 		return upgrade, err
 	}
 	return u, err

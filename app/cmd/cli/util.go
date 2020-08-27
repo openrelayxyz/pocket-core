@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"github.com/pokt-network/pocket-core/app"
 	"github.com/spf13/cobra"
@@ -14,7 +15,6 @@ func init() {
 	rootCmd.AddCommand(utilCmd)
 	utilCmd.AddCommand(chainsGenCmd)
 	utilCmd.AddCommand(chainsDelCmd)
-	utilCmd.AddCommand(decodeTxCmd)
 	utilCmd.AddCommand(unsafeRollbackCmd)
 	utilCmd.AddCommand(exportGenesisForReset)
 	utilCmd.AddCommand(completionCmd)
@@ -49,22 +49,6 @@ var chainsDelCmd = &cobra.Command{
 		app.InitConfig(datadir, tmNode, persistentPeers, seeds, remoteCLIURL)
 		app.DeleteHostedChains()
 		fmt.Println("successfully deleted " + app.GlobalConfig.PocketConfig.ChainsName)
-	},
-}
-
-var decodeTxCmd = &cobra.Command{
-	Use:   "decode-tx <tx>",
-	Short: "Decodes a given transaction encoded in Amino base64 bytes",
-	Long:  `Decodes a given transaction encoded in Amino base64 bytes`,
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		app.InitConfig(datadir, tmNode, persistentPeers, seeds, remoteCLIURL)
-		txStr := args[0]
-		stdTx := app.UnmarshalTxStr(txStr)
-		fmt.Printf(
-			"Type:\t\t%s\nMsg:\t\t%v\nFee:\t\t%s\nEntropy:\t%d\nMemo:\t\t%s\nSigner\t\t%s\nSig:\t\t%s\n",
-			stdTx.Msg.Type(), stdTx.Msg, stdTx.Fee.String(), stdTx.Entropy, stdTx.Memo, stdTx.Msg.GetSigner().String(),
-			stdTx.Signature.RawString())
 	},
 }
 
@@ -135,7 +119,8 @@ var unsafeRollbackCmd = &cobra.Command{
 		a.MountKVStores(a.Keys)
 		a.MountTransientStores(a.Tkeys)
 		// rollback the txIndexer
-		err = state.RollbackTxIndexer(&app.GlobalConfig.TendermintConfig, int64(height))
+
+		err = state.RollbackTxIndexer(&app.GlobalConfig.TendermintConfig, int64(height), context.Background())
 		if err != nil {
 			fmt.Println("error rolling back txIndexer: ", err)
 			return

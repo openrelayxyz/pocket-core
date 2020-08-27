@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	types2 "github.com/pokt-network/pocket-core/x/auth/types"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/libs/common"
+	"github.com/tendermint/tendermint/libs/bytes"
 	"github.com/tendermint/tendermint/types"
 	"math/big"
 	"net/http"
@@ -94,6 +94,7 @@ func Tx(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 	}
+	//commenting this out, still problems with .Any proto unmarshal
 	rpcResponse := ResultTxToRPC(res)
 	s, er := json.MarshalIndent(rpcResponse, "", "  ")
 	if er != nil {
@@ -111,7 +112,7 @@ type RPCResultTxSearch struct {
 
 // Result of querying for a tx
 type RPCResultTx struct {
-	Hash     common.HexBytes        `json:"hash"`
+	Hash     bytes.HexBytes         `json:"hash"`
 	Height   int64                  `json:"height"`
 	Index    uint32                 `json:"index"`
 	TxResult abci.ResponseDeliverTx `json:"tx_result"`
@@ -125,7 +126,7 @@ func ResultTxSearchToRPC(res *core_types.ResultTxSearch) RPCResultTxSearch {
 		return RPCResultTxSearch{}
 	}
 	rpcTxSearch := RPCResultTxSearch{
-		Txs:        make([]*RPCResultTx, res.TotalCount),
+		Txs:        make([]*RPCResultTx, 0),
 		TotalCount: res.TotalCount,
 	}
 	for _, result := range res.Txs {
@@ -316,7 +317,7 @@ func NodeParams(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, err := app.Codec().MarshalJSON(res)
+	j, err := json.Marshal(res)
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 		return
@@ -344,7 +345,7 @@ func NodeClaim(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, err := app.Codec().MarshalJSON(res)
+	j, err := app.CodecP().MarshalJSON(res)
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 		return
@@ -430,7 +431,7 @@ func AppParams(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, err := app.Codec().MarshalJSON(res)
+	j, err := json.Marshal(res)
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 		return
@@ -449,7 +450,7 @@ func PocketParams(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, err := app.Codec().MarshalJSON(res)
+	j, err := json.Marshal(res)
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 		return
@@ -468,7 +469,7 @@ func SupportedChains(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, err := app.Codec().MarshalJSON(res)
+	j, err := json.Marshal(res)
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 		return
@@ -572,7 +573,7 @@ func ACL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, err := app.Codec().MarshalJSON(res)
+	j, err := json.Marshal(res)
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 		return
@@ -591,7 +592,7 @@ func AllParams(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, err := app.Codec().MarshalJSON(res)
+	j, err := json.Marshal(res)
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 		return
@@ -609,7 +610,7 @@ func Param(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	j, err := app.Codec().MarshalJSON(res)
+	j, err := json.Marshal(res)
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 		return

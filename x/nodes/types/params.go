@@ -146,8 +146,8 @@ func (p Params) Validate() error {
 
 // Checks the equality of two param objects
 func (p Params) Equal(p2 Params) bool {
-	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
-	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
+	bz1 := LegacyModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
+	bz2 := LegacyModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
 	return bytes.Equal(bz1, bz2)
 }
 
@@ -187,7 +187,7 @@ func (p Params) String() string {
 }
 
 // unmarshal the current pos params value from store key
-func UnmarshalParams(cdc *codec.Codec, value []byte) (params Params, err error) {
+func UnmarshalParams(cdc *codec.LegacyAmino, value []byte) (params Params, err error) {
 	err = cdc.UnmarshalBinaryLengthPrefixed(value, &params)
 	if err != nil {
 		return

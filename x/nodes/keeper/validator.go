@@ -9,20 +9,29 @@ import (
 // GetValidator - Retrieve validator with address from the main store
 func (k Keeper) GetValidator(ctx sdk.Ctx, addr sdk.Address) (validator types.Validator, found bool) {
 	store := ctx.KVStore(k.storeKey)
-	value := store.Get(types.KeyForValByAllVals(addr))
+	value, _ := store.Get(types.KeyForValByAllVals(addr))
 	if value == nil {
 		return validator, false
 	}
-	validator = types.MustUnmarshalValidator(k.cdc, value)
+	validator, err := types.UnmarshalValidator(k.cdc, value)
+	if err != nil {
+		ctx.Logger().Error("can't get validator: " + err.Error())
+		return validator, false
+	}
 	return validator, true
 }
 
 // SetValidator - Store validator in the main store and state stores (stakingset/ unstakingset)
 func (k Keeper) SetValidator(ctx sdk.Ctx, validator types.Validator) {
 	store := ctx.KVStore(k.storeKey)
-	bz := types.MustMarshalValidator(k.cdc, validator)
-	store.Set(types.KeyForValByAllVals(validator.Address), bz)
-
+	bz, err := types.MarshalValidator(k.cdc, validator)
+	if err != nil {
+		ctx.Logger().Error("could not marshal validator: " + err.Error())
+	}
+	err = store.Set(types.KeyForValByAllVals(validator.Address), bz)
+	if err != nil {
+		ctx.Logger().Error("could not set validator: " + err.Error())
+	}
 	if validator.IsUnstaking() {
 		// Adds to unstaking validator queue
 		k.SetUnstakingValidator(ctx, validator)
@@ -38,7 +47,7 @@ func (k Keeper) SetValidator(ctx sdk.Ctx, validator types.Validator) {
 // SetValidator - Store validator in the main store
 func (k Keeper) DeleteValidator(ctx sdk.Ctx, addr sdk.Address) {
 	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.KeyForValByAllVals(addr))
+	_ = store.Delete(types.KeyForValByAllVals(addr))
 	k.DeleteValidatorSigningInfo(ctx, addr)
 }
 
@@ -46,11 +55,28 @@ func (k Keeper) DeleteValidator(ctx sdk.Ctx, addr sdk.Address) {
 func (k Keeper) GetAllValidators(ctx sdk.Ctx) (validators []types.Validator) {
 	validators = make([]types.Validator, 0)
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
-		validator := types.MustUnmarshalValidator(k.cdc, iterator.Value())
+		validator, err := types.UnmarshalValidator(k.cdc, iterator.Value())
+		if err != nil {
+			ctx.Logger().Error("can't get validator in GetAllValidators: " + err.Error())
+			continue
+		}
 		validators = append(validators, validator)
+	}
+	return validators
+}
+
+// GetAllValidators - Retrieve set of all validators with no limits from the main store
+func (k Keeper) GetAllValidatorsProto(ctx sdk.Ctx) (validators []*types.ValidatorProto) {
+	validators = make([]*types.ValidatorProto, 0)
+	store := ctx.KVStore(k.storeKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		validator, _ := types.UnmarshalProtoValidator(k.cdc, iterator.Value())
+		validators = append(validators, &validator)
 	}
 	return validators
 }
@@ -59,10 +85,14 @@ func (k Keeper) GetAllValidators(ctx sdk.Ctx) (validators []types.Validator) {
 func (k Keeper) GetAllValidatorsWithOpts(ctx sdk.Ctx, opts types.QueryValidatorsParams) (validators []types.Validator) {
 	validators = make([]types.Validator, 0)
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
-		validator := types.MustUnmarshalValidator(k.cdc, iterator.Value())
+		validator, err := types.UnmarshalValidator(k.cdc, iterator.Value())
+		if err != nil {
+			ctx.Logger().Error("could not unmarshal validator in GetAllValidatorsWithOpts: ", err.Error())
+			continue
+		}
 		if opts.IsValid(validator) {
 			validators = append(validators, validator)
 		}
@@ -74,11 +104,15 @@ func (k Keeper) GetAllValidatorsWithOpts(ctx sdk.Ctx, opts types.QueryValidators
 func (k Keeper) GetValidators(ctx sdk.Ctx, maxRetrieve uint16) (validators []types.Validator) {
 	store := ctx.KVStore(k.storeKey)
 	validators = make([]types.Validator, maxRetrieve)
-	iterator := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
 	defer iterator.Close()
 	i := 0
 	for ; iterator.Valid() && i < int(maxRetrieve); iterator.Next() {
-		validator := types.MustUnmarshalValidator(k.cdc, iterator.Value())
+		validator, err := types.UnmarshalValidator(k.cdc, iterator.Value())
+		if err != nil {
+			ctx.Logger().Error("could not unmarshal validator in GetValidators: ", err.Error())
+			continue
+		}
 		validators[i] = validator
 		i++
 	}
@@ -95,11 +129,15 @@ func (k Keeper) ClearSessionCache() {
 func (k Keeper) IterateAndExecuteOverVals(
 	ctx sdk.Ctx, fn func(index int64, validator exported.ValidatorI) (stop bool)) {
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
 	defer iterator.Close()
 	i := int64(0)
 	for ; iterator.Valid(); iterator.Next() {
-		validator := types.MustUnmarshalValidator(k.cdc, iterator.Value())
+		validator, err := types.UnmarshalValidator(k.cdc, iterator.Value())
+		if err != nil {
+			ctx.Logger().Error("could not unmarshal validator in IterateAndExecuteOverVals: ", err.Error())
+			continue
+		}
 		stop := fn(i, validator) // XXX is this safe will the validator unexposed fields be able to get written to?
 		if stop {
 			break

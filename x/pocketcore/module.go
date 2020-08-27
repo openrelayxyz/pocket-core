@@ -28,19 +28,19 @@ func (AppModuleBasic) Name() string {
 }
 
 // "RegisterCodec" - Registers the codec for the module
-func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
-	types.RegisterCodec(cdc)
+func (AppModuleBasic) RegisterCodec(amino *codec.LegacyAmino, proto *codec.ProtoCodec) {
+	types.RegisterCodec(amino, proto)
 }
 
 // "DefaultGenesis" - Returns the default genesis for the module
 func (AppModuleBasic) DefaultGenesis() json.RawMessage {
-	return types.ModuleCdc.MustMarshalJSON(types.DefaultGenesisState())
+	return types.LegacyModuleCdc.MustMarshalJSON(types.DefaultGenesisState())
 }
 
 // "ValidateGenesis" - Validation check for genesis state bytes
 func (AppModuleBasic) ValidateGenesis(bytes json.RawMessage) error {
 	var data types.GenesisState
-	err := types.ModuleCdc.UnmarshalJSON(bytes, &data)
+	err := types.LegacyModuleCdc.UnmarshalJSON(bytes, &data)
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func (am AppModule) InitGenesis(ctx sdk.Ctx, data json.RawMessage) []abci.Valida
 	if data == nil {
 		genesisState = types.DefaultGenesisState()
 	} else {
-		types.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
+		types.LegacyModuleCdc.MustUnmarshalJSON(data, &genesisState)
 	}
 	return InitGenesis(ctx, am.keeper, genesisState)
 }
@@ -126,5 +126,5 @@ func (am AppModule) InitGenesis(ctx sdk.Ctx, data json.RawMessage) []abci.Valida
 // "ExportGenesis" - Exports the genesis from raw json
 func (am AppModule) ExportGenesis(ctx sdk.Ctx) json.RawMessage {
 	gs := ExportGenesis(ctx, am.keeper)
-	return types.ModuleCdc.MustMarshalJSON(gs)
+	return types.LegacyModuleCdc.MustMarshalJSON(gs)
 }

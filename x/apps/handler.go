@@ -2,6 +2,7 @@ package pos
 
 import (
 	"fmt"
+	"github.com/pokt-network/pocket-core/crypto"
 	sdk "github.com/pokt-network/pocket-core/types"
 	"github.com/pokt-network/pocket-core/x/apps/keeper"
 	"github.com/pokt-network/pocket-core/x/apps/types"
@@ -11,12 +12,12 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 	return func(ctx sdk.Ctx, msg sdk.Msg) sdk.Result {
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
 		switch msg := msg.(type) {
-		case types.MsgAppStake:
-			return handleStake(ctx, msg, k)
-		case types.MsgBeginAppUnstake:
-			return handleMsgBeginUnstake(ctx, msg, k)
-		case types.MsgAppUnjail:
-			return handleMsgUnjail(ctx, msg, k)
+		case *types.MsgAppStake:
+			return handleStake(ctx, *msg, k)
+		case *types.MsgBeginAppUnstake:
+			return handleMsgBeginUnstake(ctx, *msg, k)
+		case *types.MsgAppUnjail:
+			return handleMsgUnjail(ctx, *msg, k)
 		default:
 			errMsg := fmt.Sprintf("unrecognized staking message type: %T", msg)
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -25,16 +26,21 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 }
 
 func handleStake(ctx sdk.Ctx, msg types.MsgAppStake, k keeper.Keeper) sdk.Result {
-	ctx.Logger().Info("Begin Staking App Message received from " + sdk.Address(msg.PubKey.Address()).String())
+	pk, er := crypto.NewPublicKey(msg.PubKey)
+	if er != nil {
+		return sdk.ErrInvalidPubKey(er.Error()).Result()
+	}
+	addr := pk.Address()
+	ctx.Logger().Info("Begin Staking App Message received from " + sdk.Address(pk.Address()).String())
 	// create application object using the message fields
-	application := types.NewApplication(sdk.Address(msg.PubKey.Address()), msg.PubKey, msg.Chains, sdk.ZeroInt())
-	ctx.Logger().Info("Validate App Can Stake " + sdk.Address(msg.PubKey.Address()).String())
+	application := types.NewApplication(sdk.Address(addr), pk, msg.Chains, sdk.ZeroInt())
+	ctx.Logger().Info("Validate App Can Stake " + sdk.Address(addr).String())
 	// check if they can stake
 	if err := k.ValidateApplicationStaking(ctx, application, msg.Value); err != nil {
-		ctx.Logger().Error(fmt.Sprintf("Validate App Can Stake Error, at height: %d with address: %s", ctx.BlockHeight(), sdk.Address(msg.PubKey.Address()).String()))
+		ctx.Logger().Error(fmt.Sprintf("Validate App Can Stake Error, at height: %d with address: %s", ctx.BlockHeight(), sdk.Address(addr).String()))
 		return err.Result()
 	}
-	ctx.Logger().Info("Change App state to Staked " + sdk.Address(msg.PubKey.Address()).String())
+	ctx.Logger().Info("Change App state to Staked " + sdk.Address(addr).String())
 	// change the application state to staked
 	err := k.StakeApplication(ctx, application, msg.Value)
 	if err != nil {
@@ -44,18 +50,18 @@ func handleStake(ctx sdk.Ctx, msg types.MsgAppStake, k keeper.Keeper) sdk.Result
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeCreateApplication,
-			sdk.NewAttribute(types.AttributeKeyApplication, sdk.Address(msg.PubKey.Address()).String()),
+			sdk.NewAttribute(types.AttributeKeyApplication, sdk.Address(addr).String()),
 		),
 		sdk.NewEvent(
 			types.EventTypeStake,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
-			sdk.NewAttribute(sdk.AttributeKeySender, sdk.Address(msg.PubKey.Address()).String()),
+			sdk.NewAttribute(sdk.AttributeKeySender, sdk.Address(addr).String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Value.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
-			sdk.NewAttribute(sdk.AttributeKeySender, sdk.Address(msg.PubKey.Address()).String()),
+			sdk.NewAttribute(sdk.AttributeKeySender, sdk.Address(addr).String()),
 		),
 	})
 	return sdk.Result{Events: ctx.EventManager().Events()}
@@ -98,11 +104,11 @@ func handleMsgUnjail(ctx sdk.Ctx, msg types.MsgAppUnjail, k keeper.Keeper) sdk.R
 	}
 	k.UnjailApplication(ctx, consAddr)
 	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
+		sdk.Event(sdk.NewEvent(
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.AppAddr.String()),
-		),
+		)),
 	)
 	return sdk.Result{Events: ctx.EventManager().Events()}
 }

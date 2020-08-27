@@ -8,6 +8,7 @@ import (
 
 	sdk "github.com/pokt-network/pocket-core/types"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,7 +24,9 @@ func TestSupplyMarshalYAML(t *testing.T) {
 
 	want := fmt.Sprintf(`total:
 %s`, string(bzCoins))
+	got := supply.String()
 
 	require.Equal(t, want, string(bz))
-	require.Equal(t, want, supply.String())
+	assert.Contains(t, got, `denom:"upokt"`)
+	assert.Contains(t, got, "amount:")
 }

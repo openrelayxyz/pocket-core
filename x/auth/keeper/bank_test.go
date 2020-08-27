@@ -1,20 +1,21 @@
 package keeper
 
 import (
+	"testing"
+
 	sdk "github.com/pokt-network/pocket-core/types"
 	"github.com/pokt-network/pocket-core/x/auth/types"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 const initialPower = int64(100)
 
 var (
-	holderAcc     = types.NewEmptyModuleAccount(holder)
-	burnerAcc     = types.NewEmptyModuleAccount(types.Burner, types.Burner)
-	minterAcc     = types.NewEmptyModuleAccount(types.Minter, types.Minter)
-	multiPermAcc  = types.NewEmptyModuleAccount(multiPerm, types.Burner, types.Minter, types.Staking)
-	randomPermAcc = types.NewEmptyModuleAccount(randomPerm, "random")
+	// holderAcc     = types.NewEmptyModuleAccount(holder)
+	// burnerAcc     = types.NewEmptyModuleAccount(types.Burner, types.Burner)
+	// minterAcc     = types.NewEmptyModuleAccount(types.Minter, types.Minter)
+	// multiPermAcc  = types.NewEmptyModuleAccount(multiPerm, types.Burner, types.Minter, types.Staking)
+	// randomPermAcc = types.NewEmptyModuleAccount(randomPerm, "random")
 
 	initTokens = sdk.TokensFromConsensusPower(initialPower)
 	initCoins  = sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, initTokens))
@@ -22,11 +23,12 @@ var (
 
 func getCoinsByName(ctx sdk.Ctx, k Keeper, moduleName string) sdk.Coins {
 	moduleAddress := k.GetModuleAddress(moduleName)
-	macc := k.GetAccount(ctx, moduleAddress)
+	macc := k.GetModuleAcc(ctx, moduleAddress)
 	if macc == nil {
 		return sdk.Coins(nil)
 	}
-	return macc.GetCoins()
+	coins := macc.GetCoins()
+	return coins
 }
 
 func TestSendCoins(t *testing.T) {
@@ -49,14 +51,15 @@ func TestSendCoins(t *testing.T) {
 	err = keeper.SendCoinsFromModuleToModule(ctx, holderAcc.GetName(), types.Burner, initCoins)
 	require.NoError(t, err)
 	require.Equal(t, sdk.Coins(nil), getCoinsByName(ctx, keeper, holderAcc.GetName()))
-	require.Equal(t, initCoins, getCoinsByName(ctx, keeper, types.Burner))
+	gotCoins := getCoinsByName(ctx, keeper, types.Burner)
+	require.Equal(t, initCoins, gotCoins)
 	err = keeper.SendCoinsFromModuleToAccount(ctx, types.Burner, baseAcc.GetAddress(), initCoins)
 	require.NoError(t, err)
 	require.Equal(t, sdk.Coins(nil), getCoinsByName(ctx, keeper, types.Burner))
-	require.Equal(t, initCoins, keeper.GetAccount(ctx, baseAcc.GetAddress()).GetCoins())
+	require.Equal(t, initCoins, keeper.GetAcc(ctx, baseAcc.GetAddress()).GetCoins())
 	err = keeper.SendCoinsFromAccountToModule(ctx, baseAcc.GetAddress(), types.Burner, initCoins)
 	require.NoError(t, err)
-	require.Equal(t, sdk.Coins(nil), keeper.GetAccount(ctx, baseAcc.GetAddress()).GetCoins())
+	require.Equal(t, sdk.Coins(nil), keeper.GetAcc(ctx, baseAcc.GetAddress()).GetCoins())
 	require.Equal(t, initCoins, getCoinsByName(ctx, keeper, types.Burner))
 }
 

@@ -1,8 +1,9 @@
 package keeper
 
 import (
-	"github.com/pokt-network/pocket-core/x/auth/types"
 	"testing"
+
+	"github.com/pokt-network/pocket-core/x/auth/types"
 
 	"github.com/stretchr/testify/require"
 
@@ -61,21 +62,24 @@ func TestKeeper(t *testing.T) {
 	require.False(t, input.Keeper.HasCoins(ctx, addr, sdk.NewCoins(sdk.NewInt64Coin("barcoin", 5))))
 
 	// Test AddCoins
-	_, _ = input.Keeper.AddCoins(ctx, addr, sdk.NewCoins(sdk.NewInt64Coin("foocoin", 15)))
+	acc = input.Keeper.GetAcc(ctx, addr).(*types.BaseAccount)
+	_, _ = input.Keeper.AddCoins(ctx, acc, sdk.NewCoins(sdk.NewInt64Coin("foocoin", 15)))
 	require.True(t, input.Keeper.GetCoins(ctx, addr).IsEqual(sdk.NewCoins(sdk.NewInt64Coin("foocoin", 25))))
 
-	_, _ = input.Keeper.AddCoins(ctx, addr, sdk.NewCoins(sdk.NewInt64Coin("barcoin", 15)))
+	_, _ = input.Keeper.AddCoins(ctx, acc, sdk.NewCoins(sdk.NewInt64Coin("barcoin", 15)))
 	require.True(t, input.Keeper.GetCoins(ctx, addr).IsEqual(sdk.NewCoins(sdk.NewInt64Coin("barcoin", 15), sdk.NewInt64Coin("foocoin", 25))))
 
 	// Test SubtractCoins
-	_, _ = input.Keeper.SubtractCoins(ctx, addr, sdk.NewCoins(sdk.NewInt64Coin("foocoin", 10)))
-	_, _ = input.Keeper.SubtractCoins(ctx, addr, sdk.NewCoins(sdk.NewInt64Coin("barcoin", 5)))
+	acc = input.Keeper.GetAcc(ctx, addr).(*types.BaseAccount)
+	_, _ = input.Keeper.SubtractCoins(ctx, acc, sdk.NewCoins(sdk.NewInt64Coin("foocoin", 10)))
+	acc = input.Keeper.GetAcc(ctx, addr).(*types.BaseAccount)
+	_, _ = input.Keeper.SubtractCoins(ctx, acc, sdk.NewCoins(sdk.NewInt64Coin("barcoin", 5)))
 	require.True(t, input.Keeper.GetCoins(ctx, addr).IsEqual(sdk.NewCoins(sdk.NewInt64Coin("barcoin", 10), sdk.NewInt64Coin("foocoin", 15))))
 
-	_, _ = input.Keeper.SubtractCoins(ctx, addr, sdk.NewCoins(sdk.NewInt64Coin("barcoin", 11)))
+	_, _ = input.Keeper.SubtractCoins(ctx, acc, sdk.NewCoins(sdk.NewInt64Coin("barcoin", 11)))
 	require.True(t, input.Keeper.GetCoins(ctx, addr).IsEqual(sdk.NewCoins(sdk.NewInt64Coin("barcoin", 10), sdk.NewInt64Coin("foocoin", 15))))
 
-	_, _ = input.Keeper.SubtractCoins(ctx, addr, sdk.NewCoins(sdk.NewInt64Coin("barcoin", 10)))
+	_, _ = input.Keeper.SubtractCoins(ctx, acc, sdk.NewCoins(sdk.NewInt64Coin("barcoin", 10)))
 	require.True(t, input.Keeper.GetCoins(ctx, addr).IsEqual(sdk.NewCoins(sdk.NewInt64Coin("foocoin", 15))))
 	require.False(t, input.Keeper.HasCoins(ctx, addr, sdk.NewCoins(sdk.NewInt64Coin("barcoin", 1))))
 
@@ -89,7 +93,8 @@ func TestKeeper(t *testing.T) {
 	require.True(t, input.Keeper.GetCoins(ctx, addr).IsEqual(sdk.NewCoins(sdk.NewInt64Coin("foocoin", 10))))
 	require.True(t, input.Keeper.GetCoins(ctx, addr2).IsEqual(sdk.NewCoins(sdk.NewInt64Coin("foocoin", 5))))
 
-	_, _ = input.Keeper.AddCoins(ctx, addr, sdk.NewCoins(sdk.NewInt64Coin("barcoin", 30)))
+	acc = input.Keeper.GetAcc(ctx, addr).(*types.BaseAccount)
+	_, _ = input.Keeper.AddCoins(ctx, acc, sdk.NewCoins(sdk.NewInt64Coin("barcoin", 30)))
 	_ = input.Keeper.SendCoins(ctx, addr, addr2, sdk.NewCoins(sdk.NewInt64Coin("barcoin", 10), sdk.NewInt64Coin("foocoin", 5)))
 	require.True(t, input.Keeper.GetCoins(ctx, addr).IsEqual(sdk.NewCoins(sdk.NewInt64Coin("barcoin", 20), sdk.NewInt64Coin("foocoin", 5))))
 	require.True(t, input.Keeper.GetCoins(ctx, addr2).IsEqual(sdk.NewCoins(sdk.NewInt64Coin("barcoin", 10), sdk.NewInt64Coin("foocoin", 10))))
@@ -128,7 +133,8 @@ func TestSendKeeper(t *testing.T) {
 	require.True(t, sendKeeper.GetCoins(ctx, addr).IsEqual(sdk.NewCoins(sdk.NewInt64Coin("foocoin", 10))))
 	require.True(t, sendKeeper.GetCoins(ctx, addr2).IsEqual(sdk.NewCoins(sdk.NewInt64Coin("foocoin", 5))))
 
-	_, _ = input.Keeper.AddCoins(ctx, addr, sdk.NewCoins(sdk.NewInt64Coin("barcoin", 30)))
+	acc = input.Keeper.GetAcc(ctx, addr).(*types.BaseAccount)
+	_, _ = input.Keeper.AddCoins(ctx, acc, sdk.NewCoins(sdk.NewInt64Coin("barcoin", 30)))
 	_ = sendKeeper.SendCoins(ctx, addr, addr2, sdk.NewCoins(sdk.NewInt64Coin("barcoin", 10), sdk.NewInt64Coin("foocoin", 5)))
 	require.True(t, sendKeeper.GetCoins(ctx, addr).IsEqual(sdk.NewCoins(sdk.NewInt64Coin("barcoin", 20), sdk.NewInt64Coin("foocoin", 5))))
 	require.True(t, sendKeeper.GetCoins(ctx, addr2).IsEqual(sdk.NewCoins(sdk.NewInt64Coin("barcoin", 10), sdk.NewInt64Coin("foocoin", 10))))

@@ -18,8 +18,10 @@ func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, data types.GenesisState) []a
 
 // "ExportGenesis" - Exports the state in a genesis state object
 func ExportGenesis(ctx sdk.Ctx, k keeper.Keeper) types.GenesisState {
+	c := k.GetAllClaims(ctx)
+	p := k.GetParams(ctx)
 	return types.GenesisState{
-		Params: k.GetParams(ctx),
-		Claims: k.GetAllClaims(ctx),
+		Params: p,
+		Claims: c,
 	}
 }

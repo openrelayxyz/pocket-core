@@ -19,7 +19,7 @@ func (k Keeper) Subspace(s string) sdk.Subspace {
 		os.Exit(1)
 	}
 	space := sdk.NewSubspace(s)
-	space.SetCodec(k.cdc)
+	space.SetCodec(k.legacyCdc)
 	k.spaces[s] = space
 	return space
 }
@@ -35,7 +35,7 @@ func (k Keeper) AddSubspaces(subspaces ...sdk.Subspace) {
 			fmt.Println(fmt.Errorf("cannot use empty stirng for subspace"))
 			os.Exit(1)
 		}
-		space.SetCodec(k.cdc)
+		space.SetCodec(k.legacyCdc)
 		k.spaces[space.Name()] = space
 	}
 }
@@ -104,12 +104,12 @@ func (k Keeper) HandleUpgrade(ctx sdk.Ctx, aclKey string, paramValue interface{}
 			ctx.Logger().Error(fmt.Sprintf("unable to convert %v to upgrade, can't emit event about upgrade, at height: %d", paramValue, ctx.BlockHeight()))
 			return sdk.Result{Events: ctx.EventManager().Events()}
 		}
-		ctx.EventManager().EmitEvent(sdk.NewEvent(
+		ctx.EventManager().EmitEvent(sdk.Event(sdk.NewEvent(
 			types.EventUpgrade,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
 			sdk.NewAttribute(sdk.AttributeKeyAction, fmt.Sprintf("UPGRADE CONFIRMED: %s at height %v", u.UpgradeVersion(), u.UpgradeHeight())),
 			sdk.NewAttribute(sdk.AttributeKeySender, owner.String()),
-		))
+		)))
 	}
 	return sdk.Result{Events: ctx.EventManager().Events()}
 }

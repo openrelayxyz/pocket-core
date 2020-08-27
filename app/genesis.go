@@ -2,10 +2,12 @@ package app
 
 import (
 	"fmt"
-	posConfig "github.com/pokt-network/pocket-core/config"
 	"log"
 	"os"
 	"time"
+
+	posConfig "github.com/pokt-network/pocket-core/config"
+	authTypes "github.com/pokt-network/pocket-core/x/auth/types"
 
 	tmType "github.com/tendermint/tendermint/types"
 
@@ -14867,7 +14869,8 @@ var testnetGenesis = `{
             "time_iota_ms": "1"
         },
         "evidence": {
-            "max_age": "120000000000"
+            "max_age_num_blocks": "10000",
+            "max_age_duration": "172800000000000"
         },
         "validator": {
             "pub_key_types": [
@@ -15415,7 +15418,7 @@ func GenesisStateFromJson(json string) posConfig.GenesisState {
 		fmt.Println("unable to read genesis from json (internal)")
 		os.Exit(1)
 	}
-	return posConfig.GenesisStateFromGenDoc(cdc, *genDoc)
+	return posConfig.GenesisStateFromGenDoc(legacyAminoCodec, *genDoc)
 }
 
 func newDefaultGenesisState() []byte {
@@ -15427,6 +15430,7 @@ func newDefaultGenesisState() []byte {
 	if err != nil {
 		log.Fatal(err)
 	}
+	aminoCodec, _ := Codec()
 	pubKey := cb.PublicKey
 	defaultGenesis := module.NewBasicManager(
 		apps.AppModuleBasic{},
@@ -15438,19 +15442,20 @@ func newDefaultGenesisState() []byte {
 	// setup account genesis
 	rawAuth := defaultGenesis[auth.ModuleName]
 	var accountGenesis auth.GenesisState
-	types.ModuleCdc.MustUnmarshalJSON(rawAuth, &accountGenesis)
-	accountGenesis.Accounts = append(accountGenesis.Accounts, &auth.BaseAccount{
+	types.LegacyModuleCdc.MustUnmarshalJSON(rawAuth, &accountGenesis)
+	acc := authTypes.BaseAccount{
 		Address: cb.GetAddress(),
 		Coins:   sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(1000000))),
 		PubKey:  pubKey,
-	})
-	res := Codec().MustMarshalJSON(accountGenesis)
+	}
+	accountGenesis.Accounts = append(accountGenesis.Accounts, &acc)
+	res := aminoCodec.MustMarshalJSON(accountGenesis)
 	defaultGenesis[auth.ModuleName] = res
 	// set address as application too
 	rawApps := defaultGenesis[appsTypes.ModuleName]
 	var appsGenesis appsTypes.GenesisState
-	types.ModuleCdc.MustUnmarshalJSON(rawApps, &appsGenesis)
-	appsGenesis.Applications = append(appsGenesis.Applications, appsTypes.Application{
+	types.LegacyModuleCdc.MustUnmarshalJSON(rawApps, &appsGenesis)
+	app := appsTypes.Application{
 		Address:                 cb.GetAddress(),
 		PublicKey:               cb.PublicKey,
 		Jailed:                  false,
@@ -15459,20 +15464,21 @@ func newDefaultGenesisState() []byte {
 		StakedTokens:            sdk.NewInt(10000000000000),
 		MaxRelays:               sdk.NewInt(10000000000000),
 		UnstakingCompletionTime: time.Time{},
-	})
-	res = Codec().MustMarshalJSON(appsGenesis)
+	}
+	appsGenesis.Applications = append(appsGenesis.Applications, app)
+	res = aminoCodec.MustMarshalJSON(appsGenesis)
 	defaultGenesis[appsTypes.ModuleName] = res
 	// set default governance in genesis
 	rawPocket := defaultGenesis[types.ModuleName]
 	var pocketGenesis types.GenesisState
-	types.ModuleCdc.MustUnmarshalJSON(rawPocket, &pocketGenesis)
+	types.LegacyModuleCdc.MustUnmarshalJSON(rawPocket, &pocketGenesis)
 	pocketGenesis.Params.SessionNodeCount = 1
-	res = Codec().MustMarshalJSON(pocketGenesis)
+	res = aminoCodec.MustMarshalJSON(pocketGenesis)
 	defaultGenesis[types.ModuleName] = res
 	// setup pos genesis
 	rawPOS := defaultGenesis[nodesTypes.ModuleName]
 	var posGenesisState nodesTypes.GenesisState
-	types.ModuleCdc.MustUnmarshalJSON(rawPOS, &posGenesisState)
+	types.LegacyModuleCdc.MustUnmarshalJSON(rawPOS, &posGenesisState)
 	posGenesisState.Validators = append(posGenesisState.Validators,
 		nodesTypes.Validator{Address: sdk.Address(pubKey.Address()),
 			PublicKey:    pubKey,
@@ -15480,21 +15486,22 @@ func newDefaultGenesisState() []byte {
 			Chains:       []string{PlaceholderHash},
 			ServiceURL:   PlaceholderServiceURL,
 			StakedTokens: sdk.NewInt(10000000)})
-	res = types.ModuleCdc.MustMarshalJSON(posGenesisState)
+	res = types.LegacyModuleCdc.MustMarshalJSON(posGenesisState)
 	defaultGenesis[nodesTypes.ModuleName] = res
 	// set default governance in genesis
 	var govGenesisState govTypes.GenesisState
 	rawGov := defaultGenesis[govTypes.ModuleName]
-	Codec().MustUnmarshalJSON(rawGov, &govGenesisState)
+	aminoCodec.MustUnmarshalJSON(rawGov, &govGenesisState)
 	mACL := createDummyACL(pubKey)
 	govGenesisState.Params.ACL = mACL
 	govGenesisState.Params.DAOOwner = sdk.Address(pubKey.Address())
-	govGenesisState.Params.Upgrade = govTypes.NewUpgrade(0, "0")
-	res4 := Codec().MustMarshalJSON(govGenesisState)
+	u := govTypes.NewUpgrade(0, "0")
+	govGenesisState.Params.Upgrade = u
+	res4 := aminoCodec.MustMarshalJSON(govGenesisState)
 	defaultGenesis[govTypes.ModuleName] = res4
 	// end genesis setup
-	j, _ := types.ModuleCdc.MarshalJSONIndent(defaultGenesis, "", "    ")
-	j, _ = types.ModuleCdc.MarshalJSONIndent(tmType.GenesisDoc{
+	j, _ := types.LegacyModuleCdc.MarshalJSONIndent(defaultGenesis, "", "  ")
+	j, _ = types.LegacyModuleCdc.MarshalJSONIndent(tmType.GenesisDoc{
 		GenesisTime: time.Now(),
 		ChainID:     "pocket-test",
 		ConsensusParams: &tmType.ConsensusParams{
@@ -15513,7 +15520,7 @@ func newDefaultGenesisState() []byte {
 		Validators: nil,
 		AppHash:    nil,
 		AppState:   j,
-	}, "", "    ")
+	}, "", "  ")
 	return j
 }
 

@@ -208,7 +208,7 @@ func TestValidator_UnmarshalJSON(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"Unmarshal JSON Test", fields{
+		{"UnmarshalObject JSON Test", fields{
 			Address:                 sdk.Address(pub.Address()),
 			ConsPubKey:              pub,
 			Jailed:                  false,

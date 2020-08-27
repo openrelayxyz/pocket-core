@@ -3,6 +3,8 @@ package keeper
 // DONTCOVER
 
 import (
+	"github.com/pokt-network/pocket-core/codec/types"
+	"github.com/pokt-network/pocket-core/crypto"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
@@ -16,7 +18,7 @@ import (
 )
 
 type testInput struct {
-	cdc    *codec.Codec
+	cdc    *codec.ProtoCodec
 	ctx    sdk.Context
 	Keeper Keeper
 }
@@ -24,9 +26,10 @@ type testInput struct {
 func setupTestInput() testInput {
 	db := dbm.NewMemDB()
 
-	cdc := codec.New()
-	authTypes.RegisterCodec(cdc)
-	codec.RegisterCrypto(cdc)
+	cdc := codec.NewLegacyAminoCodec()
+	proto := codec.NewProtoCodec(types.NewInterfaceRegistry())
+	authTypes.RegisterCodec(cdc, proto)
+	crypto.RegisterCrypto(cdc, nil)
 
 	authCapKey := sdk.NewKVStoreKey("auth")
 	keyParams := sdk.ParamsKey
@@ -39,10 +42,10 @@ func setupTestInput() testInput {
 	_ = ms.LoadLatestVersion()
 	akSubspace := sdk.NewSubspace(authTypes.DefaultCodespace)
 	ak := NewKeeper(
-		cdc, authCapKey, akSubspace, nil,
+		cdc, proto, authCapKey, akSubspace, nil,
 	)
-	govKeeper.NewKeeper(cdc, sdk.ParamsKey, sdk.ParamsTKey, govTypes.DefaultCodespace, ak, akSubspace)
+	govKeeper.NewKeeper(cdc, proto, sdk.ParamsKey, sdk.ParamsTKey, govTypes.DefaultCodespace, ak, akSubspace)
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 	ak.SetParams(ctx, authTypes.DefaultParams())
-	return testInput{Keeper: ak, cdc: cdc, ctx: ctx}
+	return testInput{Keeper: ak, cdc: proto, ctx: ctx}
 }

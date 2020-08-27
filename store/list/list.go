@@ -22,12 +22,14 @@ func ElemKey(index uint64) []byte {
 // List defines an integer indexable mapper
 // It panics when the element type cannot be (un/)marshalled by the codec
 type List struct {
-	cdc   *codec.Codec
+	cdc   *codec.LegacyAmino
 	store types.KVStore
 }
 
+// TODO: list is not really being used, should be completely removed from source
+
 // NewList constructs new List
-func NewList(cdc *codec.Codec, store types.KVStore) List {
+func NewList(cdc *codec.LegacyAmino, store types.KVStore) List {
 	return List{
 		cdc:   cdc,
 		store: store,
@@ -39,7 +41,7 @@ func NewList(cdc *codec.Codec, store types.KVStore) List {
 // List dosen't check if an index is in bounds
 // The user should check Len() before doing any actions
 func (m List) Len() (res uint64) {
-	bz := m.store.Get(LengthKey())
+	bz, _ := m.store.Get(LengthKey())
 	if bz == nil {
 		return 0
 	}
@@ -50,7 +52,7 @@ func (m List) Len() (res uint64) {
 
 // Get() returns the element by its index
 func (m List) Get(index uint64, ptr interface{}) error {
-	bz := m.store.Get(ElemKey(index))
+	bz, _ := m.store.Get(ElemKey(index))
 	return m.cdc.UnmarshalBinaryLengthPrefixed(bz, ptr)
 }
 
@@ -59,14 +61,14 @@ func (m List) Get(index uint64, ptr interface{}) error {
 // Use Push() instead of Set() to append a new element
 func (m List) Set(index uint64, value interface{}) {
 	bz := m.cdc.MustMarshalBinaryLengthPrefixed(value)
-	m.store.Set(ElemKey(index), bz)
+	_ = m.store.Set(ElemKey(index), bz)
 }
 
 // Delete() deletes the element in the given position
 // Other elements' indices are preserved after deletion
 // Panics when the index is out of range
 func (m List) Delete(index uint64) {
-	m.store.Delete(ElemKey(index))
+	_ = m.store.Delete(ElemKey(index))
 }
 
 // Push() inserts the element to the end of the list
@@ -74,7 +76,7 @@ func (m List) Delete(index uint64) {
 func (m List) Push(value interface{}) {
 	length := m.Len()
 	m.Set(length, value)
-	m.store.Set(LengthKey(), m.cdc.MustMarshalBinaryLengthPrefixed(length+1))
+	_ = m.store.Set(LengthKey(), m.cdc.MustMarshalBinaryLengthPrefixed(length+1))
 }
 
 // Iterate() is used to iterate over all existing elements in the list
@@ -84,7 +86,7 @@ func (m List) Push(value interface{}) {
 
 // CONTRACT: No writes may happen within a domain while iterating over it.
 func (m List) Iterate(ptr interface{}, fn func(uint64) bool) {
-	iter := types.KVStorePrefixIterator(m.store, []byte{0x01})
+	iter, _ := types.KVStorePrefixIterator(m.store, []byte{0x01})
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
 		v := iter.Value()

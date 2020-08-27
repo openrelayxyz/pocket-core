@@ -12,11 +12,11 @@ func NewHandler(keeper keeper.Keeper) sdk.Handler {
 	return func(ctx sdk.Ctx, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {
 		// handle claim message
-		case types.MsgClaim:
-			return handleClaimMsg(ctx, keeper, msg)
+		case *types.MsgClaim:
+			return handleClaimMsg(ctx, keeper, *msg)
 		// handle proof message
-		case types.MsgProof:
-			return handleProofMsg(ctx, keeper, msg)
+		case *types.MsgProof:
+			return handleProofMsg(ctx, keeper, *msg)
 		default:
 			errMsg := fmt.Sprintf("Unrecognized pocketcore Msg type: %v", msg.Type())
 			return sdk.ErrUnknownRequest(errMsg).Result()

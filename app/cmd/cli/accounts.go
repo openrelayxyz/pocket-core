@@ -414,6 +414,7 @@ Prompts the user for <fromAddr> account passphrase.`,
 			fmt.Println(err)
 			return
 		}
+		fmt.Println(res.RawHexBytes)
 		fmt.Println(resp)
 	},
 }

@@ -2,23 +2,32 @@ package types
 
 import (
 	"github.com/pokt-network/pocket-core/codec"
+	"github.com/pokt-network/pocket-core/codec/types"
+	"github.com/pokt-network/pocket-core/crypto"
+	sdk "github.com/pokt-network/pocket-core/types"
 )
 
-// module codec
-var ModuleCdc *codec.Codec
+// RegisterCodec registers concrete types on the codec
+func RegisterCodec(amino *codec.LegacyAmino, proto *codec.ProtoCodec) {
+	amino.RegisterConcrete(MsgChangeParam{}, "gov/msg_change_param", nil)
+	amino.RegisterConcrete(MsgDAOTransfer{}, "gov/msg_dao_transfer", nil)
+	amino.RegisterInterface((*interface{})(nil), nil)
+	amino.RegisterConcrete(ACL{}, "gov/non_map_acl", nil)
+	amino.RegisterConcrete(Upgrade{}, "gov/upgrade", nil)
+	amino.RegisterConcrete(MsgUpgrade{}, "gov/msg_upgrade", nil)
 
-func init() {
-	ModuleCdc = codec.New()
-	RegisterCodec(ModuleCdc)
-	ModuleCdc.Seal()
+	proto.RegisterImplementation((*sdk.Msg)(nil), &MsgChangeParam{}, &MsgDAOTransfer{}, &MsgUpgrade{})
+	ModuleCdc = proto
 }
 
-// RegisterCodec registers all necessary param module types with a given codec.
-func RegisterCodec(cdc *codec.Codec) {
-	cdc.RegisterConcrete(MsgChangeParam{}, "gov/msg_change_param", nil)
-	cdc.RegisterConcrete(MsgDAOTransfer{}, "gov/msg_dao_transfer", nil)
-	cdc.RegisterInterface((*interface{})(nil), nil)
-	cdc.RegisterConcrete(ACL{}, "gov/non_map_acl", nil)
-	cdc.RegisterConcrete(Upgrade{}, "gov/upgrade", nil)
-	cdc.RegisterConcrete(MsgUpgrade{}, "gov/msg_upgrade", nil)
+// module wide codec
+var ModuleCdc *codec.ProtoCodec
+var LegacyModuleCdc *codec.LegacyAmino
+
+func init() {
+	ModuleCdc = codec.NewProtoCodec(types.NewInterfaceRegistry())
+	LegacyModuleCdc = codec.NewLegacyAminoCodec()
+	RegisterCodec(LegacyModuleCdc, ModuleCdc)
+	crypto.RegisterCrypto(LegacyModuleCdc, ModuleCdc)
+	LegacyModuleCdc.Seal()
 }

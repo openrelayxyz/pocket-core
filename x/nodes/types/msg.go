@@ -23,27 +23,31 @@ const (
 //----------------------------------------------------------------------------------------------------------------------
 
 // MsgStake - struct for staking transactions
-type MsgStake struct {
-	PublicKey  crypto.PublicKey `json:"public_key" yaml:"public_key"`
-	Chains     []string         `json:"chains" yaml:"chains"`
-	Value      sdk.Int          `json:"value" yaml:"value"`
-	ServiceURL string           `json:"service_url" yaml:"service_url"`
-}
+//type MsgStake struct {
+//	PublicKey  crypto.PublicKey `json:"public_key" yaml:"public_key"`
+//	Chains     []string         `json:"chains" yaml:"chains"`
+//	Value      sdk.Int          `json:"value" yaml:"value"`
+//	ServiceURL string           `json:"service_url" yaml:"service_url"`
+//}
 
 // GetSigners retrun address(es) that must sign over msg.GetSignBytes()
 func (msg MsgStake) GetSigner() sdk.Address {
-	return sdk.Address(msg.PublicKey.Address())
+	pubkey, err := crypto.NewPublicKey(msg.Publickey)
+	if err != nil {
+		return sdk.Address{}
+	}
+	return sdk.Address(pubkey.Address())
 }
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgStake) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
+	return bz
 }
 
 // ValidateBasic quick validity check, stateless
 func (msg MsgStake) ValidateBasic() sdk.Error {
-	if msg.PublicKey == nil || msg.PublicKey.RawString() == "" {
+	if msg.Publickey == "" {
 		return ErrNilValidatorAddr(DefaultCodespace)
 	}
 	if msg.Value.LTE(sdk.ZeroInt()) {
@@ -58,7 +62,7 @@ func (msg MsgStake) ValidateBasic() sdk.Error {
 			return err
 		}
 	}
-	if err := ValidateServiceURL(msg.ServiceURL); err != nil {
+	if err := ValidateServiceURL(msg.ServiceUrl); err != nil {
 		return err
 	}
 	return nil
@@ -78,24 +82,24 @@ func (msg MsgStake) GetFee() sdk.Int {
 //----------------------------------------------------------------------------------------------------------------------
 
 // MsgBeginUnstake - struct for unstaking transaciton
-type MsgBeginUnstake struct {
-	Address sdk.Address `json:"validator_address" yaml:"validator_address"`
-}
+//type MsgBeginUnstake struct {
+//	Address sdk.Address `json:"validator_address" yaml:"validator_address"`
+//}
 
 // GetSigners return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgBeginUnstake) GetSigner() sdk.Address {
-	return msg.Address
+	return msg.ValidatorAddress
 }
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgBeginUnstake) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
+	return bz
 }
 
 // ValidateBasic quick validity check, stateless
 func (msg MsgBeginUnstake) ValidateBasic() sdk.Error {
-	if msg.Address.Empty() {
+	if msg.ValidatorAddress.Empty() {
 		return ErrNilValidatorAddr(DefaultCodespace)
 	}
 	return nil
@@ -115,24 +119,24 @@ func (msg MsgBeginUnstake) GetFee() sdk.Int {
 //----------------------------------------------------------------------------------------------------------------------
 
 // MsgUnjail - struct for unjailing jailed validator
-type MsgUnjail struct {
-	ValidatorAddr sdk.Address `json:"address" yaml:"address"` // address of the validator operator
-}
+//type MsgUnjail struct {
+//	ValidatorAddr sdk.Address `json:"address" yaml:"address"` // address of the validator operator
+//}
 
 // GetSigners return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgUnjail) GetSigner() sdk.Address {
-	return msg.ValidatorAddr
+	return msg.Address
 }
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgUnjail) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
+	return bz
 }
 
 // ValidateBasic quick validity check, stateless
 func (msg MsgUnjail) ValidateBasic() sdk.Error {
-	if msg.ValidatorAddr.Empty() {
+	if msg.Address.Empty() {
 		return ErrNoValidatorFound(DefaultCodespace)
 	}
 	return nil
@@ -152,11 +156,11 @@ func (msg MsgUnjail) GetFee() sdk.Int {
 //----------------------------------------------------------------------------------------------------------------------
 
 // MsgSend structure for sending coins
-type MsgSend struct {
-	FromAddress sdk.Address `json:"from_address"`
-	ToAddress   sdk.Address `json:"to_address"`
-	Amount      sdk.Int     `json:"amount"`
-}
+//type MsgSend struct {
+//	FromAddress sdk.Address `json:"from_address"`
+//	ToAddress   sdk.Address `json:"to_address"`
+//	Amount      sdk.Int     `json:"amount"`
+//}
 
 // GetSigners return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgSend) GetSigner() sdk.Address {
@@ -165,8 +169,8 @@ func (msg MsgSend) GetSigner() sdk.Address {
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgSend) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
+	return bz
 }
 
 // ValidateBasic quick validity check, stateless

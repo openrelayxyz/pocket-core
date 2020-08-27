@@ -72,7 +72,7 @@ func TestKeepers_NewKeeper(t *testing.T) {
 					},
 				},
 			)
-			cdc := makeTestCodec()
+			amino, proto := makeTestCodec()
 
 			maccPerms := map[string][]string{
 				auth.FeeCollectorName:     nil,
@@ -92,8 +92,8 @@ func TestKeepers_NewKeeper(t *testing.T) {
 			accSubspace := sdk.NewSubspace(auth.DefaultParamspace)
 			nodesSubspace := sdk.NewSubspace(nodestypes.DefaultParamspace)
 			appSubspace := sdk.NewSubspace(DefaultParamspace)
-			ak := auth.NewKeeper(cdc, keyAcc, accSubspace, maccPerms)
-			nk := nodeskeeper.NewKeeper(cdc, nodesKey, ak, nodesSubspace, "pos")
+			ak := auth.NewKeeper(amino, proto, keyAcc, accSubspace, maccPerms)
+			nk := nodeskeeper.NewKeeper(amino, proto, nodesKey, ak, nodesSubspace, "pos")
 			moduleManager := module.NewManager(
 				auth.NewAppModule(ak),
 				nodes.NewAppModule(nk),
@@ -107,7 +107,7 @@ func TestKeepers_NewKeeper(t *testing.T) {
 			if tt.hasError {
 				return
 			}
-			_ = NewKeeper(cdc, appsKey, nk, ak, appSubspace, "apps")
+			_ = NewKeeper(amino, proto, appsKey, nk, ak, appSubspace, "apps")
 		})
 	}
 }

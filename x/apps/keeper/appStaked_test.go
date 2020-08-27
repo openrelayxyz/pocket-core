@@ -1,10 +1,11 @@
 package keeper
 
 import (
+	"testing"
+
 	sdk "github.com/pokt-network/pocket-core/types"
 	"github.com/pokt-network/pocket-core/x/apps/types"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestGetAndSetStakedApplication(t *testing.T) {
@@ -105,7 +106,8 @@ func TestRemoveStakedApplicationTokens(t *testing.T) {
 			}
 			assert.True(t, application.StakedTokens.Equal(test.want.tokens), "application staked tokens is not as want")
 			store := context.KVStore(keeper.storeKey)
-			assert.NotNil(t, store.Get(types.KeyForAppInStakingSet(application)))
+			sg, _ := store.Get(types.KeyForAppInStakingSet(application))
+			assert.NotNil(t, sg)
 
 		})
 	}
@@ -170,7 +172,7 @@ func TestGetValsIterator(t *testing.T) {
 				keeper.SetStakedApplication(context, application)
 			}
 
-			it := keeper.stakedAppsIterator(context)
+			it, _ := keeper.stakedAppsIterator(context)
 			assert.Implements(t, (*sdk.Iterator)(nil), it, "does not implement interface")
 		})
 	}

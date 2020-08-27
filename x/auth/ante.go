@@ -14,7 +14,7 @@ import (
 
 // NewAnteHandler returns an AnteHandler that checks signatures and deducts fees from the first signer.
 func NewAnteHandler(ak keeper.Keeper) sdk.AnteHandler {
-	return func(ctx sdk.Ctx, tx sdk.Tx, txBz []byte, txIndexer *txindex.TxIndexer, simulate bool) (newCtx sdk.Ctx, res sdk.Result, abort bool) {
+	return func(ctx sdk.Ctx, tx sdk.Tx, txBz []byte, txIndexer txindex.TxIndexer, simulate bool) (newCtx sdk.Ctx, res sdk.Result, abort bool) {
 		if addr := ak.GetModuleAddress(types.FeeCollectorName); addr == nil {
 			ctx.Logger().Error(fmt.Sprintf("%s module account has not been set", types.FeeCollectorName))
 			os.Exit(1)
@@ -40,18 +40,22 @@ func NewAnteHandler(ak keeper.Keeper) sdk.AnteHandler {
 	}
 }
 
-func ValidateTransaction(ctx sdk.Ctx, k Keeper, stdTx StdTx, params Params, txIndexer *txindex.TxIndexer, txBz []byte, simulate bool) sdk.Error {
+func ValidateTransaction(ctx sdk.Ctx, k Keeper, stdTx StdTx, params Params, txIndexer txindex.TxIndexer, txBz []byte, simulate bool) sdk.Error {
 	// validate the memo
 	if err := ValidateMemo(stdTx, params); err != nil {
 		return types.ErrInvalidMemo(ModuleName, err)
 	}
 	var pk posCrypto.PublicKey
 	// attempt to get the public key from the signature
-	if stdTx.Signature.PublicKey != nil && len(stdTx.Signature.PublicKey.RawBytes()) != 0 {
-		pk = stdTx.Signature.PublicKey
+	if stdTx.Signature.PublicKey != "" {
+		var err error
+		pk, err = posCrypto.NewPublicKey(stdTx.Signature.PublicKey)
+		if err != nil {
+			return sdk.ErrInvalidPubKey(err.Error())
+		}
 	} else {
 		// public key in the signature not found so check world state
-		acc := k.GetAccount(ctx, stdTx.GetSigner())
+		acc := k.GetAcc(ctx, stdTx.GetSigner())
 		if acc == nil {
 			return types.ErrAccountNotFound(ModuleName)
 		}
@@ -62,7 +66,7 @@ func ValidateTransaction(ctx sdk.Ctx, k Keeper, stdTx StdTx, params Params, txIn
 	// check for duplicate transaction to prevent replay attacks
 	txHash := tmTypes.Tx(txBz).Hash()
 	// make http call to tendermint to check txIndexer
-	res, _ := (*txIndexer).Get(txHash)
+	res, _ := (txIndexer).Get(txHash)
 	if res != nil {
 		return types.ErrDuplicateTx(ModuleName, hex.EncodeToString(txHash))
 	}
@@ -72,7 +76,7 @@ func ValidateTransaction(ctx sdk.Ctx, k Keeper, stdTx StdTx, params Params, txIn
 		return sdk.ErrInternal(err.Error())
 	}
 	// get the fees from the tx
-	expectedFee := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, k.GetParams(ctx).FeeMultiplier.GetFee(stdTx.Msg)))
+	expectedFee := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, k.GetParams(ctx).FeeMultiplier.GetFee(stdTx.GetMsg())))
 	// test for public key type
 	p, ok := pk.(posCrypto.PublicKeyMultiSig)
 	// if standard public key
@@ -124,7 +128,7 @@ func recSignDepth(count, limit uint64, publicKey posCrypto.PublicKeyMultiSig) (c
 // GetSignerAcc returns an account for a given address that is expected to sign
 // a transaction.
 func GetSignerAcc(ctx sdk.Ctx, ak keeper.Keeper, addr sdk.Address) (Account, sdk.Error) {
-	if acc := ak.GetAccount(ctx, addr); acc != nil {
+	if acc := ak.GetAcc(ctx, addr); acc != nil {
 		return acc, nil
 	}
 	return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))
@@ -171,6 +175,6 @@ func DeductFees(keeper keeper.Keeper, ctx sdk.Ctx, tx types.StdTx) sdk.Error {
 // and an account.
 func GetSignBytes(chainID string, stdTx StdTx) ([]byte, error) {
 	return StdSignBytes(
-		chainID, stdTx.Entropy, stdTx.Fee, stdTx.Msg, stdTx.Memo,
+		chainID, stdTx.Entropy, stdTx.Fee, stdTx.GetMsg(), stdTx.Memo,
 	)
 }

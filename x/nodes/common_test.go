@@ -1,6 +1,8 @@
 package nodes
 
 import (
+	types2 "github.com/pokt-network/pocket-core/codec/types"
+	"github.com/tendermint/tendermint/rpc/client/http"
 	"math/rand"
 	"testing"
 
@@ -32,14 +34,15 @@ var (
 
 // : deadcode unused
 // create a codec used only for testing
-func makeTestCodec() *codec.Codec {
-	var cdc = codec.New()
-	auth.RegisterCodec(cdc)
-	gov.RegisterCodec(cdc)
-	sdk.RegisterCodec(cdc)
-	codec.RegisterCrypto(cdc)
+func makeTestCodec() (*codec.LegacyAmino, *codec.ProtoCodec) {
+	var amino = codec.NewLegacyAminoCodec()
+	var proto = codec.NewProtoCodec(types2.NewInterfaceRegistry())
+	auth.RegisterCodec(amino, proto)
+	gov.RegisterCodec(amino, proto)
+	sdk.RegisterCodec(amino, proto)
+	crypto.RegisterCrypto(amino, proto)
 
-	return cdc
+	return amino, proto
 }
 
 func GetTestTendermintClient() client.Client {
@@ -47,9 +50,11 @@ func GetTestTendermintClient() client.Client {
 	var defaultTMURI = "tcp://localhost:26657"
 
 	if tmNodeURI == "" {
-		return client.NewHTTP(defaultTMURI, "/websocket")
+		c, _ := http.New(defaultTMURI, "/websocket")
+		return c
 	}
-	return client.NewHTTP(tmNodeURI, "/websocket")
+	c, _ := http.New(tmNodeURI, "/websocket")
+	return c
 }
 
 // : deadcode unused
@@ -79,7 +84,7 @@ func createTestInput(t *testing.T, isCheckTx bool) (sdk.Context, []auth.Account,
 			},
 		},
 	)
-	cdc := makeTestCodec()
+	amino, proto := makeTestCodec()
 
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName:   nil,
@@ -95,7 +100,7 @@ func createTestInput(t *testing.T, isCheckTx bool) (sdk.Context, []auth.Account,
 	accSubspace := sdk.NewSubspace(auth.DefaultParamspace)
 	posSubspace := sdk.NewSubspace(types.DefaultParamspace)
 
-	ak := auth.NewKeeper(cdc, keyAcc, accSubspace, maccPerms)
+	ak := auth.NewKeeper(amino, proto, keyAcc, accSubspace, maccPerms)
 	moduleManager := module.NewManager(
 		auth.NewAppModule(ak),
 	)
@@ -106,7 +111,7 @@ func createTestInput(t *testing.T, isCheckTx bool) (sdk.Context, []auth.Account,
 	initialCoins := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, valTokens))
 	accs := createTestAccs(ctx, int(nAccs), initialCoins, &ak)
 
-	keeper := keeper.NewKeeper(cdc, keyPOS, ak, posSubspace, sdk.CodespaceType("pos"))
+	keeper := keeper.NewKeeper(amino, proto, keyPOS, ak, posSubspace, sdk.CodespaceType("pos"))
 
 	params := types.DefaultParams()
 	keeper.SetParams(ctx, params)

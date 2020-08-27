@@ -18,8 +18,8 @@ var (
 	globalRPCTimeout time.Duration
 )
 
-// "InitConfig" - Initializes the cache for sessions and evidence
-func InitConfig(userAgent, evidenceDir, sessionDir string, sessionDBType, evidenceDBType db.DBBackendType, maxEvidenceEntries, maxSessionEntries int, evidenceDBName, sessionDBName string, chains HostedBlockchains, logger log.Logger, prometheusAddr string, maxOpenConn int, timeout int64) {
+// "InitConfig" - Initializes the cache for sessions and EvidenceEncodable
+func InitConfig(userAgent, evidenceDir, sessionDir string, sessionDBType, evidenceDBType db.BackendType, maxEvidenceEntries, maxSessionEntries int, evidenceDBName, sessionDBName string, chains HostedBlockchains, logger log.Logger, prometheusAddr string, maxOpenConn int, timeout int64) {
 	cacheOnce.Do(func() {
 		globalEvidenceCache = new(CacheStorage)
 		globalSessionCache = new(CacheStorage)
@@ -38,7 +38,7 @@ func FlushCache() {
 	}
 	err = globalEvidenceCache.FlushToDB()
 	if err != nil {
-		fmt.Printf("unable to flush evidence to the database before shutdown!! %s\n", err.Error())
+		fmt.Printf("unable to flush EvidenceEncodable to the database before shutdown!! %s\n", err.Error())
 	}
 }
 

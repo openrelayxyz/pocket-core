@@ -2,6 +2,8 @@ package keeper
 
 import (
 	"fmt"
+
+	"github.com/pokt-network/pocket-core/x/auth/exported"
 	"github.com/pokt-network/pocket-core/x/auth/types"
 
 	sdk "github.com/pokt-network/pocket-core/types"
@@ -11,42 +13,58 @@ import (
 func (k Keeper) SendCoinsFromModuleToAccount(ctx sdk.Ctx, senderModule string,
 	recipientAddr sdk.Address, amt sdk.Coins) sdk.Error {
 
-	senderAddr := k.GetModuleAddress(senderModule)
-	if senderAddr == nil {
+	sender := k.GetModuleAccount(ctx, senderModule)
+	if sender == nil || sender.GetAddress() == nil {
 		return sdk.ErrUnknownAddress(fmt.Sprintf("module account %s does not exist", senderModule))
 	}
+	recipient := k.GetAcc(ctx, recipientAddr)
+	if recipient == nil {
+		var err error
+		recipient, err = k.NewAccountWithAddress(ctx, recipientAddr)
+		if err != nil {
+			return sdk.ErrInternal(err.Error())
+		}
+	}
 
-	return k.SendCoins(ctx, senderAddr, recipientAddr, amt)
+	return k.sendCoins(ctx, sender, recipient, amt)
 }
 
 // SendCoinsFromModuleToModule transfers coins from a ModuleAccount to another
 func (k Keeper) SendCoinsFromModuleToModule(ctx sdk.Ctx, senderModule, recipientModule string, amt sdk.Coins) sdk.Error {
-
-	senderAddr := k.GetModuleAddress(senderModule)
-	if senderAddr == nil {
+	sender := k.GetModuleAccount(ctx, senderModule)
+	if sender == nil || sender.GetAddress() == nil {
 		return sdk.ErrUnknownAddress(fmt.Sprintf("module account %s does not exist", senderModule))
 	}
 
+	recipient := k.GetModuleAccount(ctx, recipientModule)
 	// create the account if it doesn't yet exist
-	recipientAcc := k.GetModuleAccount(ctx, recipientModule)
-	if recipientAcc == nil {
+	if recipient == nil {
 		return sdk.ErrModuleAccountCreate(fmt.Sprintf("module account %s isn't able to be created", recipientModule))
 	}
 
-	return k.SendCoins(ctx, senderAddr, recipientAcc.GetAddress(), amt)
+	return k.sendCoins(ctx, sender, recipient, amt)
 }
 
 // SendCoinsFromAccountToModule transfers coins from an Address to a ModuleAccount
 func (k Keeper) SendCoinsFromAccountToModule(ctx sdk.Ctx, senderAddr sdk.Address,
 	recipientModule string, amt sdk.Coins) sdk.Error {
+	sender := k.GetAcc(ctx, senderAddr)
+	if sender == nil {
+		var err error
+		sender, err = k.NewAccountWithAddress(ctx, senderAddr)
+		if err != nil {
+			return sdk.ErrInternal(err.Error())
+		}
+	}
 
 	// create the account if it doesn't yet exist
-	recipientAcc := k.GetModuleAccount(ctx, recipientModule)
-	if recipientAcc == nil {
+	recipient := k.GetModuleAccount(ctx, recipientModule)
+	// create the account if it doesn't yet exist
+	if recipient == nil {
 		return sdk.ErrModuleAccountCreate(fmt.Sprintf("module account %s isn't able to be created", recipientModule))
 	}
 
-	return k.SendCoins(ctx, senderAddr, recipientAcc.GetAddress(), amt)
+	return k.sendCoins(ctx, sender, recipient, amt)
 }
 
 // MintCoins creates new coins from thin air and adds it to the module account.
@@ -63,7 +81,8 @@ func (k Keeper) MintCoins(ctx sdk.Ctx, moduleName string, amt sdk.Coins) sdk.Err
 		return sdk.ErrForbidden(fmt.Sprintf("module account %s does not have permissions to mint tokens", moduleName))
 	}
 
-	_, err := k.AddCoins(ctx, acc.GetAddress(), amt)
+	// Actually Add coins to acc
+	_, err := k.AddCoins(ctx, acc, amt)
 	if err != nil {
 		return sdk.ErrInternal(err.Error())
 	}
@@ -94,7 +113,8 @@ func (k Keeper) BurnCoins(ctx sdk.Ctx, moduleName string, amt sdk.Coins) sdk.Err
 		return sdk.ErrModuleAccountCreate(fmt.Sprintf("module account %s does not have permissions to burn tokens", moduleName))
 	}
 
-	_, err := k.SubtractCoins(ctx, acc.GetAddress(), amt)
+	// TODO actually subtract coins from Acc
+	_, err := k.SubtractCoins(ctx, acc, amt)
 	if err != nil {
 		return sdk.ErrInternal(err.Error())
 	}
@@ -111,24 +131,47 @@ func (k Keeper) BurnCoins(ctx sdk.Ctx, moduleName string, amt sdk.Coins) sdk.Err
 }
 
 // SendCoins moves coins from one account to another
-func (k Keeper) SendCoins(ctx sdk.Ctx, fromAddr sdk.Address, toAddr sdk.Address, amt sdk.Coins) sdk.Error {
-	_, err := k.SubtractCoins(ctx, fromAddr, amt)
+func (k Keeper) SendCoins(ctx sdk.Ctx, fromAddr sdk.Address, toAddress sdk.Address, amt sdk.Coins) sdk.Error {
+	sender := k.GetAcc(ctx, fromAddr)
+	if sender == nil {
+		var err error
+		sender, err = k.NewAccountWithAddress(ctx, toAddress)
+		if err != nil {
+			return sdk.ErrInternal(err.Error())
+		}
+	}
+	recipient := k.GetAcc(ctx, toAddress)
+	if recipient == nil {
+		var err error
+		recipient, err = k.NewAccountWithAddress(ctx, toAddress)
+		if err != nil {
+			return sdk.ErrInternal(err.Error())
+		}
+	}
+
+	return k.sendCoins(ctx, sender, recipient, amt)
+}
+
+// SendCoins moves coins from one account to another
+func (k Keeper) sendCoins(ctx sdk.Ctx, from exported.Account, to exported.Account, amt sdk.Coins) sdk.Error {
+	_, err := k.SubtractCoins(ctx, from, amt)
 	if err != nil {
 		return err
 	}
-	_, err = k.AddCoins(ctx, toAddr, amt)
+	_, err = k.AddCoins(ctx, to, amt)
 	if err != nil {
 		return err
 	}
+
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeTransfer,
-			sdk.NewAttribute(types.AttributeKeyRecipient, toAddr.String()),
+			sdk.NewAttribute(types.AttributeKeyRecipient, to.GetAddress().String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, amt.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
-			sdk.NewAttribute(types.AttributeKeySender, fromAddr.String()),
+			sdk.NewAttribute(types.AttributeKeySender, from.GetAddress().String()),
 		),
 	})
 
@@ -136,19 +179,13 @@ func (k Keeper) SendCoins(ctx sdk.Ctx, fromAddr sdk.Address, toAddr sdk.Address,
 }
 
 // SubtractCoins subtracts amt from the coins at the addr.
-func (k Keeper) SubtractCoins(ctx sdk.Ctx, addr sdk.Address, amt sdk.Coins) (sdk.Coins, sdk.Error) {
-
+func (k Keeper) SubtractCoins(ctx sdk.Ctx, acc exported.Account, amt sdk.Coins) (sdk.Coins, sdk.Error) {
 	if !amt.IsValid() {
 		return nil, sdk.ErrInvalidCoins(amt.String())
 	}
 
-	oldCoins, spendableCoins := sdk.NewCoins(), sdk.NewCoins()
-
-	acc := k.GetAccount(ctx, addr)
-	if acc != nil {
-		oldCoins = acc.GetCoins()
-		spendableCoins = acc.SpendableCoins(ctx.BlockHeader().Time)
-	}
+	oldCoins := acc.GetCoins()
+	spendableCoins := acc.SpendableCoins(ctx.BlockHeader().Time)
 
 	// For non-vesting accounts, spendable coins will simply be the original coins.
 	// So the check here is sufficient instead of subtracting from oldCoins.
@@ -160,19 +197,20 @@ func (k Keeper) SubtractCoins(ctx sdk.Ctx, addr sdk.Address, amt sdk.Coins) (sdk
 	}
 
 	newCoins := oldCoins.Sub(amt) // should not panic as spendable coins was already checked
-	err := k.SetCoins(ctx, addr, newCoins)
 
-	return newCoins, err
+	acc.SetCoins(newCoins)
+	k.SetAccount(ctx, acc)
+
+	return newCoins, nil
 }
 
 // AddCoins adds amt to the coins at the addr.
-func (k Keeper) AddCoins(ctx sdk.Ctx, addr sdk.Address, amt sdk.Coins) (sdk.Coins, sdk.Error) {
-
+func (k Keeper) AddCoins(ctx sdk.Ctx, acc exported.Account, amt sdk.Coins) (sdk.Coins, sdk.Error) {
 	if !amt.IsValid() {
 		return nil, sdk.ErrInvalidCoins(amt.String())
 	}
 
-	oldCoins := k.GetCoins(ctx, addr)
+	oldCoins := acc.GetCoins()
 	newCoins := oldCoins.Add(amt)
 
 	if newCoins.IsAnyNegative() {
@@ -180,19 +218,19 @@ func (k Keeper) AddCoins(ctx sdk.Ctx, addr sdk.Address, amt sdk.Coins) (sdk.Coin
 			fmt.Sprintf("insufficient account funds; %s < %s", oldCoins, amt),
 		)
 	}
+	acc.SetCoins(newCoins)
+	k.SetAccount(ctx, acc)
 
-	err := k.SetCoins(ctx, addr, newCoins)
-	return newCoins, err
+	return newCoins, nil
 }
 
 // SetCoins sets the coins at the addr.
 func (k Keeper) SetCoins(ctx sdk.Ctx, addr sdk.Address, amt sdk.Coins) sdk.Error {
-
 	if !amt.IsValid() {
 		return sdk.ErrInvalidCoins(amt.String())
 	}
 
-	acc := k.GetAccount(ctx, addr)
+	acc := k.GetAcc(ctx, addr)
 	if acc == nil {
 		var err error
 		acc, err = k.NewAccountWithAddress(ctx, addr)
@@ -211,7 +249,7 @@ func (k Keeper) SetCoins(ctx sdk.Ctx, addr sdk.Address, amt sdk.Coins) sdk.Error
 
 // GetCoins returns the coins at the addr.
 func (k Keeper) GetCoins(ctx sdk.Ctx, addr sdk.Address) sdk.Coins {
-	acc := k.GetAccount(ctx, addr)
+	acc := k.GetAcc(ctx, addr)
 	if acc == nil {
 		return sdk.NewCoins()
 	}

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/pokt-network/pocket-core/codec"
 	"github.com/pokt-network/pocket-core/crypto"
-	"github.com/tendermint/tendermint/libs/common"
+	"github.com/tendermint/tendermint/libs/os"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
 
@@ -16,8 +16,8 @@ type GenesisState map[string]json.RawMessage
 //	genesisState := GetGensisFromFile(app.cdc, "genesis.go")
 //	return app.mm.InitGenesis(ctx, genesisState)
 //}
-func GenesisStateFromFile(cdc *codec.Codec, genFile string) GenesisState {
-	if !common.FileExists(genFile) {
+func GenesisStateFromFile(cdc *codec.LegacyAmino, genFile string) GenesisState {
+	if !os.FileExists(genFile) {
 		panic(fmt.Errorf("%s does not exist, run `init` first", genFile))
 	}
 	genDoc := GenesisFileToGenDoc(genFile)
@@ -25,7 +25,7 @@ func GenesisStateFromFile(cdc *codec.Codec, genFile string) GenesisState {
 }
 
 func GenesisFileToGenDoc(genFile string) *tmtypes.GenesisDoc {
-	if !common.FileExists(genFile) {
+	if !os.FileExists(genFile) {
 		panic(fmt.Errorf("%s does not exist, run `init` first", genFile))
 	}
 	genDoc, err := tmtypes.GenesisDocFromFile(genFile)
@@ -35,7 +35,7 @@ func GenesisFileToGenDoc(genFile string) *tmtypes.GenesisDoc {
 	return genDoc
 }
 
-func GenesisStateFromGenDoc(cdc *codec.Codec, genDoc tmtypes.GenesisDoc) (genesisState map[string]json.RawMessage) {
+func GenesisStateFromGenDoc(cdc *codec.LegacyAmino, genDoc tmtypes.GenesisDoc) (genesisState map[string]json.RawMessage) {
 	if err := cdc.UnmarshalJSON(genDoc.AppState, &genesisState); err != nil {
 		panic(err)
 	}

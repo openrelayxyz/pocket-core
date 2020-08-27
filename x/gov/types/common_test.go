@@ -2,6 +2,7 @@ package types
 
 import (
 	"github.com/pokt-network/pocket-core/codec"
+	"github.com/pokt-network/pocket-core/codec/types"
 	"github.com/pokt-network/pocket-core/crypto"
 	sdk "github.com/pokt-network/pocket-core/types"
 	"github.com/pokt-network/pocket-core/x/auth"
@@ -10,13 +11,14 @@ import (
 
 // nolint: deadcode unused
 // create a codec used only for testing
-func makeTestCodec() *codec.Codec {
-	var cdc = codec.New()
-	auth.RegisterCodec(cdc)
-	RegisterCodec(cdc)
-	sdk.RegisterCodec(cdc)
-	codec.RegisterCrypto(cdc)
-	return cdc
+func makeTestCodec() (*codec.LegacyAmino, *codec.ProtoCodec) {
+	var amino = codec.NewLegacyAminoCodec()
+	var proto = codec.NewProtoCodec(types.NewInterfaceRegistry())
+	auth.RegisterCodec(amino, proto)
+	RegisterCodec(amino, proto)
+	sdk.RegisterCodec(amino, proto)
+	crypto.RegisterCrypto(amino, nil)
+	return amino, proto
 }
 
 func getRandomPubKey() crypto.Ed25519PublicKey {

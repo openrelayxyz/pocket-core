@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/pokt-network/pocket-core/codec"
+	types "github.com/pokt-network/pocket-core/codec/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -644,8 +645,10 @@ func TestFindDup(t *testing.T) {
 }
 
 func TestMarshalJSONCoins(t *testing.T) {
-	cdc := codec.New()
-	RegisterCodec(cdc)
+	cdc := codec.NewLegacyAminoCodec()
+	// Coins is no longer marshalled through protobuff, its converted to bytes with MarshalJSON and processed on StdSignDoc
+	protoCodec := codec.NewProtoCodec(types.NewInterfaceRegistry())
+	RegisterCodec(cdc, protoCodec)
 
 	testCases := []struct {
 		name      string

@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"github.com/tendermint/tendermint/libs/strings"
 	"time"
 
 	"github.com/pokt-network/pocket-core/crypto"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/libs/common"
 
 	sdk "github.com/pokt-network/pocket-core/types"
 	"github.com/pokt-network/pocket-core/x/nodes/types"
@@ -29,7 +29,7 @@ func (k Keeper) UpdateTendermintValidators(ctx sdk.Ctx) (updates []abci.Validato
 	// Retrieve the prevState validator set addresses mapped to their respective staking power
 	prevStatePowerMap := k.getPrevStatePowerMap(ctx)
 	// Iterate over staked validators, highest power to lowest.
-	iterator := sdk.KVStoreReversePrefixIterator(store, types.StakedValidatorsKey)
+	iterator, _ := sdk.KVStoreReversePrefixIterator(store, types.StakedValidatorsKey)
 	defer iterator.Close()
 	for count := 0; iterator.Valid() && count < int(maxValidators); iterator.Next() {
 		// get the validator address
@@ -55,21 +55,21 @@ func (k Keeper) UpdateTendermintValidators(ctx sdk.Ctx) (updates []abci.Validato
 		copy(valAddrBytes[:], valAddr[:])
 		// check the previous state: if found calculate current power...
 		prevStatePowerBytes, found := prevStatePowerMap[valAddrBytes]
-		curStatePower := validator.ConsensusPower()
-		curStatePowerBytes := k.cdc.MustMarshalBinaryLengthPrefixed(curStatePower)
+		curStatePower := sdk.IntProto{Int: sdk.NewInt(validator.ConsensusPower())}
+		curStatePowerBytes := k.cdc.MustMarshalBinaryLengthPrefixed(&curStatePower)
 		// if not found or the power has changed -> add this validator to the updated list
 		if !found || !bytes.Equal(prevStatePowerBytes, curStatePowerBytes) {
 			ctx.Logger().Info(fmt.Sprintf("Updating Validator-Set to Tendermint: %s power changed to %d", validator.Address, validator.ConsensusPower()))
 			updates = append(updates, validator.ABCIValidatorUpdate())
 			// update the previous state as this will soon be the previous state
-			k.SetPrevStateValPower(ctx, valAddr, curStatePower)
+			k.SetPrevStateValPower(ctx, valAddr, curStatePower.Int.Int64())
 		}
 		// remove the validator from power map, this structure is used to keep track of who is no longer staked
 		delete(prevStatePowerMap, valAddrBytes)
 		// keep count of the number of validators to ensure we don't go over the maximum number of validators
 		count++
 		// update the total power
-		totalPower = totalPower.Add(sdk.NewInt(curStatePower))
+		totalPower = totalPower.Add(sdk.NewInt(curStatePower.Int.Int64()))
 	}
 	// sort the no-longer-staked validators
 	noLongerStaked := sortNoLongerStakedValidators(prevStatePowerMap)
@@ -118,7 +118,7 @@ func (k Keeper) ValidateValidatorStaking(ctx sdk.Ctx, validator types.Validator,
 					err.Error(),
 					ctx.ConsensusParams().Validator.PubKeyTypes)
 			}
-			if !common.StringInSlice(tmPubKey.Type, ctx.ConsensusParams().Validator.PubKeyTypes) {
+			if !strings.StringInSlice(tmPubKey.Type, ctx.ConsensusParams().Validator.PubKeyTypes) {
 				return types.ErrValidatorPubKeyTypeNotSupported(k.Codespace(),
 					tmPubKey.Type,
 					ctx.ConsensusParams().Validator.PubKeyTypes)
@@ -160,7 +160,7 @@ func (k Keeper) StakeValidator(ctx sdk.Ctx, validator types.Validator, amount sd
 			StartHeight: ctx.BlockHeight(),
 			JailedUntil: time.Unix(0, 0),
 		}
-		k.SetValidatorSigningInfo(ctx, validator.GetAddress(), signingInfo)
+		k.SetValidatorSigningInfo(ctx, validator.GetAddress(), &signingInfo)
 	}
 	ctx.Logger().Info("Successfully staked validator: " + validator.Address.String())
 	return nil
@@ -354,20 +354,24 @@ func (k Keeper) JailValidator(ctx sdk.Ctx, addr sdk.Address) {
 	logger := k.Logger(ctx)
 	logger.Info(fmt.Sprintf("validator %s jailed", addr))
 	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
+		sdk.Event(sdk.NewEvent(
 			types.EventTypeJail,
 			sdk.NewAttribute(types.AttributeKeyAddress, addr.String()),
 			sdk.NewAttribute(types.AttributeKeyReason, types.AttributeValueMissingSignature),
-		),
+		)),
 	)
 }
 
 func (k Keeper) IncrementJailedValidators(ctx sdk.Ctx) {
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
-		val := types.MustUnmarshalValidator(k.cdc, iterator.Value())
+		val, err := types.UnmarshalValidator(k.cdc, iterator.Value())
+		if err != nil {
+			ctx.Logger().Error("could not unmarshal validator in IncrementJailedValidators: ", err.Error())
+			continue
+		}
 		if val.IsJailed() {
 			addr := val.Address
 			signInfo, found := k.GetValidatorSigningInfo(ctx, addr)
@@ -389,7 +393,7 @@ func (k Keeper) IncrementJailedValidators(ctx sdk.Ctx) {
 				}
 				k.DeleteValidator(ctx, addr)
 			} else {
-				k.SetValidatorSigningInfo(ctx, addr, signInfo)
+				k.SetValidatorSigningInfo(ctx, addr, &signInfo)
 			}
 		}
 	}
@@ -397,7 +401,7 @@ func (k Keeper) IncrementJailedValidators(ctx sdk.Ctx) {
 
 // ValidateUnjailMessage - Check unjail message
 func (k Keeper) ValidateUnjailMessage(ctx sdk.Ctx, msg types.MsgUnjail) (addr sdk.Address, err sdk.Error) {
-	validator, found := k.GetValidator(ctx, msg.ValidatorAddr)
+	validator, found := k.GetValidator(ctx, msg.Address)
 	if !found {
 		return nil, types.ErrNoValidatorForAddress(k.Codespace())
 	}

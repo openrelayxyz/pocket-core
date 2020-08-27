@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	types2 "github.com/pokt-network/pocket-core/codec/types"
 	"math/rand"
 	"testing"
 
@@ -31,13 +32,15 @@ var (
 
 // : deadcode unused
 // create a codec used only for testing
-func makeTestCodec() *codec.Codec {
-	var cdc = codec.New()
-	auth.RegisterCodec(cdc)
-	gov.RegisterCodec(cdc)
-	sdk.RegisterCodec(cdc)
-	codec.RegisterCrypto(cdc)
-	return cdc
+func makeTestCodec() (*codec.LegacyAmino, *codec.ProtoCodec) {
+	var amino = codec.NewLegacyAminoCodec()
+	var proto = codec.NewProtoCodec(types2.NewInterfaceRegistry())
+
+	auth.RegisterCodec(amino, proto)
+	gov.RegisterCodec(amino, proto)
+	sdk.RegisterCodec(amino, proto)
+	crypto.RegisterCrypto(amino, proto)
+	return amino, proto
 }
 
 // : deadcode unused
@@ -66,7 +69,7 @@ func createTestInput(t *testing.T, isCheckTx bool) (sdk.Context, []auth.Account,
 			},
 		},
 	)
-	cdc := makeTestCodec()
+	amino, proto := makeTestCodec()
 
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName: nil,
@@ -80,7 +83,7 @@ func createTestInput(t *testing.T, isCheckTx bool) (sdk.Context, []auth.Account,
 	valTokens := sdk.TokensFromConsensusPower(initPower)
 	accSubspace := sdk.NewSubspace(auth.DefaultParamspace)
 	posSubspace := sdk.NewSubspace(DefaultParamspace)
-	ak := auth.NewKeeper(cdc, keyAcc, accSubspace, maccPerms)
+	ak := auth.NewKeeper(amino, proto, keyAcc, accSubspace, maccPerms)
 	moduleManager := module.NewManager(
 		auth.NewAppModule(ak),
 	)
@@ -88,7 +91,7 @@ func createTestInput(t *testing.T, isCheckTx bool) (sdk.Context, []auth.Account,
 	moduleManager.InitGenesis(ctx, genesisState)
 	initialCoins := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, valTokens))
 	accs := createTestAccs(ctx, int(nAccs), initialCoins, &ak)
-	keeper := NewKeeper(cdc, keyPOS, ak, posSubspace, "pos")
+	keeper := NewKeeper(amino, proto, keyPOS, ak, posSubspace, "pos")
 	params := types.DefaultParams()
 	keeper.SetParams(ctx, params)
 	return ctx, accs, keeper

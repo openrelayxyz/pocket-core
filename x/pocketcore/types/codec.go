@@ -2,29 +2,38 @@ package types
 
 import (
 	"github.com/pokt-network/pocket-core/codec"
-	"github.com/pokt-network/pocket-core/x/nodes/exported"
+	"github.com/pokt-network/pocket-core/codec/types"
+	"github.com/pokt-network/pocket-core/crypto"
+	sdk "github.com/pokt-network/pocket-core/types"
 	nodesTypes "github.com/pokt-network/pocket-core/x/nodes/types"
 )
 
-// ModuleCdc is the codec for the module
-var ModuleCdc = codec.New()
+// module wide codec
+var ModuleCdc *codec.ProtoCodec
+var LegacyModuleCdc *codec.LegacyAmino
 
 func init() {
-	RegisterCodec(ModuleCdc)
-	codec.RegisterCrypto(ModuleCdc)
+	ModuleCdc = codec.NewProtoCodec(types.NewInterfaceRegistry())
+	LegacyModuleCdc = codec.NewLegacyAminoCodec()
+	RegisterCodec(LegacyModuleCdc, ModuleCdc)
+	crypto.RegisterCrypto(LegacyModuleCdc, ModuleCdc)
+	LegacyModuleCdc.Seal()
 }
 
-// RegisterCodec registers concrete types on the Amino codec
-func RegisterCodec(cdc *codec.Codec) {
-	cdc.RegisterConcrete(MsgClaim{}, "pocketcore/claim", nil)
-	cdc.RegisterConcrete(MsgProof{}, "pocketcore/proof", nil)
-	cdc.RegisterConcrete(Relay{}, "pocketcore/relay", nil)
-	cdc.RegisterConcrete(Session{}, "pocketcore/session", nil)
-	cdc.RegisterConcrete(RelayResponse{}, "pocketcore/relay_response", nil)
-	cdc.RegisterInterface((*Proof)(nil), nil)
-	cdc.RegisterConcrete(RelayProof{}, "pocketcore/relay_proof", nil)
-	cdc.RegisterConcrete(ChallengeProofInvalidData{}, "pocketcore/challenge_proof_invalid_data", nil)
-	cdc.RegisterConcrete(evidence{}, "pocketcore/evidence_persisted", nil)
-	cdc.RegisterInterface((*exported.ValidatorI)(nil), nil)
-	cdc.RegisterConcrete(nodesTypes.Validator{}, "pos/Validator", nil) // todo does this really need to depend on nodes/types
+// RegisterCodec registers concrete types on the codec
+func RegisterCodec(amino *codec.LegacyAmino, proto *codec.ProtoCodec) {
+	amino.RegisterConcrete(MsgClaim{}, "pocketcore/claim", nil)
+	amino.RegisterConcrete(MsgProof{}, "pocketcore/proof", nil)
+	amino.RegisterConcrete(Relay{}, "pocketcore/relay", nil)
+	amino.RegisterConcrete(Session{}, "pocketcore/session", nil)
+	amino.RegisterConcrete(RelayResponse{}, "pocketcore/relay_response", nil)
+	amino.RegisterConcrete(RelayProof{}, "pocketcore/relay_proof", nil)
+	amino.RegisterConcrete(ChallengeProofInvalidData{}, "pocketcore/challenge_proof_invalid_data", nil)
+	amino.RegisterConcrete(EvidenceEncodable{}, "pocketcore/evidence_persisted", nil)
+	amino.RegisterConcrete(nodesTypes.Validator{}, "pos/Validator", nil) // todo does this really need to depend on nodes/types
+	amino.RegisterInterface((*Proof)(nil), nil)
+
+	proto.Register("x.pocketcore.Proof", (*Proof)(nil), &RelayProof{}, &ChallengeProofInvalidData{})
+	proto.RegisterImplementation((*sdk.Msg)(nil), &MsgClaim{}, &MsgProof{})
+	ModuleCdc = proto
 }

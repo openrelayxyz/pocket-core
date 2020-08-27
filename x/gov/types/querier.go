@@ -17,9 +17,3 @@ const (
 	QueryUpgrade                       = "upgrade"
 	QueryDAOOwner                      = "daoOwner"
 )
-
-type QueryACLParams struct{}
-
-type QueryDAOParams struct{}
-
-type QueryUpgradeParams struct{}

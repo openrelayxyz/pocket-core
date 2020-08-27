@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/pokt-network/pocket-core/codec"
+	types2 "github.com/pokt-network/pocket-core/codec/types"
 	"github.com/pokt-network/pocket-core/crypto"
 	sdk "github.com/pokt-network/pocket-core/types"
 
@@ -16,7 +17,8 @@ import (
 )
 
 var application Application
-var moduleCdc *codec.Codec
+var amino *codec.LegacyAmino
+var protoCdc *codec.ProtoCodec
 
 func init() {
 	var pub crypto.Ed25519PublicKey
@@ -26,10 +28,11 @@ func init() {
 		return
 	}
 
-	moduleCdc = codec.New()
-	RegisterCodec(moduleCdc)
-	codec.RegisterCrypto(moduleCdc)
-	moduleCdc.Seal()
+	amino = codec.NewLegacyAminoCodec()
+	protoCdc = codec.NewProtoCodec(types2.NewInterfaceRegistry())
+	RegisterCodec(amino, protoCdc)
+	crypto.RegisterCrypto(amino, nil)
+	amino.Seal()
 
 	application = Application{
 		Address:                 sdk.Address(pub.Address()),
@@ -45,7 +48,7 @@ func init() {
 func TestApplicationUtil_MarshalJSON(t *testing.T) {
 	type args struct {
 		application Application
-		codec       *codec.Codec
+		codec       *codec.LegacyAmino
 	}
 	hexApp := hexApplication{
 		Address:                 application.Address,
@@ -56,7 +59,7 @@ func TestApplicationUtil_MarshalJSON(t *testing.T) {
 		UnstakingCompletionTime: application.UnstakingCompletionTime,
 		MaxRelays:               application.MaxRelays,
 	}
-	bz, _ := codec.Cdc.MarshalJSON(hexApp)
+	bz, _ := amino.MarshalJSON(hexApp)
 
 	tests := []struct {
 		name string
@@ -65,7 +68,7 @@ func TestApplicationUtil_MarshalJSON(t *testing.T) {
 	}{
 		{
 			name: "marshals application",
-			args: args{application: application, codec: moduleCdc},
+			args: args{application: application, codec: amino},
 			want: bz,
 		},
 	}
@@ -154,7 +157,7 @@ func TestApplicationUtil_UnmarshalJSON(t *testing.T) {
 				t.Fatalf("Cannot marshal application")
 			}
 			if err = tt.args.application.UnmarshalJSON(marshaled); err != nil {
-				t.Fatalf("Unmarshal(): returns %v but want %v", err, tt.want)
+				t.Fatalf("UnmarshalObject(): returns %v but want %v", err, tt.want)
 			}
 			// NOTE CANNOT PERFORM DEEP EQUAL
 			// Unmarshalling causes StakedTokens & MaxRelays to be
@@ -185,7 +188,7 @@ func TestApplicationUtil_UnmarshalJSON(t *testing.T) {
 func TestApplicationUtil_UnMarshalApplication(t *testing.T) {
 	type args struct {
 		application Application
-		codec       *codec.Codec
+		codec       *codec.ProtoCodec
 	}
 	tests := []struct {
 		name string
@@ -194,7 +197,7 @@ func TestApplicationUtil_UnMarshalApplication(t *testing.T) {
 	}{
 		{
 			name: "can unmarshal application",
-			args: args{application: application, codec: moduleCdc},
+			args: args{application: application, codec: protoCdc},
 			want: application,
 		},
 	}

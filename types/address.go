@@ -47,6 +47,10 @@ func VerifyAddressFormat(bz []byte) error {
 // When marshaled to a string or JSON.
 type Address tmCrypto.Address
 
+// Address a wrapper around bytes meant to represent an address.
+// When marshaled to a string or JSON.
+type addresses []Address
+
 // AddressFromHex creates an Address from a hex string.
 func AddressFromHex(address string) (addr Address, err error) {
 	if len(address) == 0 {
@@ -84,13 +88,13 @@ func (aa Address) Empty() bool {
 	return bytes.Equal(aa.Bytes(), aa2.Bytes())
 }
 
-// Marshal returns the raw address bytes. It is needed for protobuf
+// MarshalObject returns the raw address bytes. It is needed for protobuf
 // compatibility.
 func (aa Address) Marshal() ([]byte, error) {
 	return aa, nil
 }
 
-// Unmarshal sets the address to the given data. It is needed for protobuf
+// UnmarshalObject sets the address to the given data. It is needed for protobuf
 // compatibility.
 func (aa *Address) Unmarshal(data []byte) error {
 	*aa = data
@@ -162,11 +166,11 @@ func (aa Address) String() string {
 func (aa Address) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 's':
-		s.Write([]byte(aa.String()))
+		_, _ = s.Write([]byte(aa.String()))
 	case 'p':
-		s.Write([]byte(fmt.Sprintf("%p", aa)))
+		_, _ = s.Write([]byte(fmt.Sprintf("%p", aa)))
 	default:
-		s.Write([]byte(fmt.Sprintf("%X", []byte(aa))))
+		_, _ = s.Write([]byte(fmt.Sprintf("%X", []byte(aa))))
 	}
 }
 

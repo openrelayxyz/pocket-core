@@ -1,6 +1,7 @@
 package pos
 
 import (
+	types2 "github.com/pokt-network/pocket-core/codec/types"
 	"math/rand"
 	"testing"
 
@@ -34,16 +35,17 @@ var (
 )
 
 // create a codec used only for testing
-func makeTestCodec() *codec.Codec {
-	var cdc = codec.New()
-	auth.RegisterCodec(cdc)
-	gov.RegisterCodec(cdc)
-	nodestypes.RegisterCodec(cdc)
-	types.RegisterCodec(cdc)
-	sdk.RegisterCodec(cdc)
-	codec.RegisterCrypto(cdc)
+func makeTestCodec() (*codec.LegacyAmino, *codec.ProtoCodec) {
+	var amino = codec.NewLegacyAminoCodec()
+	var proto = codec.NewProtoCodec(types2.NewInterfaceRegistry())
+	auth.RegisterCodec(amino, proto)
+	gov.RegisterCodec(amino, proto)
+	nodestypes.RegisterCodec(amino, proto)
+	types.RegisterCodec(amino, proto)
+	sdk.RegisterCodec(amino, proto)
+	crypto.RegisterCrypto(amino, nil)
 
-	return cdc
+	return amino, proto
 }
 
 func createTestInput(t *testing.T, isCheckTx bool) (sdk.Ctx, keeper.Keeper, types.AuthKeeper, types.PosKeeper) {
@@ -71,7 +73,7 @@ func createTestInput(t *testing.T, isCheckTx bool) (sdk.Ctx, keeper.Keeper, type
 			},
 		},
 	)
-	cdc := makeTestCodec()
+	amino, proto := makeTestCodec()
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName:     nil,
 		types.StakedPoolName:      {auth.Burner, auth.Staking, auth.Minter},
@@ -86,8 +88,8 @@ func createTestInput(t *testing.T, isCheckTx bool) (sdk.Ctx, keeper.Keeper, type
 	accSubspace := sdk.NewSubspace(auth.DefaultParamspace)
 	nodesSubspace := sdk.NewSubspace(nodestypes.DefaultParamspace)
 	appSubspace := sdk.NewSubspace(types.DefaultParamspace)
-	ak := auth.NewKeeper(cdc, keyAcc, accSubspace, maccPerms)
-	nk := nodeskeeper.NewKeeper(cdc, nodesKey, ak, nodesSubspace, "pos")
+	ak := auth.NewKeeper(amino, proto, keyAcc, accSubspace, maccPerms)
+	nk := nodeskeeper.NewKeeper(amino, proto, nodesKey, ak, nodesSubspace, "pos")
 	moduleManager := module.NewManager(
 		auth.NewAppModule(ak),
 		nodes.NewAppModule(nk),
@@ -97,7 +99,7 @@ func createTestInput(t *testing.T, isCheckTx bool) (sdk.Ctx, keeper.Keeper, type
 
 	initialCoins := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, valTokens))
 	_ = createTestAccs(ctx, int(nAccs), initialCoins, &ak)
-	keeper := keeper.NewKeeper(cdc, appsKey, nk, ak, appSubspace, "apps")
+	keeper := keeper.NewKeeper(amino, proto, appsKey, nk, ak, appSubspace, "apps")
 	p := types.DefaultParams()
 	keeper.SetParams(ctx, p)
 	return ctx, keeper, ak, nk

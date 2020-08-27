@@ -15,6 +15,13 @@ import (
 // Applications is a slice of type application.
 type Applications []Application
 
+func (a Applications) ToProto() (res []ApplicationEncodable) {
+	for _, app := range a {
+		res = append(res, app.ToProto())
+	}
+	return
+}
+
 func (a Applications) String() (out string) {
 	for _, val := range a {
 		out += val.String() + "\n\n"
@@ -27,6 +34,20 @@ func (a Application) String() string {
 	return fmt.Sprintf("Address:\t\t%s\nPublic Key:\t\t%s\nJailed:\t\t\t%v\nChains:\t\t\t%v\nMaxRelays:\t\t%v\nStatus:\t\t\t%s\nTokens:\t\t\t%s\nUnstaking Time:\t%v\n----\n",
 		a.Address, a.PublicKey.RawString(), a.Jailed, a.Chains, a.MaxRelays, a.Status, a.StakedTokens, a.UnstakingCompletionTime,
 	)
+}
+
+type ApplicationsEncodable []ApplicationEncodable
+
+func (a ApplicationsEncodable) FromProto() (res Applications) {
+	for _, app := range a {
+		a, err := app.FromProto()
+		if err != nil {
+			fmt.Println("can't convert app in applications encodable, continuing")
+			continue
+		}
+		res = append(res, a)
+	}
+	return
 }
 
 // this is a helper struct used for JSON de- and encoding only
@@ -48,7 +69,7 @@ func (a Applications) JSON() (out []byte, err error) {
 
 // MarshalJSON marshals the application to JSON using raw Hex for the public key
 func (a Application) MarshalJSON() ([]byte, error) {
-	return codec.Cdc.MarshalJSON(hexApplication{
+	return LegacyModuleCdc.MarshalJSON(hexApplication{
 		Address:                 a.Address,
 		PublicKey:               a.PublicKey.RawString(),
 		Jailed:                  a.Jailed,
@@ -63,7 +84,7 @@ func (a Application) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON unmarshals the application from JSON using raw hex for the public key
 func (a *Application) UnmarshalJSON(data []byte) error {
 	bv := &hexApplication{}
-	if err := codec.Cdc.UnmarshalJSON(data, bv); err != nil {
+	if err := LegacyModuleCdc.UnmarshalJSON(data, bv); err != nil {
 		return err
 	}
 	consPubKey, err := crypto.NewPublicKey(bv.PublicKey)
@@ -84,14 +105,19 @@ func (a *Application) UnmarshalJSON(data []byte) error {
 }
 
 // unmarshal the application
-func MarshalApplication(cdc *codec.Codec, application Application) (result []byte, err error) {
-	return cdc.MarshalBinaryLengthPrefixed(application)
+func MarshalApplication(cdc *codec.ProtoCodec, application Application) (result []byte, err error) {
+	ae := application.ToProto()
+	return cdc.MarshalBinaryLengthPrefixed(&ae)
 }
 
 // unmarshal the application
-func UnmarshalApplication(cdc *codec.Codec, appBytes []byte) (application Application, err error) {
-	err = cdc.UnmarshalBinaryLengthPrefixed(appBytes, &application)
-	return application, err
+func UnmarshalApplication(cdc *codec.ProtoCodec, appBytes []byte) (application Application, err error) {
+	var appEncodable ApplicationEncodable
+	err = cdc.UnmarshalBinaryLengthPrefixed(appBytes, &appEncodable)
+	if err != nil {
+		return
+	}
+	return appEncodable.FromProto()
 }
 
 // TODO shared code among modules below
@@ -115,4 +141,26 @@ func ValidateNetworkIdentifier(chain string) sdk.Error {
 		return ErrInvalidNetworkIdentifier(ModuleName, fmt.Errorf("net id length is > %d", NetworkIdentifierLength))
 	}
 	return nil
+}
+
+func (a ApplicationEncodable) GetChains() []string        { return a.Chains }
+func (a ApplicationEncodable) IsStaked() bool             { return a.GetStatus().Equal(sdk.Staked) }
+func (a ApplicationEncodable) IsUnstaked() bool           { return a.GetStatus().Equal(sdk.Unstaked) }
+func (a ApplicationEncodable) IsUnstaking() bool          { return a.GetStatus().Equal(sdk.Unstaking) }
+func (a ApplicationEncodable) IsJailed() bool             { return a.Jailed }
+func (a ApplicationEncodable) GetStatus() sdk.StakeStatus { return a.Status }
+func (a ApplicationEncodable) GetAddress() sdk.Address    { return a.Address }
+func (a ApplicationEncodable) GetPublicKey() crypto.PublicKey {
+	pubkey, _ := crypto.NewPublicKey(a.PublicKey)
+	return pubkey
+}
+func (a ApplicationEncodable) GetTokens() sdk.Int       { return a.StakedTokens }
+func (a ApplicationEncodable) GetConsensusPower() int64 { return a.ConsensusPower() }
+func (a ApplicationEncodable) GetMaxRelays() sdk.Int    { return a.MaxRelays }
+
+func (a ApplicationEncodable) ConsensusPower() int64 {
+	if a.IsStaked() {
+		return sdk.TokensToConsensusPower(a.StakedTokens)
+	}
+	return 0
 }

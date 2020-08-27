@@ -2,10 +2,11 @@ package pos
 
 import (
 	"fmt"
+	"log"
+
 	sdk "github.com/pokt-network/pocket-core/types"
 	"github.com/pokt-network/pocket-core/x/apps/keeper"
 	"github.com/pokt-network/pocket-core/x/apps/types"
-	"log"
 )
 
 // InitGenesis sets up the module based on the genesis state

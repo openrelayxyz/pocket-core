@@ -21,13 +21,13 @@ type TestStruct struct {
 	B bool
 }
 
-func defaultComponents(key sdk.StoreKey) (sdk.Context, *codec.Codec) {
+func defaultComponents(key sdk.StoreKey) (sdk.Context, *codec.LegacyAmino) {
 	db := dbm.NewMemDB()
 	cms := rootmulti.NewStore(db)
 	cms.MountStoreWithDB(key, sdk.StoreTypeIAVL, db)
 	_ = cms.LoadLatestVersion()
 	ctx := sdk.NewContext(cms, abci.Header{}, false, log.NewNopLogger())
-	cdc := codec.New()
+	cdc := codec.NewLegacyAminoCodec()
 	return ctx, cdc
 }
 func TestList(t *testing.T) {

@@ -1,6 +1,6 @@
 package types
 
-// "GenesisState" - The state of the module from the beginning
+//"GenesisState" - The state of the module from the beginning
 type GenesisState struct {
 	Params Params     `json:"params" yaml:"params"` // governance params
 	Claims []MsgClaim `json:"claims"`               // outstanding claims

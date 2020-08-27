@@ -31,18 +31,18 @@ func TestAppModule_InitExportGenesis(t *testing.T) {
 	}
 	ctx, _, _, k, _ := createTestInput(t, false)
 	am := NewAppModule(k)
-	data, err := types.ModuleCdc.MarshalJSON(genesisState)
+	data, err := types.LegacyModuleCdc.MarshalJSON(genesisState)
 	assert.Nil(t, err)
 	am.InitGenesis(ctx, data)
 	genesisbz := am.ExportGenesis(ctx)
 	var genesis types.GenesisState
-	err = types.ModuleCdc.UnmarshalJSON(genesisbz, &genesis)
+	err = types.LegacyModuleCdc.UnmarshalJSON(genesisbz, &genesis)
 	assert.Nil(t, err)
 	assert.Equal(t, genesis, genesisState)
 	am.InitGenesis(ctx, nil)
 	var genesis2 types.GenesisState
 	genesis2bz := am.ExportGenesis(ctx)
-	err = types.ModuleCdc.UnmarshalJSON(genesis2bz, &genesis2)
+	err = types.LegacyModuleCdc.UnmarshalJSON(genesis2bz, &genesis2)
 	assert.Equal(t, genesis2, types.DefaultGenesisState())
 	assert.Nil(t, err)
 }
@@ -74,7 +74,7 @@ func TestAppModule_EndBlock(t *testing.T) {
 func TestAppModuleBasic_DefaultGenesis(t *testing.T) {
 	_, _, _, k, _ := createTestInput(t, false)
 	am := NewAppModule(k)
-	assert.Equal(t, []byte(am.DefaultGenesis()), []byte(types.ModuleCdc.MustMarshalJSON(types.DefaultGenesisState())))
+	assert.Equal(t, []byte(am.DefaultGenesis()), []byte(types.LegacyModuleCdc.MustMarshalJSON(types.DefaultGenesisState())))
 }
 
 func TestAppModuleBasic_ValidateGenesis(t *testing.T) {
@@ -100,9 +100,9 @@ func TestAppModuleBasic_ValidateGenesis(t *testing.T) {
 		Params: p2,
 		Claims: []types.MsgClaim(nil),
 	}
-	validBz, err := types.ModuleCdc.MarshalJSON(genesisState)
+	validBz, err := types.LegacyModuleCdc.MarshalJSON(genesisState)
 	assert.Nil(t, err)
-	invalidBz, err := types.ModuleCdc.MarshalJSON(genesisState2)
+	invalidBz, err := types.LegacyModuleCdc.MarshalJSON(genesisState2)
 	assert.Nil(t, err)
 	assert.True(t, nil == am.ValidateGenesis(validBz))
 	assert.False(t, nil == am.ValidateGenesis(invalidBz))

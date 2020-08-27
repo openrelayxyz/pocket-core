@@ -48,13 +48,13 @@ func NewQuerier(k Keeper) sdk.Querier {
 
 func queryApplications(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error) {
 	var params types.QueryApplicationsWithOpts
-	err := types.ModuleCdc.UnmarshalJSON(req.Data, &params)
+	err := types.LegacyModuleCdc.UnmarshalJSON(req.Data, &params)
 	if err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 	applications := k.GetAllApplicationsWithOpts(ctx, params)
 	applicationsPage := paginate(params.Page, params.Limit, applications, int(k.GetParams(ctx).MaxApplications))
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, applicationsPage)
+	res, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, applicationsPage)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("failed to JSON marshal result: %s", err.Error()))
 	}
@@ -64,7 +64,7 @@ func queryApplications(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sd
 
 func queryApplication(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error) {
 	var params types.QueryAppParams
-	err := types.ModuleCdc.UnmarshalJSON(req.Data, &params)
+	err := types.LegacyModuleCdc.UnmarshalJSON(req.Data, &params)
 	if err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
@@ -72,7 +72,7 @@ func queryApplication(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk
 	if !found {
 		return nil, types.ErrNoApplicationFound(types.DefaultCodespace)
 	}
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, application)
+	res, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, application)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}
@@ -81,7 +81,7 @@ func queryApplication(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk
 
 func queryStakedPool(ctx sdk.Ctx, k Keeper) ([]byte, sdk.Error) {
 	stakedTokens := k.GetStakedTokens(ctx)
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, stakedTokens)
+	res, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, stakedTokens)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}
@@ -90,7 +90,7 @@ func queryStakedPool(ctx sdk.Ctx, k Keeper) ([]byte, sdk.Error) {
 
 func queryParameters(ctx sdk.Ctx, k Keeper) ([]byte, sdk.Error) {
 	params := k.GetParams(ctx)
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, params)
+	res, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, params)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}

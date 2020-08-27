@@ -1,23 +1,24 @@
 package util
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/pokt-network/pocket-core/crypto"
 	"github.com/pokt-network/pocket-core/x/auth"
 	"github.com/pokt-network/pocket-core/x/auth/exported"
 	"github.com/pokt-network/pocket-core/x/auth/types"
+	"github.com/tendermint/tendermint/libs/bytes"
 
 	"github.com/pokt-network/pocket-core/codec"
 	sdk "github.com/pokt-network/pocket-core/types"
-	cmn "github.com/tendermint/tendermint/libs/common"
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
 )
 
 // CLIContext implements a typical CLI context created in SDK modules for
 // transaction handling and queries.
 type CLIContext struct { // TODO consider module passing clicontext instead of node and keybase
-	Codec         *codec.Codec
+	Codec         *codec.ProtoCodec
 	Client        rpcclient.Client
 	FromAddress   sdk.Address
 	Passphrase    string
@@ -39,7 +40,7 @@ func NewCLIContext(node rpcclient.Client, fromAddress sdk.Address, passphrase st
 }
 
 // WithCodec returns a copy of the context with an updated codec.
-func (ctx CLIContext) WithCodec(cdc *codec.Codec) CLIContext {
+func (ctx CLIContext) WithCodec(cdc *codec.ProtoCodec) CLIContext {
 	ctx.Codec = cdc
 	return ctx
 }
@@ -181,27 +182,14 @@ func (ctx CLIContext) QueryWithData(path string, data []byte) ([]byte, int64, er
 // QueryStore performs a query to a Tendermint node with the provided key and
 // store name. It returns the result and height of the query upon success
 // or an error if the query fails.
-func (ctx CLIContext) QueryStore(key cmn.HexBytes, storeName string) ([]byte, int64, error) {
+func (ctx CLIContext) QueryStore(key bytes.HexBytes, storeName string) ([]byte, int64, error) {
 	return ctx.queryStore(key, storeName, "key")
-}
-
-// QuerySubspace performs a query to a Tendermint node with the provided
-// store name and subspace. It returns key value pair and height of the query
-// upon success or an error if the query fails.
-func (ctx CLIContext) QuerySubspace(subspace []byte, storeName string) (res []sdk.KVPair, height int64, err error) {
-	resRaw, height, err := ctx.queryStore(subspace, storeName, "subspace")
-	if err != nil {
-		return res, height, err
-	}
-
-	ctx.Codec.MustUnmarshalBinaryLengthPrefixed(resRaw, &res)
-	return
 }
 
 // query performs a query to a Tendermint node with the provided store name
 // and path. It returns the result and height of the query upon success
 // or an error if the query fails. If query height is invalid, an error will be returned.
-func (ctx CLIContext) query(path string, key cmn.HexBytes) (res []byte, height int64, err error) {
+func (ctx CLIContext) query(path string, key bytes.HexBytes) (res []byte, height int64, err error) {
 	node, err := ctx.GetNode()
 	if err != nil {
 		return res, height, err
@@ -228,12 +216,12 @@ func (ctx CLIContext) query(path string, key cmn.HexBytes) (res []byte, height i
 // queryStore performs a query to a Tendermint node with the provided a store
 // name and path. It returns the result and height of the query upon success
 // or an error if the query fails.
-func (ctx CLIContext) queryStore(key cmn.HexBytes, storeName, endPath string) ([]byte, int64, error) {
+func (ctx CLIContext) queryStore(key bytes.HexBytes, storeName, endPath string) ([]byte, int64, error) {
 	path := fmt.Sprintf("/store/%s/%s", storeName, endPath)
 	return ctx.query(path, key)
 }
 
-// GetAccount queries for an account given an address and a block height. An
+// GetAcc queries for an account given an address and a block height. An
 // error is returned if the query or decoding fails.
 func (ctx CLIContext) GetAccount(addr sdk.Address) (exported.Account, error) {
 	account, _, err := ctx.GetAccountWithHeight(addr)
@@ -244,7 +232,7 @@ func (ctx CLIContext) GetAccount(addr sdk.Address) (exported.Account, error) {
 // height of the query with the account. An error is returned if the query
 // or decoding fails.
 func (ctx CLIContext) GetAccountWithHeight(addr sdk.Address) (exported.Account, int64, error) {
-	bs, err := auth.ModuleCdc.MarshalJSON(types.NewQueryAccountParams(addr))
+	bs, err := json.Marshal(types.NewQueryAccountParams(addr))
 	if err != nil {
 		return nil, 0, err
 	}
@@ -253,7 +241,7 @@ func (ctx CLIContext) GetAccountWithHeight(addr sdk.Address) (exported.Account, 
 		return nil, height, err
 	}
 	var account exported.Account
-	if err := auth.ModuleCdc.UnmarshalJSON(res, &account); err != nil {
+	if err := types.LegacyModuleCdc.UnmarshalJSON(res, &account); err != nil {
 		return nil, height, err
 	}
 	return account, height, nil

@@ -1,9 +1,10 @@
 package keeper
 
 import (
+	"testing"
+
 	sdk "github.com/pokt-network/pocket-core/types"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"testing"
 )
 
 func TestBeginBlocker(t *testing.T) {

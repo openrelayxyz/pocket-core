@@ -1,9 +1,9 @@
 package types
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
+	"reflect"
 
 	"github.com/pokt-network/pocket-core/types"
 )
@@ -32,7 +32,7 @@ var (
 
 var _ types.ParamSet = (*Params)(nil)
 
-// "Params" - defines the governance set, high level settings for pocketcore module
+//"Params" - defines the governance set, high level settings for pocketcore module
 type Params struct {
 	SessionNodeCount           int64    `json:"session_node_count"`
 	ClaimSubmissionWindow      int64    `json:"proof_waiting_period"`
@@ -99,9 +99,7 @@ func (p Params) Validate() error {
 
 // "Equal" - Checks the equality of two param objects
 func (p Params) Equal(p2 Params) bool {
-	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
-	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
-	return bytes.Equal(bz1, bz2)
+	return reflect.DeepEqual(p, p2)
 }
 
 // "String" -  returns a human readable string representation of the parameters

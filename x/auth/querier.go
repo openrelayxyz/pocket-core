@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/pokt-network/pocket-core/x/auth/keeper"
 
@@ -25,16 +26,16 @@ func NewQuerier(keeper keeper.Keeper) sdk.Querier {
 
 func queryAccount(ctx sdk.Ctx, req abci.RequestQuery, keeper keeper.Keeper) ([]byte, sdk.Error) {
 	var params types.QueryAccountParams
-	if err := types.ModuleCdc.UnmarshalJSON(req.Data, &params); err != nil {
+	if err := json.Unmarshal(req.Data, &params); err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 
-	account := keeper.GetAccount(ctx, params.Address)
+	account := keeper.GetAcc(ctx, params.Address)
 	if account == nil {
 		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", params.Address))
 	}
 
-	bz, err := codec.MarshalJSONIndent(types.ModuleCdc, account)
+	bz, err := codec.MarshalJSONIndent(types.LegacyModuleCdc, account)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}

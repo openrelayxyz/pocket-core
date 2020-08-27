@@ -10,7 +10,8 @@ import (
 
 // Keeper of the global paramstore
 type Keeper struct {
-	cdc        *codec.Codec
+	legacyCdc  *codec.LegacyAmino
+	cdc        *codec.ProtoCodec
 	key        sdk.StoreKey
 	tkey       sdk.StoreKey
 	codespace  sdk.CodespaceType
@@ -20,8 +21,9 @@ type Keeper struct {
 }
 
 // NewKeeper constructs a params keeper
-func NewKeeper(cdc *codec.Codec, key *sdk.KVStoreKey, tkey *sdk.TransientStoreKey, codespace sdk.CodespaceType, authKeeper types.AuthKeeper, subspaces ...sdk.Subspace) (k Keeper) {
+func NewKeeper(amino *codec.LegacyAmino, cdc *codec.ProtoCodec, key *sdk.KVStoreKey, tkey *sdk.TransientStoreKey, codespace sdk.CodespaceType, authKeeper types.AuthKeeper, subspaces ...sdk.Subspace) (k Keeper) {
 	k = Keeper{
+		legacyCdc:  amino,
 		cdc:        cdc,
 		key:        key,
 		tkey:       tkey,
@@ -30,7 +32,7 @@ func NewKeeper(cdc *codec.Codec, key *sdk.KVStoreKey, tkey *sdk.TransientStoreKe
 		spaces:     make(map[string]sdk.Subspace),
 	}
 	k.paramstore = sdk.NewSubspace(types.ModuleName).WithKeyTable(types.ParamKeyTable())
-	k.paramstore.SetCodec(k.cdc)
+	k.paramstore.SetCodec(k.legacyCdc)
 	subspaces = append(subspaces, k.paramstore)
 	k.AddSubspaces(subspaces...)
 	return k

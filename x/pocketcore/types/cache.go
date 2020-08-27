@@ -13,7 +13,7 @@ import (
 var (
 	// cache for session objects
 	globalSessionCache *CacheStorage
-	// cache for evidence objects
+	// cache for EvidenceEncodable objects
 	globalEvidenceCache *CacheStorage
 	// sync.once to perform initialization
 	cacheOnce sync.Once
@@ -27,13 +27,13 @@ type CacheStorage struct {
 }
 
 type CacheObject interface {
-	Marshal() ([]byte, error)
-	Unmarshal(b []byte) (CacheObject, error)
+	MarshalObject() ([]byte, error)
+	UnmarshalObject(b []byte) (CacheObject, error)
 	Key() ([]byte, error)
 }
 
 // "Init" - Initializes a cache storage object
-func (cs *CacheStorage) Init(dir, name string, dbType db.DBBackendType, maxEntries int) {
+func (cs *CacheStorage) Init(dir, name string, dbType db.BackendType, maxEntries int) {
 	// init the lru cache with a max entries
 	var err error
 	cs.Cache, err = New(maxEntries)
@@ -53,11 +53,11 @@ func (cs *CacheStorage) Get(key []byte, object CacheObject) (interface{}, bool) 
 		return res, true
 	}
 	// not in cache, so search database
-	bz := cs.DB.Get(key)
+	bz, _ := cs.DB.Get(key)
 	if len(bz) == 0 {
 		return nil, false
 	}
-	res, err := object.Unmarshal(bz)
+	res, err := object.UnmarshalObject(bz)
 	if err != nil {
 		fmt.Printf("Error in CacheStorage.Get(): %s\n", err.Error())
 		return nil, true
@@ -88,7 +88,7 @@ func (cs *CacheStorage) Delete(key []byte) {
 	// remove from cache
 	cs.Cache.Remove(hex.EncodeToString(key))
 	// remove from db
-	cs.DB.Delete(key)
+	_ = cs.DB.Delete(key)
 }
 
 func (cs *CacheStorage) FlushToDB() error {
@@ -106,7 +106,7 @@ func (cs *CacheStorage) FlushToDB() error {
 			return fmt.Errorf("object in cache does not impement the cache object interface")
 		}
 		// marshal object to bytes
-		bz, err := co.Marshal()
+		bz, err := co.MarshalObject()
 		if err != nil {
 			return fmt.Errorf("error flushing database, marshalling value for DB: %s", err.Error())
 		}
@@ -115,7 +115,7 @@ func (cs *CacheStorage) FlushToDB() error {
 			return fmt.Errorf("error flushing database, couldn't hex decode key: %s", err.Error())
 		}
 		// set to DB
-		cs.DB.Set(kBz, bz)
+		_ = cs.DB.Set(kBz, bz)
 	}
 	return nil
 }
@@ -127,15 +127,15 @@ func (cs *CacheStorage) Clear() {
 	// clear cache
 	cs.Cache.Purge()
 	// clear db
-	iter := cs.DB.Iterator(nil, nil)
+	iter, _ := cs.DB.Iterator(nil, nil)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
-		cs.DB.Delete(iter.Key())
+		_ = cs.DB.Delete(iter.Key())
 	}
 }
 
 // "Iterator" - Returns an iterator for all of the items in the stores
-func (cs *CacheStorage) Iterator() db.Iterator {
+func (cs *CacheStorage) Iterator() (db.Iterator, error) {
 	_ = cs.FlushToDB()
 	return cs.DB.Iterator(nil, nil)
 }
@@ -183,7 +183,7 @@ type SessionIt struct {
 
 // "Value" - returns the value of the iterator (session)
 func (si *SessionIt) Value() (session Session) {
-	s, err := session.Unmarshal(si.Iterator.Value())
+	s, err := session.UnmarshalObject(si.Iterator.Value())
 	if err != nil {
 		log.Fatal(fmt.Errorf("can't unmarshal session iterator value into session: %s", err.Error()))
 	}
@@ -196,14 +196,15 @@ func (si *SessionIt) Value() (session Session) {
 
 // "SessionIterator" - Returns an instance iterator of the globalSessionCache
 func SessionIterator() SessionIt {
+	it, _ := globalSessionCache.Iterator()
 	return SessionIt{
-		Iterator: globalSessionCache.Iterator(),
+		Iterator: it,
 	}
 }
 
-// "GetEvidence" - Retrieves the evidence object from the storage
+// "GetEvidence" - Retrieves the EvidenceEncodable object from the storage
 func GetEvidence(header SessionHeader, evidenceType EvidenceType, max sdk.Int) (evidence Evidence, err error) {
-	// generate the key for the evidence
+	// generate the key for the EvidenceEncodable
 	key, err := KeyForEvidence(header, evidenceType)
 	if err != nil {
 		return
@@ -211,7 +212,7 @@ func GetEvidence(header SessionHeader, evidenceType EvidenceType, max sdk.Int) (
 	// get the bytes from the storage
 	val, found := globalEvidenceCache.Get(key, evidence)
 	if !found && max.Equal(sdk.ZeroInt()) {
-		return Evidence{}, fmt.Errorf("evidence not found")
+		return Evidence{}, fmt.Errorf("EvidenceEncodable not found")
 	}
 	if !found {
 		bloomFilter := bloom.NewWithEstimates(uint(sdk.NewUintFromBigInt(max.BigInt()).Uint64()), .01)
@@ -233,9 +234,9 @@ func GetEvidence(header SessionHeader, evidenceType EvidenceType, max sdk.Int) (
 	return
 }
 
-// "SetEvidence" - Sets an evidence object in the storage
+// "SetEvidence" - Sets an EvidenceEncodable object in the storage
 func SetEvidence(evidence Evidence) {
-	// generate the key for the evidence
+	// generate the key for the EvidenceEncodable
 	key, err := KeyForEvidence(evidence.SessionHeader, evidence.EvidenceType)
 	if err != nil {
 		return
@@ -243,9 +244,9 @@ func SetEvidence(evidence Evidence) {
 	globalEvidenceCache.Set(key, evidence)
 }
 
-// "DeleteEvidence" - Delete the evidence from the stores
+// "DeleteEvidence" - Delete the EvidenceEncodable from the stores
 func DeleteEvidence(header SessionHeader, evidenceType EvidenceType) error {
-	// generate key for evidence
+	// generate key for EvidenceEncodable
 	key, err := KeyForEvidence(header, evidenceType)
 	if err != nil {
 		return err
@@ -255,42 +256,44 @@ func DeleteEvidence(header SessionHeader, evidenceType EvidenceType) error {
 	return nil
 }
 
-// "ClearEvidence" - Clear stores of all evidence
+// "ClearEvidence" - Clear stores of all EvidenceEncodable
 func ClearEvidence() {
 	if globalEvidenceCache != nil {
 		globalEvidenceCache.Clear()
 	}
 }
 
-// "EvidenceIt" - An evidence iterator instance of the globalEvidenceCache
+// "EvidenceIt" - An EvidenceEncodable iterator instance of the globalEvidenceCache
 type EvidenceIt struct {
 	db.Iterator
 }
 
-// "Value" - Returns the evidence object value of the iterator
+// "Value" - Returns the EvidenceEncodable object value of the iterator
 func (ei *EvidenceIt) Value() (evidence Evidence) {
-	// unmarshal the value (bz) into an evidence object
-	e, err := evidence.Unmarshal(ei.Iterator.Value())
+	// unmarshal the value (bz) into an EvidenceEncodable object
+	e, err := evidence.UnmarshalObject(ei.Iterator.Value())
 	if err != nil {
-		log.Fatal(fmt.Errorf("can't unmarshal evidence iterator value into evidence: %s", err.Error()))
+		log.Fatal(fmt.Errorf("can't unmarshal EvidenceEncodable iterator value into EvidenceEncodable: %s", err.Error()))
 	}
 	evidence, ok := e.(Evidence)
 	if !ok {
-		log.Fatal("can't unmarshal evidence iterator value into evidence: cache object is not evidence")
+		log.Fatal("can't unmarshal EvidenceEncodable iterator value into EvidenceEncodable: cache object is not EvidenceEncodable")
 	}
 	return
 }
 
 // "EvidenceIterator" - Returns a globalEvidenceCache iterator instance
 func EvidenceIterator() EvidenceIt {
+	it, _ := globalEvidenceCache.Iterator()
+
 	return EvidenceIt{
-		Iterator: globalEvidenceCache.Iterator(),
+		Iterator: it,
 	}
 }
 
-// "GetProof" - Returns the Proof object from a specific piece of evidence at a certain index
+// "GetProof" - Returns the Proof object from a specific piece of EvidenceEncodable at a certain index
 func GetProof(header SessionHeader, evidenceType EvidenceType, index int64) Proof {
-	// retrieve the evidence
+	// retrieve the EvidenceEncodable
 	evidence, err := GetEvidence(header, evidenceType, sdk.ZeroInt())
 	if err != nil {
 		return nil
@@ -303,17 +306,17 @@ func GetProof(header SessionHeader, evidenceType EvidenceType, index int64) Proo
 	return evidence.Proofs[index]
 }
 
-// "SetProof" - Sets a proof object in the evidence, using the header and evidence type
+// "SetProof" - Sets a proof object in the EvidenceEncodable, using the header and EvidenceEncodable type
 func SetProof(header SessionHeader, evidenceType EvidenceType, p Proof, max sdk.Int) {
-	// retireve the evidence
+	// retireve the EvidenceEncodable
 	evidence, err := GetEvidence(header, evidenceType, max)
-	// if not found generate the evidence object
+	// if not found generate the EvidenceEncodable object
 	if err != nil {
 		log.Fatalf("could not set proof object: %s", err.Error())
 	}
 	// add proof
 	evidence.AddProof(p)
-	// set evidence back
+	// set EvidenceEncodable back
 	SetEvidence(evidence)
 }
 
@@ -321,12 +324,12 @@ func IsUniqueProof(p Proof, evidence Evidence) bool {
 	return !evidence.Bloom.Test(p.Hash())
 }
 
-// "GetTotalProofs" - Returns the total number of proofs for a piece of evidence
+// "GetTotalProofs" - Returns the total number of proofs for a piece of EvidenceEncodable
 func GetTotalProofs(h SessionHeader, et EvidenceType, maxPossibleRelays sdk.Int) (Evidence, int64) {
-	// retrieve the evidence
+	// retrieve the EvidenceEncodable
 	evidence, err := GetEvidence(h, et, maxPossibleRelays)
 	if err != nil {
-		log.Fatalf("could not get total proofs for evidence: %s", err.Error())
+		log.Fatalf("could not get total proofs for EvidenceEncodable: %s", err.Error())
 	}
 	// return number of proofs
 	return evidence, evidence.NumOfProofs

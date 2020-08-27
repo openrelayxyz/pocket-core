@@ -3,9 +3,10 @@ package types
 import (
 	"bytes"
 	"fmt"
-	"github.com/pokt-network/pocket-core/types"
 	"math"
 	"time"
+
+	"github.com/pokt-network/pocket-core/types"
 )
 
 // POS params default values
@@ -88,8 +89,8 @@ func (p Params) Validate() error {
 
 // Checks the equality of two param objects
 func (p Params) Equal(p2 Params) bool {
-	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
-	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
+	bz1 := LegacyModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
+	bz2 := LegacyModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
 	return bytes.Equal(bz1, bz2)
 }
 

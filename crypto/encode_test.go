@@ -13,7 +13,7 @@ type byter interface {
 }
 
 func checkAminoBinary(t *testing.T, src, dst interface{}, size int) {
-	// Marshal to binary bytes.
+	// MarshalObject to binary bytes.
 	bz, err := cdc.MarshalBinaryBare(src)
 	require.Nil(t, err, "%+v", err)
 	if byterSrc, ok := src.(byter); ok {
@@ -24,13 +24,13 @@ func checkAminoBinary(t *testing.T, src, dst interface{}, size int) {
 	if size != -1 {
 		require.Equal(t, size, len(bz), "Amino binary size mismatch")
 	}
-	// Unmarshal
+	// UnmarshalObject
 	err = cdc.UnmarshalBinaryBare(bz, dst)
 	require.Nil(t, err, "%+v", err)
 }
 
 func checkAminoJSON(t *testing.T, src interface{}, dst interface{}, isNil bool) {
-	// Marshal to JSON bytes.
+	// MarshalObject to JSON bytes.
 	js, err := cdc.MarshalJSON(src)
 	require.Nil(t, err, "%+v", err)
 	if isNil {
@@ -39,16 +39,16 @@ func checkAminoJSON(t *testing.T, src interface{}, dst interface{}, isNil bool) 
 		require.Contains(t, string(js), `"type":`)
 		require.Contains(t, string(js), `"value":`)
 	}
-	// Unmarshal.
+	// UnmarshalObject.
 	err = cdc.UnmarshalJSON(js, dst)
 	require.Nil(t, err, "%+v", err)
 }
 
 func checkJSONMarshalUnMarshal(t *testing.T, src interface{}, dst interface{}) {
-	// Marshal to JSON bytes.
+	// MarshalObject to JSON bytes.
 	jbytes, err := json.Marshal(src)
 	require.Nil(t, err, "%+v", err)
-	// Unmarshal.
+	// UnmarshalObject.
 	err = json.Unmarshal(jbytes, dst)
 	require.Nil(t, err, "%+v", err)
 }
@@ -56,7 +56,7 @@ func checkJSONMarshalUnMarshal(t *testing.T, src interface{}, dst interface{}) {
 func TestKeyEncodings(t *testing.T) {
 	cases := []struct {
 		privKey           PrivateKey
-		privSize, pubSize int // binary sizes with the amino overhead
+		privSize, pubSize int // binary sizes with the cdc overhead
 	}{
 		{
 			privKey:  PrivateKey(Ed25519PrivateKey{}).GenPrivateKey(),

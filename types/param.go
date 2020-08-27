@@ -23,7 +23,7 @@ var (
 // Transient store persists for a block, so we use it for
 // recording whether the parameter has been changed or not
 type Subspace struct {
-	cdc   *codec.Codec
+	cdc   *codec.LegacyAmino
 	key   StoreKey // []byte -> []byte, stores parameter
 	tkey  StoreKey // []byte -> bool, stores parameter change
 	name  []byte
@@ -33,7 +33,7 @@ type Subspace struct {
 // NewSubspace constructs a store with namestore
 func NewSubspace(name string) (res Subspace) {
 	res = Subspace{
-		cdc:  codec.Cdc,
+		cdc:  legacyCdc,
 		key:  ParamsKey,
 		tkey: ParamsTKey,
 		name: []byte(name),
@@ -44,7 +44,7 @@ func NewSubspace(name string) (res Subspace) {
 	return
 }
 
-func (s *Subspace) SetCodec(cdc *codec.Codec) {
+func (s *Subspace) SetCodec(cdc *codec.LegacyAmino) {
 	s.cdc = cdc
 }
 
@@ -95,7 +95,7 @@ func concatKeys(key, subkey []byte) (res []byte) {
 // Get parameter from store
 func (s Subspace) Get(ctx Ctx, key []byte, ptr interface{}) {
 	store := s.kvStore(ctx)
-	bz := store.Get(key)
+	bz, _ := store.Get(key)
 	err := s.cdc.UnmarshalJSON(bz, ptr)
 	if err != nil {
 		panic(err)
@@ -104,7 +104,7 @@ func (s Subspace) Get(ctx Ctx, key []byte, ptr interface{}) {
 
 func (s Subspace) GetAllParamKeys(ctx Ctx) (keys []string) {
 	store := s.kvStore(ctx)
-	it := store.Iterator(nil, nil)
+	it, _ := store.Iterator(nil, nil)
 	for ; it.Valid(); it.Next() {
 		keys = append(keys, string(it.Key()))
 	}
@@ -114,7 +114,7 @@ func (s Subspace) GetAllParamKeys(ctx Ctx) (keys []string) {
 // GetIfExists do not modify ptr if the stored parameter is nil
 func (s Subspace) GetIfExists(ctx Ctx, key []byte, ptr interface{}) {
 	store := s.kvStore(ctx)
-	bz := store.Get(key)
+	bz, _ := store.Get(key)
 	if bz == nil {
 		return
 	}
@@ -126,7 +126,7 @@ func (s Subspace) GetIfExists(ctx Ctx, key []byte, ptr interface{}) {
 
 func (s Subspace) GetIfExistsRaw(ctx Ctx, key []byte) []byte {
 	store := s.kvStore(ctx)
-	bz := store.Get(key)
+	bz, _ := store.Get(key)
 	if bz == nil {
 		return nil
 	}
@@ -145,19 +145,19 @@ func (s Subspace) GetWithSubkeyIfExists(ctx Ctx, key, subkey []byte, ptr interfa
 }
 
 // Get raw bytes of parameter from store
-func (s Subspace) GetRaw(ctx Ctx, key []byte) []byte {
+func (s Subspace) GetRaw(ctx Ctx, key []byte) ([]byte, error) {
 	store := s.kvStore(ctx)
 	return store.Get(key)
 }
 
 // Check if the parameter is set in the store
-func (s Subspace) Has(ctx Ctx, key []byte) bool {
+func (s Subspace) Has(ctx Ctx, key []byte) (bool, error) {
 	store := s.kvStore(ctx)
 	return store.Has(key)
 }
 
 // Returns true if the parameter is set in the block
-func (s Subspace) Modified(ctx Ctx, key []byte) bool {
+func (s Subspace) Modified(ctx Ctx, key []byte) (bool, error) {
 	tstore := s.transientStore(ctx)
 	return tstore.Has(key)
 }
@@ -193,9 +193,9 @@ func (s Subspace) Set(ctx Ctx, key []byte, param interface{}) {
 	if err != nil {
 		panic(err)
 	}
-	store.Set(key, bz)
+	_ = store.Set(key, bz)
 	tstore := s.transientStore(ctx)
-	tstore.Set(key, []byte{})
+	_ = tstore.Set(key, []byte{})
 }
 
 // Update stores raw parameter bytes. It returns error if the stored parameter
@@ -217,7 +217,7 @@ func (s Subspace) Update(ctx Ctx, key []byte, param []byte) error {
 
 	s.Set(ctx, key, dest)
 	tStore := s.transientStore(ctx)
-	tStore.Set(key, []byte{})
+	_ = tStore.Set(key, []byte{})
 
 	return nil
 }
@@ -235,10 +235,10 @@ func (s Subspace) SetWithSubkey(ctx Ctx, key []byte, subkey []byte, param interf
 	if err != nil {
 		panic(err)
 	}
-	store.Set(newkey, bz)
+	_ = store.Set(newkey, bz)
 
 	tstore := s.transientStore(ctx)
-	tstore.Set(newkey, []byte{})
+	_ = tstore.Set(newkey, []byte{})
 }
 
 // UpdateWithSubkey stores raw parameter bytes  with a key and subkey. It checks
@@ -261,7 +261,7 @@ func (s Subspace) UpdateWithSubkey(ctx Ctx, key []byte, subkey []byte, param []b
 
 	s.SetWithSubkey(ctx, key, subkey, dest)
 	tStore := s.transientStore(ctx)
-	tStore.Set(concatkey, []byte{})
+	_ = tStore.Set(concatkey, []byte{})
 
 	return nil
 }
@@ -301,17 +301,17 @@ func (ros ReadOnlySubspace) Get(ctx Ctx, key []byte, ptr interface{}) {
 }
 
 // Exposes GetRaw
-func (ros ReadOnlySubspace) GetRaw(ctx Ctx, key []byte) []byte {
+func (ros ReadOnlySubspace) GetRaw(ctx Ctx, key []byte) ([]byte, error) {
 	return ros.s.GetRaw(ctx, key)
 }
 
 // Exposes Has
-func (ros ReadOnlySubspace) Has(ctx Ctx, key []byte) bool {
+func (ros ReadOnlySubspace) Has(ctx Ctx, key []byte) (bool, error) {
 	return ros.s.Has(ctx, key)
 }
 
 // Exposes Modified
-func (ros ReadOnlySubspace) Modified(ctx Ctx, key []byte) bool {
+func (ros ReadOnlySubspace) Modified(ctx Ctx, key []byte) (bool, error) {
 	return ros.s.Modified(ctx, key)
 }
 

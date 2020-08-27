@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pokt-network/pocket-core/codec"
+	"github.com/pokt-network/pocket-core/codec/types"
 	posCrypto "github.com/pokt-network/pocket-core/crypto"
 	sdk "github.com/pokt-network/pocket-core/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/multisig"
 	"gopkg.in/yaml.v2"
+	"log"
 	"os"
 )
 
@@ -16,9 +18,9 @@ var (
 	_ sdk.Tx = (*StdTx)(nil)
 )
 
-// StdTx is a standard way to wrap a Msg with Fee and Sigs.
-// NOTE: the first signature is the fee payer (Sigs must not be nil).
-type StdTx struct {
+//StdTx is a standard way to wrap a Msg with Fee and Sigs.
+//NOTE: the first signature is the fee payer (Sigs must not be nil).
+type stdTx struct {
 	Msg       sdk.Msg      `json:"msg" yaml:"msg"`
 	Fee       sdk.Coins    `json:"fee" yaml:"fee"`
 	Signature StdSignature `json:"signature" yaml:"signature"`
@@ -27,8 +29,12 @@ type StdTx struct {
 }
 
 func NewStdTx(msgs sdk.Msg, fee sdk.Coins, sigs StdSignature, memo string, entropy int64) StdTx {
+	any, err := types.NewAnyWithValue(msgs)
+	if err != nil {
+		return StdTx{}
+	}
 	return StdTx{
-		Msg:       msgs,
+		Msg:       *any,
 		Fee:       fee,
 		Signature: sigs,
 		Memo:      memo,
@@ -37,7 +43,13 @@ func NewStdTx(msgs sdk.Msg, fee sdk.Coins, sigs StdSignature, memo string, entro
 }
 
 // GetMsg returns the all the transaction's messages.
-func (tx StdTx) GetMsg() sdk.Msg { return tx.Msg }
+func (tx StdTx) GetMsg() (res sdk.Msg) {
+	err := ModuleCdc.UnpackAny(&tx.Msg, &res)
+	if err != nil {
+		panic("unable to retrive msg: " + err.Error())
+	}
+	return
+}
 
 // ValidateBasic does a simple and lightweight validation check that doesn't
 // require access to any other information.
@@ -50,6 +62,18 @@ func (tx StdTx) ValidateBasic() sdk.Error {
 		return sdk.ErrUnauthorized("empty signature")
 	}
 	return nil
+}
+
+func (tx *StdTx) MarshalJSON() ([]byte, error) {
+	res := stdTx{
+		Msg:       tx.GetMsg(),
+		Fee:       tx.Fee,
+		Signature: tx.GetSignature(),
+		Memo:      tx.GetMemo(),
+		Entropy:   tx.Entropy,
+	}
+
+	return json.Marshal(&res)
 }
 
 // CountSubKeys counts the total number of keys for a multi-sig public key.
@@ -94,13 +118,13 @@ func (tx StdTx) GetSignature() StdSignature { return tx.Signature }
 // as well as the ChainID (prevent cross chain replay)
 // and the Entropy numbers for each signature (prevent
 // inchain replay and enforce tx ordering per account).
-type StdSignDoc struct {
-	ChainID string          `json:"chain_id" yaml:"chain_id"`
-	Fee     json.RawMessage `json:"fee" yaml:"fee"`
-	Memo    string          `json:"memo" yaml:"memo"`
-	Msg     json.RawMessage `json:"msg" yaml:"msg"`
-	Entropy int64           `json:"entropy" yaml:"entropy"`
-}
+//type StdSignDoc struct {
+//	ChainID string          `json:"chain_id" yaml:"chain_id"`
+//	Fee     json.RawMessage `json:"fee" yaml:"fee"`
+//	Memo    string          `json:"memo" yaml:"memo"`
+//	Msg     json.RawMessage `json:"msg" yaml:"msg"`
+//	Entropy int64           `json:"entropy" yaml:"entropy"`
+//}
 
 // StdSignBytes returns the bytes to sign for a transaction.
 func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msg sdk.Msg, memo string) ([]byte, error) {
@@ -110,7 +134,7 @@ func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msg sdk.Msg, mem
 	if err != nil {
 		return nil, fmt.Errorf("could not marshal fee to json for StdSignBytes function: %v", err.Error())
 	}
-	bz, err := ModuleCdc.MarshalJSON(StdSignDoc{
+	bz, err := ModuleCdc.MarshalBinaryBare(&StdSignDoc{
 		ChainID: chainID,
 		Fee:     feeBytes,
 		Memo:    memo,
@@ -120,17 +144,17 @@ func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msg sdk.Msg, mem
 	if err != nil {
 		return nil, fmt.Errorf("could not marshal bytes to json for StdSignDoc function: %v", err.Error())
 	}
-	return sdk.MustSortJSON(bz), nil
+	return bz, nil
 }
 
 // StdSignature represents a sig
-type StdSignature struct {
-	posCrypto.PublicKey `json:"pub_key" yaml:"pub_key"` // technically optional if the public key is in the world state
-	Signature           []byte                          `json:"signature" yaml:"signature"`
-}
+//type StdSignature struct {
+//	posCrypto.PublicKey `json:"pub_key" yaml:"pub_key"` // technically optional if the public key is in the world state
+//	Signature           []byte                          `json:"signature" yaml:"signature"`
+//}
 
 // DefaultTxDecoder logic for standard transaction decoding
-func DefaultTxDecoder(cdc *codec.Codec) sdk.TxDecoder {
+func DefaultTxDecoder(_ *codec.LegacyAmino, proto *codec.ProtoCodec) sdk.TxDecoder {
 	return func(txBytes []byte) (sdk.Tx, sdk.Error) {
 		var tx = StdTx{}
 		if len(txBytes) == 0 {
@@ -138,36 +162,36 @@ func DefaultTxDecoder(cdc *codec.Codec) sdk.TxDecoder {
 		}
 		// StdTx.Msg is an interface. The concrete types
 		// are registered by MakeTxCodec
-		err := cdc.UnmarshalBinaryLengthPrefixed(txBytes, &tx)
+		err := proto.UnmarshalBinaryLengthPrefixed(txBytes, &tx)
 		if err != nil {
-			return nil, sdk.ErrTxDecode("error decoding transaction").TraceSDK(err.Error())
+			return nil, sdk.ErrTxDecode("error decoding transaction: " + err.Error())
 		}
 		return tx, nil
 	}
 }
 
 // DefaultTxEncoder logic for standard transaction encoding
-func DefaultTxEncoder(cdc *codec.Codec) sdk.TxEncoder {
+func DefaultTxEncoder(_ *codec.LegacyAmino, proto *codec.ProtoCodec) sdk.TxEncoder {
 	return func(tx sdk.Tx) ([]byte, error) {
-		return cdc.MarshalBinaryLengthPrefixed(tx)
+		stdTx, ok := tx.(StdTx)
+		if !ok {
+			log.Fatal("tx must be of type stdTx")
+		}
+		return proto.MarshalBinaryLengthPrefixed(&stdTx)
 	}
 }
 
 // MarshalYAML returns the YAML representation of the signature.
 func (ss StdSignature) MarshalYAML() (interface{}, error) {
 	var (
-		bz     []byte
-		pubkey string
-		err    error
+		bz  []byte
+		err error
 	)
-	if ss.PublicKey != nil {
-		pubkey = ss.PublicKey.RawString()
-	}
 	bz, err = yaml.Marshal(struct {
 		PubKey    string
 		Signature string
 	}{
-		PubKey:    pubkey,
+		PubKey:    ss.PublicKey,
 		Signature: fmt.Sprintf("%s", ss.Signature),
 	})
 	if err != nil {
@@ -187,7 +211,7 @@ func NewTestTx(ctx sdk.Ctx, msgs sdk.Msg, priv posCrypto.PrivateKey, entropy int
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	s := StdSignature{PublicKey: priv.PublicKey(), Signature: sig}
+	s := StdSignature{PublicKey: priv.PublicKey().RawString(), Signature: sig}
 	tx := NewStdTx(msgs, fee, s, "", entropy)
 	return tx
 }

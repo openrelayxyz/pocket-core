@@ -17,7 +17,7 @@ import (
 // BaseAccount
 var _ exported.Account = (*BaseAccount)(nil)
 
-// BaseAccount - a base account structure.
+//BaseAccount - a base account structure.
 type BaseAccount struct {
 	Address sdk.Address      `json:"address" yaml:"address"`
 	Coins   sdk.Coins        `json:"coins" yaml:"coins"`
@@ -34,6 +34,40 @@ func NewBaseAccount(address sdk.Address, coins sdk.Coins,
 		Coins:   coins,
 		PubKey:  pubKey,
 	}
+}
+
+var _ exported.Account = &BaseAccountEncodable{}
+
+func (m *BaseAccountEncodable) GetAddress() sdk.Address {
+	return m.Address
+}
+
+func (m *BaseAccountEncodable) SetAddress(addr sdk.Address) error {
+	m.Address = addr
+	return nil
+}
+
+func (m *BaseAccountEncodable) GetPubKey() crypto.PublicKey {
+	res, _ := crypto.NewPublicKey(m.PubKey)
+	return res
+}
+
+func (m *BaseAccountEncodable) SetPubKey(pk crypto.PublicKey) error {
+	m.PubKey = pk.RawString()
+	return nil
+}
+
+func (m *BaseAccountEncodable) GetCoins() sdk.Coins {
+	return m.Coins
+}
+
+func (m *BaseAccountEncodable) SetCoins(c sdk.Coins) error {
+	m.Coins = c
+	return nil
+}
+
+func (m *BaseAccountEncodable) SpendableCoins(blockTime time.Time) sdk.Coins {
+	return m.Coins
 }
 
 // String implements fmt.Stringer

@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"github.com/pokt-network/pocket-core/codec"
 	"github.com/pokt-network/pocket-core/crypto"
-	cmn "github.com/tendermint/tendermint/libs/common"
+	"github.com/tendermint/tendermint/libs/os"
 	"github.com/tendermint/tendermint/p2p"
 	"io/ioutil"
 )
 
-func LoadOrGenerateNodeKeyFile(cdc *codec.Codec, filePath string) error {
-	if cmn.FileExists(filePath) {
+func LoadOrGenerateNodeKeyFile(cdc *codec.ProtoCodec, filePath string) error {
+	if os.FileExists(filePath) {
 		_, err := LoadNodeKeyFile(cdc, filePath)
 		if err != nil {
 			return err
@@ -24,7 +24,7 @@ func LoadOrGenerateNodeKeyFile(cdc *codec.Codec, filePath string) error {
 	return nil
 }
 
-func GenerateNodeKeyFile(cdc *codec.Codec, filePath string) (*p2p.NodeKey, error) {
+func GenerateNodeKeyFile(cdc *codec.ProtoCodec, filePath string) (*p2p.NodeKey, error) {
 	privKey := crypto.PrivateKey(crypto.Ed25519PrivateKey{}).GenPrivateKey()
 	nodeKey := &p2p.NodeKey{
 		PrivKey: privKey,
@@ -41,7 +41,7 @@ func GenerateNodeKeyFile(cdc *codec.Codec, filePath string) (*p2p.NodeKey, error
 	return nodeKey, nil
 }
 
-func LoadNodeKeyFile(cdc *codec.Codec, filePath string) (*p2p.NodeKey, error) {
+func LoadNodeKeyFile(cdc *codec.ProtoCodec, filePath string) (*p2p.NodeKey, error) {
 	jsonBytes, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return nil, err

@@ -1,19 +1,21 @@
 package crypto
 
 import (
-	"github.com/tendermint/go-amino"
-	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
+	"github.com/pokt-network/pocket-core/codec"
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto/ed25519"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
-var cdc = amino.NewCodec()
+var cdc *codec.LegacyAmino
 
 func init() {
-	RegisterAmino(cdc)
-	cryptoAmino.RegisterAmino(cdc)
+	cdc = codec.NewLegacyAminoCodec()
+	RegisterCrypto(cdc, nil)
 }
 
-// RegisterAmino registers all go-crypto related types in the given (amino) codec.
-func RegisterAmino(cdc *amino.Codec) {
+// RegisterCrypto registers all go-crypto related types in the given (cdc) codec.
+func RegisterCrypto(cdc *codec.LegacyAmino, _ *codec.ProtoCodec) {
 	cdc.RegisterInterface((*PublicKey)(nil), nil)
 	cdc.RegisterInterface((*PrivateKey)(nil), nil)
 	cdc.RegisterConcrete(Ed25519PublicKey{}, "crypto/ed25519_public_key", nil)
@@ -24,4 +26,10 @@ func RegisterAmino(cdc *amino.Codec) {
 	cdc.RegisterInterface((*PublicKeyMultiSig)(nil), nil)
 	cdc.RegisterConcrete(PublicKeyMultiSignature{}, "crypto/public_key_multi_signature", nil)
 	cdc.RegisterConcrete(MultiSignature{}, "crypto/multi_signature", nil)
+	cdc.RegisterInterface((*crypto.PubKey)(nil), nil)
+	cdc.RegisterConcrete(ed25519.PubKeyEd25519{}, ed25519.PubKeyAminoName, nil)
+	cdc.RegisterConcrete(secp256k1.PubKeySecp256k1{}, secp256k1.PubKeyAminoName, nil)
+	cdc.RegisterInterface((*crypto.PrivKey)(nil), nil)
+	cdc.RegisterConcrete(ed25519.PrivKeyEd25519{}, ed25519.PrivKeyAminoName, nil)
+	cdc.RegisterConcrete(secp256k1.PrivKeySecp256k1{}, secp256k1.PrivKeyAminoName, nil)
 }

@@ -13,14 +13,14 @@ import (
 	"github.com/tendermint/tendermint/rpc/client"
 )
 
-func StakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, chains []string, amount sdk.Int, kp keys.KeyPair, passphrase string) (*sdk.TxResponse, error) {
+func StakeTx(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase, chains []string, amount sdk.Int, kp keys.KeyPair, passphrase string) (*sdk.TxResponse, error) {
 	fromAddr := kp.GetAddress()
 	msg := types.MsgAppStake{
-		PubKey: kp.PublicKey,
+		PubKey: kp.PublicKey.RawString(),
 		Value:  amount,
 		Chains: chains, // non native blockchains
 	}
-	txBuilder, cliCtx, err := newTx(cdc, msg, fromAddr, tmNode, keybase, passphrase)
+	txBuilder, cliCtx, err := newTx(cdc, &msg, fromAddr, tmNode, keybase, passphrase)
 	if err != nil {
 		return nil, err
 	}
@@ -28,12 +28,12 @@ func StakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, chain
 	if err != nil {
 		return nil, err
 	}
-	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, msg)
+	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, &msg)
 }
 
-func UnstakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, address sdk.Address, passphrase string) (*sdk.TxResponse, error) {
+func UnstakeTx(cdc *codec.ProtoCodec, tmNode client.Client, keybase keys.Keybase, address sdk.Address, passphrase string) (*sdk.TxResponse, error) {
 	msg := types.MsgBeginAppUnstake{Address: address}
-	txBuilder, cliCtx, err := newTx(cdc, msg, address, tmNode, keybase, passphrase)
+	txBuilder, cliCtx, err := newTx(cdc, &msg, address, tmNode, keybase, passphrase)
 	if err != nil {
 		return nil, err
 	}
@@ -41,10 +41,10 @@ func UnstakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, add
 	if err != nil {
 		return nil, err
 	}
-	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, msg)
+	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, &msg)
 }
 
-func newTx(cdc *codec.Codec, msg sdk.Msg, fromAddr sdk.Address, tmNode client.Client, keybase keys.Keybase, passphrase string) (txBuilder auth.TxBuilder, cliCtx util.CLIContext, err error) {
+func newTx(cdc *codec.ProtoCodec, msg sdk.Msg, fromAddr sdk.Address, tmNode client.Client, keybase keys.Keybase, passphrase string) (txBuilder auth.TxBuilder, cliCtx util.CLIContext, err error) {
 	genDoc, err := tmNode.Genesis()
 	if err != nil {
 		return
@@ -71,8 +71,8 @@ func newTx(cdc *codec.Codec, msg sdk.Msg, fromAddr sdk.Address, tmNode client.Cl
 		return
 	}
 	txBuilder = auth.NewTxBuilder(
-		auth.DefaultTxEncoder(cdc),
-		auth.DefaultTxDecoder(cdc),
+		auth.DefaultTxEncoder(nil, cdc),
+		auth.DefaultTxDecoder(nil, cdc),
 		chainID,
 		"",
 		sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, fee))).WithKeybase(keybase)
