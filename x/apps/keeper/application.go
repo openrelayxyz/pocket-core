@@ -12,7 +12,7 @@ import (
 // GetApplication - Retrieve a single application from the main store
 func (k Keeper) GetApplication(ctx sdk.Ctx, addr sdk.Address) (application types.Application, found bool) {
 	store := ctx.KVStore(k.storeKey)
-	value := store.Get(types.KeyForAppByAllApps(addr))
+	value, _ := store.Get(types.KeyForAppByAllApps(addr))
 	if value == nil {
 		return application, false
 	}
@@ -32,7 +32,7 @@ func (k Keeper) SetApplication(ctx sdk.Ctx, application types.Application) {
 		k.Logger(ctx).Error("could not marshal application object")
 		os.Exit(1)
 	}
-	store.Set(types.KeyForAppByAllApps(application.Address), bz)
+	_ = store.Set(types.KeyForAppByAllApps(application.Address), bz)
 	ctx.Logger().Info("Setting App on Main Store " + application.Address.String())
 }
 
@@ -40,7 +40,7 @@ func (k Keeper) SetApplication(ctx sdk.Ctx, application types.Application) {
 func (k Keeper) GetAllApplications(ctx sdk.Ctx) (applications types.Applications) {
 	applications = make([]types.Application, 0)
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.AllApplicationsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllApplicationsKey)
 	defer iterator.Close()
 
 	for ; iterator.Valid(); iterator.Next() {
@@ -58,7 +58,7 @@ func (k Keeper) GetAllApplications(ctx sdk.Ctx) (applications types.Applications
 func (k Keeper) GetAllApplicationsWithOpts(ctx sdk.Ctx, opts types.QueryApplicationsWithOpts) (applications types.Applications) {
 	applications = make([]types.Application, 0)
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.AllApplicationsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllApplicationsKey)
 	defer iterator.Close()
 
 	for ; iterator.Valid(); iterator.Next() {
@@ -79,7 +79,7 @@ func (k Keeper) GetApplications(ctx sdk.Ctx, maxRetrieve uint16) (applications t
 	store := ctx.KVStore(k.storeKey)
 	applications = make([]types.Application, maxRetrieve)
 
-	iterator := sdk.KVStorePrefixIterator(store, types.AllApplicationsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllApplicationsKey)
 	defer iterator.Close()
 
 	i := 0
@@ -99,7 +99,7 @@ func (k Keeper) GetApplications(ctx sdk.Ctx, maxRetrieve uint16) (applications t
 func (k Keeper) IterateAndExecuteOverApps(
 	ctx sdk.Ctx, fn func(index int64, application exported.ApplicationI) (stop bool)) {
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.AllApplicationsKey)
+	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllApplicationsKey)
 	defer iterator.Close()
 	i := int64(0)
 	for ; iterator.Valid(); iterator.Next() {

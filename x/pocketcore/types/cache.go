@@ -33,7 +33,7 @@ type CacheObject interface {
 }
 
 // "Init" - Initializes a cache storage object
-func (cs *CacheStorage) Init(dir, name string, dbType db.DBBackendType, maxEntries int) {
+func (cs *CacheStorage) Init(dir, name string, dbType db.BackendType, maxEntries int) {
 	// init the lru cache with a max entries
 	var err error
 	cs.Cache, err = New(maxEntries)
@@ -53,7 +53,7 @@ func (cs *CacheStorage) Get(key []byte, object CacheObject) (interface{}, bool) 
 		return res, true
 	}
 	// not in cache, so search database
-	bz := cs.DB.Get(key)
+	bz, _ := cs.DB.Get(key)
 	if len(bz) == 0 {
 		return nil, false
 	}
@@ -88,7 +88,7 @@ func (cs *CacheStorage) Delete(key []byte) {
 	// remove from cache
 	cs.Cache.Remove(hex.EncodeToString(key))
 	// remove from db
-	cs.DB.Delete(key)
+	_ = cs.DB.Delete(key)
 }
 
 func (cs *CacheStorage) FlushToDB() error {
@@ -115,7 +115,7 @@ func (cs *CacheStorage) FlushToDB() error {
 			return fmt.Errorf("error flushing database, couldn't hex decode key: %s", err.Error())
 		}
 		// set to DB
-		cs.DB.Set(kBz, bz)
+		_ = cs.DB.Set(kBz, bz)
 	}
 	return nil
 }
@@ -127,15 +127,15 @@ func (cs *CacheStorage) Clear() {
 	// clear cache
 	cs.Cache.Purge()
 	// clear db
-	iter := cs.DB.Iterator(nil, nil)
+	iter, _ := cs.DB.Iterator(nil, nil)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
-		cs.DB.Delete(iter.Key())
+		_ = cs.DB.Delete(iter.Key())
 	}
 }
 
 // "Iterator" - Returns an iterator for all of the items in the stores
-func (cs *CacheStorage) Iterator() db.Iterator {
+func (cs *CacheStorage) Iterator() (db.Iterator, error) {
 	_ = cs.FlushToDB()
 	return cs.DB.Iterator(nil, nil)
 }
@@ -196,8 +196,9 @@ func (si *SessionIt) Value() (session Session) {
 
 // "SessionIterator" - Returns an instance iterator of the globalSessionCache
 func SessionIterator() SessionIt {
+	it, _ := globalSessionCache.Iterator()
 	return SessionIt{
-		Iterator: globalSessionCache.Iterator(),
+		Iterator: it,
 	}
 }
 
@@ -283,8 +284,10 @@ func (ei *EvidenceIt) Value() (evidence Evidence) {
 
 // "EvidenceIterator" - Returns a globalEvidenceCache iterator instance
 func EvidenceIterator() EvidenceIt {
+	it, _ := globalEvidenceCache.Iterator()
+
 	return EvidenceIt{
-		Iterator: globalEvidenceCache.Iterator(),
+		Iterator: it,
 	}
 }
 

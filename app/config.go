@@ -25,12 +25,13 @@ import (
 	"github.com/spf13/cobra"
 	con "github.com/tendermint/tendermint/config"
 	"github.com/tendermint/tendermint/libs/cli/flags"
-	cmn "github.com/tendermint/tendermint/libs/common"
 	"github.com/tendermint/tendermint/libs/log"
+	cmn "github.com/tendermint/tendermint/libs/os"
 	"github.com/tendermint/tendermint/node"
 	"github.com/tendermint/tendermint/p2p"
 	"github.com/tendermint/tendermint/privval"
 	"github.com/tendermint/tendermint/rpc/client"
+	"github.com/tendermint/tendermint/rpc/client/http"
 	dbm "github.com/tendermint/tm-db"
 	"golang.org/x/crypto/ssh/terminal"
 	"io"
@@ -88,7 +89,7 @@ var (
 	// config
 	GlobalConfig Config
 	// HTTP CLIENT FOR TENDERMINT
-	tmClient *client.HTTP
+	tmClient *http.HTTP
 	// global genesis type
 	GlobalGenesisType GenesisType
 )
@@ -99,27 +100,27 @@ type Config struct {
 }
 
 type PocketConfig struct {
-	DataDir                  string            `json:"data_dir"`
-	GenesisName              string            `json:"genesis_file"`
-	ChainsName               string            `json:"chains_name"`
-	SessionDBType            dbm.DBBackendType `json:"session_db_type"`
-	SessionDBName            string            `json:"session_db_name"`
-	EvidenceDBType           dbm.DBBackendType `json:"evidence_db_type"`
-	EvidenceDBName           string            `json:"evidence_db_name"`
-	TendermintURI            string            `json:"tendermint_uri"`
-	KeybaseName              string            `json:"keybase_name"`
-	RPCPort                  string            `json:"rpc_port"`
-	ClientBlockSyncAllowance int               `json:"client_block_sync_allowance"`
-	MaxEvidenceCacheEntires  int               `json:"max_evidence_cache_entries"`
-	MaxSessionCacheEntries   int               `json:"max_session_cache_entries"`
-	JSONSortRelayResponses   bool              `json:"json_sort_relay_responses"`
-	RemoteCLIURL             string            `json:"remote_cli_url"`
-	UserAgent                string            `json:"user_agent"`
-	ValidatorCacheSize       int64             `json:"validator_cache_size"`
-	ApplicationCacheSize     int64             `json:"application_cache_size"`
-	RPCTimeout               int64             `json:"rpc_timeout"`
-	PrometheusAddr           string            `json:"pocket_prometheus_port"`
-	PrometheusMaxOpenfiles   int               `json:"prometheus_max_open_files"`
+	DataDir                  string          `json:"data_dir"`
+	GenesisName              string          `json:"genesis_file"`
+	ChainsName               string          `json:"chains_name"`
+	SessionDBType            dbm.BackendType `json:"session_db_type"`
+	SessionDBName            string          `json:"session_db_name"`
+	EvidenceDBType           dbm.BackendType `json:"evidence_db_type"`
+	EvidenceDBName           string          `json:"evidence_db_name"`
+	TendermintURI            string          `json:"tendermint_uri"`
+	KeybaseName              string          `json:"keybase_name"`
+	RPCPort                  string          `json:"rpc_port"`
+	ClientBlockSyncAllowance int             `json:"client_block_sync_allowance"`
+	MaxEvidenceCacheEntires  int             `json:"max_evidence_cache_entries"`
+	MaxSessionCacheEntries   int             `json:"max_session_cache_entries"`
+	JSONSortRelayResponses   bool            `json:"json_sort_relay_responses"`
+	RemoteCLIURL             string          `json:"remote_cli_url"`
+	UserAgent                string          `json:"user_agent"`
+	ValidatorCacheSize       int64           `json:"validator_cache_size"`
+	ApplicationCacheSize     int64           `json:"application_cache_size"`
+	RPCTimeout               int64           `json:"rpc_timeout"`
+	PrometheusAddr           string          `json:"pocket_prometheus_port"`
+	PrometheusMaxOpenfiles   int             `json:"prometheus_max_open_files"`
 }
 
 type GenesisType int
@@ -166,7 +167,7 @@ func DefaultConfig(dataDir string) Config {
 	c.TendermintConfig.P2P.MaxNumOutboundPeers = 250
 	c.TendermintConfig.LogLevel = "*:info, *:error"
 	c.TendermintConfig.TxIndex.Indexer = DefaultTxIndexer
-	c.TendermintConfig.TxIndex.IndexTags = DefaultTxIndexTags
+	c.TendermintConfig.TxIndex.IndexKeys = DefaultTxIndexTags
 	c.TendermintConfig.DBBackend = DefaultDBBackend
 	c.TendermintConfig.RPC.GRPCMaxOpenConnections = 2500
 	c.TendermintConfig.RPC.MaxOpenConnections = 2500
@@ -494,9 +495,9 @@ func privValState() {
 func getTMClient() client.Client {
 	if tmClient == nil {
 		if GlobalConfig.PocketConfig.TendermintURI == "" {
-			tmClient = client.NewHTTP(DefaultTMURI, "/websocket")
+			tmClient, _ = http.New(DefaultTMURI, "/websocket")
 		} else {
-			tmClient = client.NewHTTP(GlobalConfig.PocketConfig.TendermintURI, "/websocket")
+			tmClient, _ = http.New(GlobalConfig.PocketConfig.TendermintURI, "/websocket")
 		}
 	}
 	return tmClient
@@ -741,9 +742,9 @@ func ResetAll(dbDir, addrBookFile, privValKeyFile, privValStateFile string, logg
 
 func resetFilePV(privValKeyFile, privValStateFile string, logger log.Logger) {
 	if _, err := os.Stat(privValKeyFile); err == nil {
-		os.Remove(privValKeyFile)
-		os.Remove(privValStateFile)
-		os.Remove(GlobalConfig.PocketConfig.DataDir + FS + GlobalConfig.TendermintConfig.NodeKey)
+		_ = os.Remove(privValKeyFile)
+		_ = os.Remove(privValStateFile)
+		_ = os.Remove(GlobalConfig.PocketConfig.DataDir + FS + GlobalConfig.TendermintConfig.NodeKey)
 	}
 	logger.Info("Reset private validator file", "keyFile", privValKeyFile,
 		"stateFile", privValStateFile)

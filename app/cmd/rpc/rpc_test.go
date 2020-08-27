@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/pokt-network/pocket-core/app"
 	"github.com/pokt-network/pocket-core/crypto"
+	rand2 "github.com/tendermint/tendermint/libs/rand"
 	"io"
 	"io/ioutil"
 	"math/rand"
@@ -26,7 +27,6 @@ import (
 	types2 "github.com/pokt-network/pocket-core/x/nodes/types"
 	pocketTypes "github.com/pokt-network/pocket-core/x/pocketcore/types"
 	"github.com/stretchr/testify/assert"
-	"github.com/tendermint/tendermint/libs/common"
 	core_types "github.com/tendermint/tendermint/rpc/core/types"
 	tmTypes "github.com/tendermint/tendermint/types"
 	"gopkg.in/h2non/gock.v1"
@@ -729,7 +729,7 @@ func TestRPC_RawTX(t *testing.T) {
 			Amount:      types.NewInt(1),
 		},
 		pk,
-		common.RandInt64(),
+		rand2.Int64(),
 		types.NewCoins(types.NewCoin(types.DefaultStakeDenom, types.NewInt(100000)))))
 	assert.Nil(t, err)
 	<-evtChan // Wait for block

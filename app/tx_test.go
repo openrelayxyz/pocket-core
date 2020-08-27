@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/tendermint/tendermint/libs/log"
+	rand2 "github.com/tendermint/tendermint/libs/rand"
 	"math/rand"
 	"os"
 	"strings"
@@ -22,7 +23,6 @@ import (
 	nodeTypes "github.com/pokt-network/pocket-core/x/nodes/types"
 	pocketTypes "github.com/pokt-network/pocket-core/x/pocketcore/types"
 	"github.com/stretchr/testify/assert"
-	"github.com/tendermint/tendermint/libs/common"
 	tmTypes "github.com/tendermint/tendermint/types"
 	db "github.com/tendermint/tm-db"
 )
@@ -230,7 +230,7 @@ func TestDuplicateTxWithRawTx(t *testing.T) {
 			Amount:      sdk.NewInt(1),
 		},
 		pk,
-		common.RandInt64(),
+		rand2.Int64(),
 		sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(100000)))))
 	assert.Nil(t, err)
 	// create the transaction
@@ -241,7 +241,7 @@ func TestDuplicateTxWithRawTx(t *testing.T) {
 			Amount:      sdk.NewInt(1),
 		},
 		pk,
-		common.RandInt64(),
+		rand2.Int64(),
 		sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(100000)))))
 	assert.Nil(t, err)
 
@@ -279,8 +279,8 @@ func TestChangeParamsComplexTypeTx(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, tx)
 	select {
-	case res := <-evtChan:
-		fmt.Println(res)
+	case _ = <-evtChan:
+		//fmt.Println(res)
 		acl, err := PCA.QueryACL(0)
 		assert.Nil(t, err)
 		o := acl.GetOwner("gov/acl")
@@ -304,8 +304,8 @@ func TestChangeParamsSimpleTx(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, tx)
 	select {
-	case res := <-evtChan:
-		fmt.Println(res)
+	case _ = <-evtChan:
+		//fmt.Println(res)
 		assert.Nil(t, err)
 		o, _ := PCA.QueryParam(0, "application/StabilityAdjustment")
 		assert.Equal(t, "100", o.Value)
