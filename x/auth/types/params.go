@@ -1,9 +1,9 @@
 package types
 
 import (
-	"bytes"
 	"fmt"
 	sdk "github.com/pokt-network/pocket-core/types"
+	"reflect"
 	"strings"
 )
 
@@ -51,9 +51,7 @@ func (p *Params) ParamSetPairs() sdk.ParamSetPairs {
 
 // Equal returns a boolean determining if two Params types are identical.
 func (p Params) Equal(p2 Params) bool {
-	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
-	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
-	return bytes.Equal(bz1, bz2)
+	return reflect.DeepEqual(p, p2)
 }
 
 // DefaultParams returns a default set of parameters.

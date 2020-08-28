@@ -3,9 +3,11 @@ package keeper
 // DONTCOVER
 
 import (
+	cdcTypes "github.com/pokt-network/pocket-core/codec/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
+	"go/types"
 
 	"github.com/pokt-network/pocket-core/codec"
 	"github.com/pokt-network/pocket-core/store"
@@ -24,7 +26,7 @@ type testInput struct {
 func setupTestInput() testInput {
 	db := dbm.NewMemDB()
 
-	cdc := codec.New()
+	cdc := codec.NewCodec(cdcTypes.NewInterfaceRegistry())
 	authTypes.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
 

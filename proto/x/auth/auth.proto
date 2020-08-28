@@ -47,7 +47,8 @@ message FeeMultipliers {
 	int64 default = 2 [(gogoproto.jsontag) = "default"];
 }
 message Supply {
-	option (gogoproto.goproto_stringer) = true;
+	option (gogoproto.goproto_stringer) = false;
+	option (gogoproto.goproto_getters) = false;
 	repeated types.Coin total = 1 [(gogoproto.jsontag) = "total", (gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/pokt-network/pocket-core/types.Coins"];
 }
 
