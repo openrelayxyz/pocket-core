@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	types2 "github.com/pokt-network/pocket-core/codec/types"
 	"math"
 	"math/big"
 	"testing"
@@ -57,7 +58,7 @@ func NewTestKeybase() keys.Keybase {
 
 // create a codec used only for testing
 func makeTestCodec() *codec.Codec {
-	var cdc = codec.New()
+	var cdc = codec.NewCodec(types2.NewInterfaceRegistry())
 	auth.RegisterCodec(cdc)
 	gov.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)

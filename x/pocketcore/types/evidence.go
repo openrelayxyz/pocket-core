@@ -9,11 +9,11 @@ import (
 
 // "Evidence" - A proof of work/burn for nodes.
 type Evidence struct {
-	Bloom         bloom.BloomFilter        `json:"bloom_filter"` // used to check if proof contains
-	SessionHeader `json:"evidence_header"` // the session h serves as an identifier for the evidence
-	NumOfProofs   int64                    `json:"num_of_proofs"` // the total number of proofs in the evidence
-	Proofs        []Proof                  `json:"proofs"`        // a slice of Proof objects (Proof per relay or challenge)
-	EvidenceType  EvidenceType             `json:"evidence_type"`
+	Bloom         bloom.BloomFilter `json:"bloom_filter"` // used to check if proof contains
+	SessionHeader `json:"evidence_header"`                // the session h serves as an identifier for the evidence
+	NumOfProofs   int64        `json:"num_of_proofs"`     // the total number of proofs in the evidence
+	Proofs        Proofs       `json:"proofs"`            // a slice of Proof objects (Proof per relay or challenge)
+	EvidenceType  EvidenceType `json:"evidence_type"`
 }
 
 // "GenerateMerkleRoot" - Generates the merkle root for an evidence object
@@ -48,46 +48,46 @@ func (e *Evidence) GenerateMerkleProof(index int) (proof MerkleProof, leaf Proof
 
 // "Evidence" - A proof of work/burn for nodes.
 type evidence struct {
-	BloomBytes    []byte                   `json:"bloom_bytes"`
-	SessionHeader `json:"evidence_header"` // the session h serves as an identifier for the evidence
-	NumOfProofs   int64                    `json:"num_of_proofs"` // the total number of proofs in the evidence
-	Proofs        []Proof                  `json:"proofs"`        // a slice of Proof objects (Proof per relay or challenge)
-	EvidenceType  EvidenceType             `json:"evidence_type"`
+	BloomBytes    []byte `json:"bloom_bytes"`
+	SessionHeader `json:"evidence_header"`            // the session h serves as an identifier for the evidence
+	NumOfProofs   int64        `json:"num_of_proofs"` // the total number of proofs in the evidence
+	Proofs        []Proof      `json:"proofs"`        // a slice of Proof objects (Proof per relay or challenge)
+	EvidenceType  EvidenceType `json:"evidence_type"`
 }
 
 var _ CacheObject = Evidence{} // satisfies the cache object interface
 
-func (e Evidence) Marshal() ([]byte, error) {
+func (e Evidence) MarshalObject() ([]byte, error) {
 	encodedBloom, err := e.Bloom.GobEncode()
 	if err != nil {
 		return nil, err
 	}
-	ep := evidence{
+	ep := EvidenceEncodable{
 		BloomBytes:    encodedBloom,
-		SessionHeader: e.SessionHeader,
+		SessionHeader: &e.SessionHeader,
 		NumOfProofs:   e.NumOfProofs,
-		Proofs:        e.Proofs,
+		Proofs:        e.Proofs.ToProofI(),
 		EvidenceType:  e.EvidenceType,
 	}
-	return ModuleCdc.MarshalBinaryBare(ep)
+	return ModuleCdc.MarshalBinaryBare(&ep)
 }
 
-func (e Evidence) Unmarshal(b []byte) (CacheObject, error) {
-	ep := evidence{}
+func (e Evidence) UnmarshalObject(b []byte) (CacheObject, error) {
+	ep := EvidenceEncodable{}
 	err := ModuleCdc.UnmarshalBinaryBare(b, &ep)
 	if err != nil {
-		return Evidence{}, fmt.Errorf("could not unmarshal into evidence from cache, moduleCdc unmarshal binary bare: %s", err.Error())
+		return Evidence{}, fmt.Errorf("could not unmarshal into EvidenceEncodable from cache, moduleCdc unmarshal binary bare: %s", err.Error())
 	}
 	bloomFilter := bloom.BloomFilter{}
 	err = bloomFilter.GobDecode(ep.BloomBytes)
 	if err != nil {
-		return Evidence{}, fmt.Errorf("could not unmarshal into evidence from cache, bloom bytes gob decode: %s", err.Error())
+		return Evidence{}, fmt.Errorf("could not unmarshal into EvidenceEncodable from cache, bloom bytes gob decode: %s", err.Error())
 	}
 	evidence := Evidence{
 		Bloom:         bloomFilter,
-		SessionHeader: ep.SessionHeader,
+		SessionHeader: *ep.SessionHeader,
 		NumOfProofs:   ep.NumOfProofs,
-		Proofs:        ep.Proofs,
+		Proofs:        ep.Proofs.FromProofI(),
 		EvidenceType:  ep.EvidenceType}
 	return evidence, nil
 }
