@@ -2,9 +2,10 @@ package types
 
 import (
 	"fmt"
-	"github.com/tendermint/tendermint/libs/kv"
 	"sort"
 	"strings"
+
+	"github.com/tendermint/tendermint/libs/kv"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -50,10 +51,10 @@ type (
 
 	// Attribute defines an attribute wrapper where the key and value are
 	// strings instead of raw bytes.
-	Attribute struct {
-		Key   string `json:"key"`
-		Value string `json:"value,omitempty"`
-	}
+	// Attribute struct {
+	// 	Key   string `json:"key"`
+	// 	Value string `json:"value,omitempty"`
+	// }
 
 	// Events defines a slice of Event objects
 	Events []Event
@@ -81,7 +82,7 @@ func EmptyEvents() Events {
 	return make(Events, 0)
 }
 
-func (a Attribute) String() string {
+func (a *Attribute) String() string {
 	return fmt.Sprintf("%s: %s", a.Key, a.Value)
 }
 
@@ -143,10 +144,10 @@ var (
 type (
 	// StringAttribute defines en Event object wrapper where all the attributes
 	// contain key/value pairs that are strings instead of raw bytes.
-	StringEvent struct {
-		Type       string      `json:"type,omitempty"`
-		Attributes []Attribute `json:"attributes,omitempty"`
-	}
+	// StringEvent struct {
+	// 	Type       string      `json:"type,omitempty"`
+	// 	Attributes []Attribute `json:"attributes,omitempty"`
+	// }
 
 	// StringAttributes defines a slice of StringEvents objects.
 	StringEvents []StringEvent

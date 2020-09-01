@@ -13,31 +13,31 @@ import (
 )
 
 // Result is the union of ResponseFormat and ResponseCheckTx.
-type Result struct {
-	// Code is the response code, is stored back on the chain.
-	Code CodeType
+// type Result struct {
+// 	// Code is the response code, is stored back on the chain.
+// 	Code CodeType
 
-	// Codespace is the string referring to the domain of an error
-	Codespace CodespaceType
+// 	// Codespace is the string referring to the domain of an error
+// 	Codespace CodespaceType
 
-	// Data is any data returned from the app.
-	// Data has to be length prefixed in order to separate
-	// results from multiple msgs executions
-	Data []byte
+// 	// Data is any data returned from the app.
+// 	// Data has to be length prefixed in order to separate
+// 	// results from multiple msgs executions
+// 	Data []byte
 
-	// Log contains the txs log information. NOTE: nondeterministic.
-	Log string
+// 	// Log contains the txs log information. NOTE: nondeterministic.
+// 	Log string
 
-	// GasWanted is the maximum units of work we allow this tx to perform.
-	GasWanted uint64
+// 	// GasWanted is the maximum units of work we allow this tx to perform.
+// 	GasWanted uint64
 
-	// GasUsed is the amount of gas actually consumed. NOTE: unimplemented
-	GasUsed uint64
+// 	// GasUsed is the amount of gas actually consumed. NOTE: unimplemented
+// 	GasUsed uint64
 
-	// Events contains a slice of Event objects that were emitted during some
-	// execution.
-	Events Events
-}
+// 	// Events contains a slice of Event objects that were emitted during some
+// 	// execution.
+// 	Events Events
+// }
 
 // TODO: In the future, more codes may be OK.
 func (res Result) IsOK() bool {
@@ -48,15 +48,15 @@ func (res Result) IsOK() bool {
 type ABCIMessageLogs []ABCIMessageLog
 
 // ABCIMessageLog defines a structure containing an indexed tx ABCI message log.
-type ABCIMessageLog struct {
-	MsgIndex uint16 `json:"msg_index"`
-	Success  bool   `json:"success"`
-	Log      string `json:"log"`
+// type ABCIMessageLog struct {
+// 	MsgIndex uint16 `json:"msg_index"`
+// 	Success  bool   `json:"success"`
+// 	Log      string `json:"log"`
 
-	// Events contains a slice of Event objects that were emitted during some
-	// execution.
-	Events StringEvents `json:"events"`
-}
+// 	// Events contains a slice of Event objects that were emitted during some
+// 	// execution.
+// 	Events StringEvents `json:"events"`
+// }
 
 func NewABCIMessageLog(i uint16, success bool, log string, events Events) ABCIMessageLog {
 	return ABCIMessageLog{
@@ -81,24 +81,24 @@ func (logs ABCIMessageLogs) String() (str string) {
 
 // TxResponse defines a structure containing relevant tx data and metadata. The
 // tags are stringified and the log is JSON decoded.
-type TxResponse struct {
-	Height    int64           `json:"height"`
-	TxHash    string          `json:"txhash"`
-	Code      uint32          `json:"code,omitempty"`
-	Data      string          `json:"data,omitempty"`
-	RawLog    string          `json:"raw_log,omitempty"`
-	Logs      ABCIMessageLogs `json:"logs,omitempty"`
-	Info      string          `json:"info,omitempty"`
-	GasWanted int64           `json:"gas_wanted,omitempty"`
-	GasUsed   int64           `json:"gas_used,omitempty"`
-	Codespace string          `json:"codespace,omitempty"`
-	Tx        Tx              `json:"tx,omitempty"`
-	Timestamp string          `json:"timestamp,omitempty"`
+// type TxResponse struct {
+// 	Height    int64           `json:"height"`
+// 	TxHash    string          `json:"txhash"`
+// 	Code      uint32          `json:"code,omitempty"`
+// 	Data      string          `json:"data,omitempty"`
+// 	RawLog    string          `json:"raw_log,omitempty"`
+// 	Logs      ABCIMessageLogs `json:"logs,omitempty"`
+// 	Info      string          `json:"info,omitempty"`
+// 	GasWanted int64           `json:"gas_wanted,omitempty"`
+// 	GasUsed   int64           `json:"gas_used,omitempty"`
+// 	Codespace string          `json:"codespace,omitempty"`
+// 	Tx        Tx              `json:"tx,omitempty"`
+// 	Timestamp string          `json:"timestamp,omitempty"`
 
-	// DEPRECATED: Remove in the next next major release in favor of using the
-	// ABCIMessageLog.Events field.
-	Events StringEvents `json:"events,omitempty"`
-}
+// 	// DEPRECATED: Remove in the next next major release in favor of using the
+// 	// ABCIMessageLog.Events field.
+// 	Events StringEvents `json:"events,omitempty"`
+// }
 
 // NewResponseResultTx returns a TxResponse given a ResultTx from tendermint
 func NewResponseResultTx(res *ctypes.ResultTx, tx Tx, timestamp string) TxResponse {
@@ -209,7 +209,7 @@ func NewResponseFormatBroadcastTx(res *ctypes.ResultBroadcastTx) TxResponse {
 	}
 }
 
-func (r TxResponse) String() string {
+func (r *TxResponse) String() string {
 	var sb strings.Builder
 	sb.WriteString("Response:\n")
 
