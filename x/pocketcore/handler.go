@@ -17,6 +17,9 @@ func NewHandler(keeper keeper.Keeper) sdk.Handler {
 		// handle proof message
 		case types.MsgProof:
 			return handleProofMsg(ctx, keeper, msg)
+		// handle legacy proof message
+		case types.LegacyMsgProof:
+			return handleLegacyProofMsg(ctx, keeper, msg)
 		default:
 			errMsg := fmt.Sprintf("Unrecognized pocketcore Msg type: %v", msg.Type())
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -47,36 +50,39 @@ func handleClaimMsg(ctx sdk.Ctx, k keeper.Keeper, msg types.MsgClaim) sdk.Result
 
 // "handleProofMsg" - General handler for the proof message
 func handleProofMsg(ctx sdk.Ctx, k keeper.Keeper, proof types.MsgProof) sdk.Result {
-	// validate the claim claim
-	addr, claim, err := k.ValidateProof(ctx, proof)
-	if err != nil {
-		if err.Code() == types.CodeReplayAttackError && !claim.IsEmpty() {
-			// delete local evidence
-			processSelf(ctx, k, proof.GetSigner(), claim.SessionHeader, claim.EvidenceType, sdk.ZeroInt())
-			// if is a replay attack, handle accordingly
-			k.HandleReplayAttack(ctx, addr, sdk.NewInt(claim.TotalProofs))
-			err := k.DeleteClaim(ctx, addr, claim.SessionHeader, claim.EvidenceType)
-			if err != nil {
-				ctx.Logger().Error("Could not delete claim from world state after replay attack detected", "Address", claim.FromAddress)
+	if BLOCKHEIGHTPASSED {
+		// validate the claim claim
+		addr, claim, err := k.ValidateProof(ctx, proof)
+		if err != nil {
+			if err.Code() == types.CodeReplayAttackError && !claim.IsEmpty() {
+				// delete local evidence
+				processSelf(ctx, k, proof.GetSigner(), claim.SessionHeader, claim.EvidenceType, sdk.ZeroInt())
+				// if is a replay attack, handle accordingly
+				k.HandleReplayAttack(ctx, addr, sdk.NewInt(claim.TotalProofs))
+				err := k.DeleteClaim(ctx, addr, claim.SessionHeader, claim.EvidenceType)
+				if err != nil {
+					ctx.Logger().Error("Could not delete claim from world state after replay attack detected", "Address", claim.FromAddress)
+				}
 			}
+			return err.Result()
 		}
-		return err.Result()
+		// valid claim message so execute according to type
+		tokens, err := k.ExecuteProof(ctx, proof, claim)
+		if err != nil {
+			return err.Result()
+		}
+		// delete local evidence
+		processSelf(ctx, k, proof.GetSigner(), claim.SessionHeader, claim.EvidenceType, tokens)
+		// create the event
+		ctx.EventManager().EmitEvents(sdk.Events{
+			sdk.NewEvent(
+				types.EventTypeProof,
+				sdk.NewAttribute(types.AttributeKeyValidator, addr.String()),
+			),
+		})
+		return sdk.Result{Events: ctx.EventManager().Events()}
 	}
-	// valid claim message so execute according to type
-	tokens, err := k.ExecuteProof(ctx, proof, claim)
-	if err != nil {
-		return err.Result()
-	}
-	// delete local evidence
-	processSelf(ctx, k, proof.GetSigner(), claim.SessionHeader, claim.EvidenceType, tokens)
-	// create the event
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeProof,
-			sdk.NewAttribute(types.AttributeKeyValidator, addr.String()),
-		),
-	})
-	return sdk.Result{Events: ctx.EventManager().Events()}
+	return sdk.ErrInternal("invalid proto msg (ProofMsg) before the upgrade height").Result()
 }
 
 func processSelf(ctx sdk.Ctx, k keeper.Keeper, signer sdk.Address, header types.SessionHeader, evidenceType types.EvidenceType, tokens sdk.Int) {
@@ -88,4 +94,14 @@ func processSelf(ctx sdk.Ctx, k keeper.Keeper, signer sdk.Address, header types.
 		}
 		types.GlobalServiceMetric().AddUPOKTEarnedFor(header.Chain, float64(tokens.Int64()))
 	}
+}
+
+// legacy proof handling
+
+// "handleProofMsg" - General handler for the proof message
+func handleLegacyProofMsg(ctx sdk.Ctx, k keeper.Keeper, proof types.LegacyMsgProof) sdk.Result {
+	if !BLOCKHEIGHTPASSED {
+		return handleProofMsg(ctx, k, proof.ToProto())
+	}
+	return sdk.ErrInternal("invalid amino msg (legacyProofMsg) passed the upgrade height").Result()
 }
