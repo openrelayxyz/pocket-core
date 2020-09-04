@@ -62,11 +62,15 @@ func (kp KeyPair) GetAddress() types.Address {
 
 // encoding info
 func writeKeyPair(kp KeyPair) []byte {
-	return cdc.MustMarshalBinaryLengthPrefixed(kp)
+	bz, err := cdc.LegacyMarshalBinaryLengthPrefixed(kp)
+	if err != nil {
+		panic(err)
+	}
+	return bz
 }
 
 // decoding info
 func readKeyPair(bz []byte) (kp KeyPair, err error) {
-	err = cdc.UnmarshalBinaryLengthPrefixed(bz, &kp)
+	err = cdc.LegacyUnmarshalBinaryLengthPrefixed(bz, &kp)
 	return
 }

@@ -1,6 +1,7 @@
 package keys
 
 import (
+	"github.com/pokt-network/pocket-core/codec/types"
 	"github.com/pokt-network/pocket-core/crypto"
 	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
 
@@ -10,9 +11,9 @@ import (
 var cdc *codec.Codec
 
 func init() {
-	cdc = codec.New()
-	cryptoAmino.RegisterAmino(cdc)
-	crypto.RegisterAmino(cdc)
-	cdc.RegisterConcrete(KeyPair{}, "crypto/keys/keypair", nil)
-	cdc.Seal()
+	cdc = codec.NewCodec(types.NewInterfaceRegistry())
+	cryptoAmino.RegisterAmino(cdc.AminoCodec().Amino)
+	crypto.RegisterAmino(cdc.AminoCodec().Amino)
+	cdc.AminoCodec().RegisterConcrete(KeyPair{}, "crypto/keys/keypair", nil)
+	cdc.AminoCodec().Seal()
 }
