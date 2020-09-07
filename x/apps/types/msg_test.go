@@ -2,17 +2,20 @@ package types
 
 import (
 	"fmt"
-	"github.com/pokt-network/pocket-core/codec"
-	"github.com/pokt-network/pocket-core/crypto"
-	sdk "github.com/pokt-network/pocket-core/types"
+	"github.com/pokt-network/pocket-core/codec/types"
 	"math/rand"
 	"reflect"
 	"testing"
+
+	"github.com/pokt-network/pocket-core/codec"
+	"github.com/pokt-network/pocket-core/crypto"
+	sdk "github.com/pokt-network/pocket-core/types"
 )
 
 var msgAppStake MsgAppStake
 var msgBeginAppUnstake MsgBeginAppUnstake
 var msgAppUnjail MsgAppUnjail
+var pk crypto.Ed25519PublicKey
 
 func init() {
 	var pub crypto.Ed25519PublicKey
@@ -21,13 +24,14 @@ func init() {
 		_ = err
 	}
 
-	moduleCdc = codec.New()
-	RegisterCodec(moduleCdc)
-	codec.RegisterCrypto(moduleCdc)
-	moduleCdc.Seal()
+	pk = pub
+
+	cdc := codec.NewCodec(types.NewInterfaceRegistry())
+	RegisterCodec(cdc)
+	crypto.RegisterCrypto(cdc)
 
 	msgAppStake = MsgAppStake{
-		PubKey: pub,
+		PubKey: pub.RawString(),
 		Chains: []string{"0001"},
 		Value:  sdk.NewInt(10),
 	}
@@ -47,7 +51,7 @@ func TestMsgApp_GetSigners(t *testing.T) {
 		{
 			name: "return signers",
 			args: args{msgAppStake},
-			want: sdk.Address(msgAppStake.PubKey.Address()),
+			want: sdk.Address(pk.Address()),
 		},
 	}
 	for _, tt := range tests {
@@ -62,6 +66,10 @@ func TestMsgApp_GetSignBytes(t *testing.T) {
 	type args struct {
 		msgAppStake MsgAppStake
 	}
+	res, err := ModuleCdc.MarshalBinaryLengthPrefixed(&msgAppStake)
+	if err != nil {
+		panic(err)
+	}
 	tests := []struct {
 		name string
 		args
@@ -70,7 +78,7 @@ func TestMsgApp_GetSignBytes(t *testing.T) {
 		{
 			name: "return signers",
 			args: args{msgAppStake},
-			want: sdk.MustSortJSON(moduleCdc.MustMarshalJSON(msgAppStake)),
+			want: res,
 		},
 	}
 	for _, tt := range tests {
@@ -185,7 +193,7 @@ func TestMsgBeginAppUnstake_GetSigners(t *testing.T) {
 		{
 			name: "return signers",
 			args: args{msgBeginAppUnstake},
-			want: sdk.Address(msgAppStake.PubKey.Address()),
+			want: sdk.Address(pk.Address()),
 		},
 	}
 	for _, tt := range tests {
@@ -200,6 +208,10 @@ func TestMsgBeginAppUnstake_GetSignBytes(t *testing.T) {
 	type args struct {
 		msgBeginAppUnstake MsgBeginAppUnstake
 	}
+	res, err := ModuleCdc.MarshalBinaryLengthPrefixed(&msgBeginAppUnstake)
+	if err != nil {
+		panic(err)
+	}
 	tests := []struct {
 		name string
 		args
@@ -208,7 +220,7 @@ func TestMsgBeginAppUnstake_GetSignBytes(t *testing.T) {
 		{
 			name: "return signers",
 			args: args{msgBeginAppUnstake},
-			want: sdk.MustSortJSON(moduleCdc.MustMarshalJSON(msgBeginAppUnstake)),
+			want: res,
 		},
 	}
 	for _, tt := range tests {
@@ -369,6 +381,10 @@ func TestMsgAppUnjail_GetSignBytes(t *testing.T) {
 	type args struct {
 		msgAppUnjail MsgAppUnjail
 	}
+	res, err := ModuleCdc.MarshalBinaryLengthPrefixed(&msgAppUnjail)
+	if err != nil {
+		panic(err)
+	}
 	tests := []struct {
 		name string
 		args
@@ -377,7 +393,7 @@ func TestMsgAppUnjail_GetSignBytes(t *testing.T) {
 		{
 			name: "return signers",
 			args: args{msgAppUnjail},
-			want: sdk.MustSortJSON(moduleCdc.MustMarshalJSON(msgAppUnjail)),
+			want: res,
 		},
 	}
 	for _, tt := range tests {

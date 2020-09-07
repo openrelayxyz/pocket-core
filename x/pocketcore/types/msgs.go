@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/hex"
+	"fmt"
 	sdk "github.com/pokt-network/pocket-core/types"
 )
 
@@ -140,6 +141,18 @@ type LegacyMsgProof struct {
 	MerkleProof  MerkleProof  `json:"merkle_proofs"` // the merkleProof needed to verify the proofs
 	Leaf         Proof        `json:"leaf"`          // the needed to verify the Proof
 	EvidenceType EvidenceType `json:"evidence_type"` // the type of evidence
+}
+
+func (msg LegacyMsgProof) Reset() {
+	panic("amino only msg")
+}
+
+func (msg LegacyMsgProof) String() string {
+	return fmt.Sprintf("MerkleProof: %s\nLeaf: %v\nEvidenceType: %d\n", msg.MerkleProof.String(), msg.Leaf, msg.EvidenceType)
+}
+
+func (msg LegacyMsgProof) ProtoMessage() {
+	panic("amino only msg")
 }
 
 func (msg LegacyMsgProof) ToProto() MsgProof {

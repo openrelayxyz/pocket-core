@@ -2,20 +2,24 @@ package types
 
 import (
 	"github.com/pokt-network/pocket-core/codec"
+	"github.com/pokt-network/pocket-core/codec/types"
+	sdk "github.com/pokt-network/pocket-core/types"
 )
 
-// Register concrete types on codec
+// RegisterCodec registers concrete types on the codec
 func RegisterCodec(cdc *codec.Codec) {
-	cdc.RegisterConcrete(MsgAppStake{}, "apps/MsgAppStake", nil)
-	cdc.RegisterConcrete(MsgBeginAppUnstake{}, "apps/MsgAppBeginUnstake", nil)
-	cdc.RegisterConcrete(MsgAppUnjail{}, "apps/MsgAppUnjail", nil)
+	cdc.RegisterStructure(MsgAppStake{}, "apps/MsgAppStake")
+	cdc.RegisterStructure(MsgBeginAppUnstake{}, "apps/MsgAppBeginUnstake")
+	cdc.RegisterStructure(MsgAppUnjail{}, "apps/MsgAppUnjail")
+	cdc.RegisterImplementation((*sdk.Msg)(nil), &MsgAppStake{}, &MsgBeginAppUnstake{}, &MsgAppUnjail{})
+	ModuleCdc = cdc
 }
 
-var ModuleCdc *codec.Codec // generic sealed codec to be used throughout this module
+// module wide codec
+var ModuleCdc *codec.Codec
 
 func init() {
-	ModuleCdc = codec.New()
+	ModuleCdc = codec.NewCodec(types.NewInterfaceRegistry())
 	RegisterCodec(ModuleCdc)
-	codec.RegisterCrypto(ModuleCdc)
-	ModuleCdc.Seal()
+	crypto.RegisterCrypto(ModuleCdc)
 }

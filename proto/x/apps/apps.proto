@@ -60,13 +60,3 @@ message Pool {
     (gogoproto.customtype) = "github.com/pokt-network/pocket-core/types.Int",
     (gogoproto.nullable)   = false];
 }
-
-
-message PrevStatePowerMapping {
-  option (gogoproto.equal)            = true;
-  option (gogoproto.goproto_stringer) = true;
-  option (gogoproto.goproto_getters)  = false;
-
-  bytes address = 1 [(gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.Address"];
-  int64 power = 2;
-}

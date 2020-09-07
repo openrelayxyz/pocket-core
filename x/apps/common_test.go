@@ -1,6 +1,7 @@
 package pos
 
 import (
+	types3 "github.com/pokt-network/pocket-core/codec/types"
 	"math/rand"
 	"testing"
 
@@ -35,7 +36,7 @@ var (
 
 // create a codec used only for testing
 func makeTestCodec() *codec.Codec {
-	var cdc = codec.New()
+	var cdc = codec.NewCodec(types3.NewInterfaceRegistry())
 	auth.RegisterCodec(cdc)
 	gov.RegisterCodec(cdc)
 	nodestypes.RegisterCodec(cdc)
