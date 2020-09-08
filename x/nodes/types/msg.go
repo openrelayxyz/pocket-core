@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"github.com/pokt-network/pocket-core/crypto"
 	sdk "github.com/pokt-network/pocket-core/types"
 )
@@ -11,6 +12,7 @@ var (
 	_ sdk.Msg = &MsgBeginUnstake{}
 	_ sdk.Msg = &MsgUnjail{}
 	_ sdk.Msg = &MsgSend{}
+	_ sdk.Msg = &LegacyMsgStake{}
 )
 
 const (
@@ -22,28 +24,24 @@ const (
 
 //----------------------------------------------------------------------------------------------------------------------
 
-// MsgStake - struct for staking transactions
-type MsgStake struct {
-	PublicKey  crypto.PublicKey `json:"public_key" yaml:"public_key"`
-	Chains     []string         `json:"chains" yaml:"chains"`
-	Value      sdk.Int          `json:"value" yaml:"value"`
-	ServiceURL string           `json:"service_url" yaml:"service_url"`
-}
-
 // GetSigners retrun address(es) that must sign over msg.GetSignBytes()
 func (msg MsgStake) GetSigner() sdk.Address {
-	return sdk.Address(msg.PublicKey.Address())
+	pubkey, err := crypto.NewPublicKey(msg.Publickey)
+	if err != nil {
+		return sdk.Address{}
+	}
+	return sdk.Address(pubkey.Address())
 }
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgStake) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
+	return bz
 }
 
 // ValidateBasic quick validity check, stateless
 func (msg MsgStake) ValidateBasic() sdk.Error {
-	if msg.PublicKey == nil || msg.PublicKey.RawString() == "" {
+	if msg.Publickey == "" {
 		return ErrNilValidatorAddr(DefaultCodespace)
 	}
 	if msg.Value.LTE(sdk.ZeroInt()) {
@@ -58,7 +56,7 @@ func (msg MsgStake) ValidateBasic() sdk.Error {
 			return err
 		}
 	}
-	if err := ValidateServiceURL(msg.ServiceURL); err != nil {
+	if err := ValidateServiceURL(msg.ServiceUrl); err != nil {
 		return err
 	}
 	return nil
@@ -77,25 +75,20 @@ func (msg MsgStake) GetFee() sdk.Int {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-// MsgBeginUnstake - struct for unstaking transaciton
-type MsgBeginUnstake struct {
-	Address sdk.Address `json:"validator_address" yaml:"validator_address"`
-}
-
 // GetSigners return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgBeginUnstake) GetSigner() sdk.Address {
-	return msg.Address
+	return msg.ValidatorAddress
 }
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgBeginUnstake) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
+	return bz
 }
 
 // ValidateBasic quick validity check, stateless
 func (msg MsgBeginUnstake) ValidateBasic() sdk.Error {
-	if msg.Address.Empty() {
+	if msg.ValidatorAddress.Empty() {
 		return ErrNilValidatorAddr(DefaultCodespace)
 	}
 	return nil
@@ -114,25 +107,20 @@ func (msg MsgBeginUnstake) GetFee() sdk.Int {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-// MsgUnjail - struct for unjailing jailed validator
-type MsgUnjail struct {
-	ValidatorAddr sdk.Address `json:"address" yaml:"address"` // address of the validator operator
-}
-
 // GetSigners return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgUnjail) GetSigner() sdk.Address {
-	return msg.ValidatorAddr
+	return msg.Address
 }
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgUnjail) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
+	return bz
 }
 
 // ValidateBasic quick validity check, stateless
 func (msg MsgUnjail) ValidateBasic() sdk.Error {
-	if msg.ValidatorAddr.Empty() {
+	if msg.Address.Empty() {
 		return ErrNoValidatorFound(DefaultCodespace)
 	}
 	return nil
@@ -151,13 +139,6 @@ func (msg MsgUnjail) GetFee() sdk.Int {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-// MsgSend structure for sending coins
-type MsgSend struct {
-	FromAddress sdk.Address `json:"from_address"`
-	ToAddress   sdk.Address `json:"to_address"`
-	Amount      sdk.Int     `json:"amount"`
-}
-
 // GetSigners return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgSend) GetSigner() sdk.Address {
 	return msg.FromAddress
@@ -165,8 +146,8 @@ func (msg MsgSend) GetSigner() sdk.Address {
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgSend) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
+	return bz
 }
 
 // ValidateBasic quick validity check, stateless
@@ -193,3 +174,80 @@ func (msg MsgSend) Type() string { return MsgSendName }
 func (msg MsgSend) GetFee() sdk.Int {
 	return sdk.NewInt(NodeFeeMap[msg.Type()])
 }
+
+//----------------------------------------------------------------------------------------------------------------------
+
+// LegacyMsgStake - struct for staking transactions
+type LegacyMsgStake struct {
+	PublicKey  crypto.PublicKey `json:"public_key" yaml:"public_key"`
+	Chains     []string         `json:"chains" yaml:"chains"`
+	Value      sdk.Int          `json:"value" yaml:"value"`
+	ServiceURL string           `json:"service_url" yaml:"service_url"`
+} // GetSigners retrun address(es) that must sign over msg.GetSignBytes()
+
+func (msg LegacyMsgStake) GetSigner() sdk.Address {
+	return sdk.Address(msg.PublicKey.Address())
+}
+
+// GetSignBytes returns the message bytes to sign over.
+func (msg LegacyMsgStake) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// ValidateBasic quick validity check, stateless
+func (msg LegacyMsgStake) ValidateBasic() sdk.Error {
+	if msg.PublicKey == nil || msg.PublicKey.RawString() == "" {
+		return ErrNilValidatorAddr(DefaultCodespace)
+	}
+	if msg.Value.LTE(sdk.ZeroInt()) {
+		return ErrBadDelegationAmount(DefaultCodespace)
+	}
+	if len(msg.Chains) == 0 {
+		return ErrNoChains(DefaultCodespace)
+	}
+	for _, chain := range msg.Chains {
+		err := ValidateNetworkIdentifier(chain)
+		if err != nil {
+			return err
+		}
+	}
+	if err := ValidateServiceURL(msg.ServiceURL); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Route provides router key for msg
+func (msg LegacyMsgStake) Route() string { return RouterKey }
+
+// Type provides msg name
+func (msg LegacyMsgStake) Type() string { return MsgStakeName }
+
+// GetFee get fee for msg
+func (msg LegacyMsgStake) GetFee() sdk.Int {
+	return sdk.NewInt(NodeFeeMap[msg.Type()])
+}
+func (msg LegacyMsgStake) Reset() {
+	panic("amino only msg")
+}
+
+func (msg LegacyMsgStake) String() string {
+	return fmt.Sprintf("Public Key: %s\nChains: %s\nValue: %s\n", msg.PublicKey.RawString(), msg.Chains, msg.Value.String())
+}
+
+func (msg LegacyMsgStake) ProtoMessage() {
+	panic("amino only msg")
+}
+
+// GetFee get fee for msg
+func (msg LegacyMsgStake) ToProto() MsgStake {
+	return MsgStake{
+		Publickey:  msg.PublicKey.RawString(),
+		Chains:     msg.Chains,
+		Value:      msg.Value,
+		ServiceUrl: msg.ServiceURL,
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
