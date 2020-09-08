@@ -21,20 +21,22 @@ func TestMsgBeginUnstake_GetSignBytes(t *testing.T) {
 	va := sdk.Address(pub.Address())
 
 	mesg := MsgBeginUnstake{
-		Address: va,
+		ValidatorAddress: va,
 	}
+
+	encodedmsg, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&mesg)
 
 	tests := []struct {
 		name   string
 		fields fields
 		want   []byte
 	}{
-		{"Test GetSignBytes", fields{va}, sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(mesg))},
+		{"Test GetSignBytes", fields{va}, encodedmsg},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgBeginUnstake{
-				Address: tt.fields.Address,
+				ValidatorAddress: tt.fields.Address,
 			}
 			if got := msg.GetSignBytes(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetSignBytes() = %s, want %s", got, tt.want)
@@ -56,7 +58,7 @@ func TestMsgBeginUnstake_GetSigners(t *testing.T) {
 	va := sdk.Address(pub.Address())
 
 	mesg := MsgBeginUnstake{
-		Address: va,
+		ValidatorAddress: va,
 	}
 
 	tests := []struct {
@@ -64,12 +66,12 @@ func TestMsgBeginUnstake_GetSigners(t *testing.T) {
 		fields fields
 		want   sdk.Address
 	}{
-		{"Test GetSigners", fields{va}, sdk.Address(mesg.Address)},
+		{"Test GetSigners", fields{va}, sdk.Address(mesg.ValidatorAddress)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgBeginUnstake{
-				Address: tt.fields.Address,
+				ValidatorAddress: tt.fields.Address,
 			}
 			if got := msg.GetSigner(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetSigners() = %v, want %v", got, tt.want)
@@ -100,7 +102,7 @@ func TestMsgBeginUnstake_Route(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgBeginUnstake{
-				Address: tt.fields.Address,
+				ValidatorAddress: tt.fields.Address,
 			}
 			if got := msg.Route(); got != tt.want {
 				t.Errorf("Route() = %v, want %v", got, tt.want)
@@ -131,7 +133,7 @@ func TestMsgBeginUnstake_Type(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgBeginUnstake{
-				Address: tt.fields.Address,
+				ValidatorAddress: tt.fields.Address,
 			}
 			if got := msg.Type(); got != tt.want {
 				t.Errorf("Type() = %v, want %v", got, tt.want)
@@ -163,7 +165,7 @@ func TestMsgBeginUnstake_ValidateBasic(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgBeginUnstake{
-				Address: tt.fields.Address,
+				ValidatorAddress: tt.fields.Address,
 			}
 			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ValidateBasic() = %v, want %v", got, tt.want)
@@ -197,6 +199,8 @@ func TestMsgSend_GetSignBytes(t *testing.T) {
 		Amount:      sdk.OneInt(),
 	}
 
+	encmesg, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&mesg)
+
 	tests := []struct {
 		name   string
 		fields fields
@@ -206,7 +210,7 @@ func TestMsgSend_GetSignBytes(t *testing.T) {
 			FromAddress: va,
 			ToAddress:   va2,
 			Amount:      sdk.OneInt(),
-		}, sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(mesg))},
+		}, encmesg},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -432,11 +436,12 @@ func TestMsgStake_GetSignBytes(t *testing.T) {
 	surl := "www.pokt.network"
 
 	mesg := MsgStake{
-		PublicKey:  pub,
+		Publickey:  pub.RawString(),
 		Chains:     chains,
 		Value:      value,
-		ServiceURL: surl,
+		ServiceUrl: surl,
 	}
+	encmesg, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&mesg)
 
 	tests := []struct {
 		name   string
@@ -448,15 +453,15 @@ func TestMsgStake_GetSignBytes(t *testing.T) {
 			Chains:     chains,
 			Value:      value,
 			ServiceURL: surl,
-		}, sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(mesg))},
+		}, encmesg},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgStake{
-				PublicKey:  tt.fields.PubKey,
+				Publickey:  tt.fields.PubKey.RawString(),
 				Chains:     tt.fields.Chains,
 				Value:      tt.fields.Value,
-				ServiceURL: tt.fields.ServiceURL,
+				ServiceUrl: tt.fields.ServiceURL,
 			}
 			if got := msg.GetSignBytes(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetSignBytes() = %v, want %v", got, tt.want)
@@ -498,10 +503,10 @@ func TestMsgStake_GetSigners(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgStake{
-				PublicKey:  tt.fields.PubKey,
+				Publickey:  tt.fields.PubKey.RawString(),
 				Chains:     tt.fields.Chains,
 				Value:      tt.fields.Value,
-				ServiceURL: tt.fields.ServiceURL,
+				ServiceUrl: tt.fields.ServiceURL,
 			}
 			if got := msg.GetSigner(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetSigners() = %v, want %v", got, tt.want)
@@ -543,10 +548,10 @@ func TestMsgStake_Route(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgStake{
-				PublicKey:  tt.fields.PubKey,
+				Publickey:  tt.fields.PubKey.RawString(),
 				Chains:     tt.fields.Chains,
 				Value:      tt.fields.Value,
-				ServiceURL: tt.fields.ServiceURL,
+				ServiceUrl: tt.fields.ServiceURL,
 			}
 			if got := msg.Route(); got != tt.want {
 				t.Errorf("Route() = %v, want %v", got, tt.want)
@@ -588,10 +593,10 @@ func TestMsgStake_Type(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgStake{
-				PublicKey:  tt.fields.PubKey,
+				Publickey:  tt.fields.PubKey.RawString(),
 				Chains:     tt.fields.Chains,
 				Value:      tt.fields.Value,
-				ServiceURL: tt.fields.ServiceURL,
+				ServiceUrl: tt.fields.ServiceURL,
 			}
 			if got := msg.Type(); got != tt.want {
 				t.Errorf("Type() = %v, want %v", got, tt.want)
@@ -657,10 +662,10 @@ func TestMsgStake_ValidateBasic(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgStake{
-				PublicKey:  tt.fields.PubKey,
+				Publickey:  tt.fields.PubKey.RawString(),
 				Chains:     tt.fields.Chains,
 				Value:      tt.fields.Value,
-				ServiceURL: tt.fields.ServiceURL,
+				ServiceUrl: tt.fields.ServiceURL,
 			}
 			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ValidateBasic() = %v, want %v", got, tt.want)
@@ -682,20 +687,22 @@ func TestMsgUnjail_GetSignBytes(t *testing.T) {
 	va := sdk.Address(pub.Address())
 
 	mesg := MsgUnjail{
-		ValidatorAddr: va,
+		Address: va,
 	}
+
+	encmesg, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&mesg)
 
 	tests := []struct {
 		name   string
 		fields fields
 		want   []byte
 	}{
-		{"Test GetSignBytes", fields{va}, sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(mesg))},
+		{"Test GetSignBytes", fields{va}, encmesg},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgUnjail{
-				ValidatorAddr: tt.fields.ValidatorAddr,
+				Address: tt.fields.ValidatorAddr,
 			}
 			if got := msg.GetSignBytes(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetSignBytes() = %v, want %v", got, tt.want)
@@ -726,7 +733,7 @@ func TestMsgUnjail_GetSigners(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgUnjail{
-				ValidatorAddr: tt.fields.ValidatorAddr,
+				Address: tt.fields.ValidatorAddr,
 			}
 			if got := msg.GetSigner(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetSigners() = %v, want %v", got, tt.want)
@@ -757,7 +764,7 @@ func TestMsgUnjail_Route(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgUnjail{
-				ValidatorAddr: tt.fields.ValidatorAddr,
+				Address: tt.fields.ValidatorAddr,
 			}
 			if got := msg.Route(); got != tt.want {
 				t.Errorf("Route() = %v, want %v", got, tt.want)
@@ -788,7 +795,7 @@ func TestMsgUnjail_Type(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgUnjail{
-				ValidatorAddr: tt.fields.ValidatorAddr,
+				Address: tt.fields.ValidatorAddr,
 			}
 			if got := msg.Type(); got != tt.want {
 				t.Errorf("Type() = %v, want %v", got, tt.want)
@@ -820,7 +827,7 @@ func TestMsgUnjail_ValidateBasic(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgUnjail{
-				ValidatorAddr: tt.fields.ValidatorAddr,
+				Address: tt.fields.ValidatorAddr,
 			}
 			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ValidateBasic() = %v, want %v", got, tt.want)

@@ -155,12 +155,12 @@ func (k Keeper) handleDoubleSign(ctx sdk.Ctx, addr crypto.Address, infractionHei
 	// `power` is the int64 power of the validator as provided to/by Tendermint. This value is validator.StakedTokens as
 	// sent to Tendermint via ABCI, and now received as evidence. The fraction is passed in to separately to slash
 	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
+		sdk.Event(sdk.NewEvent(
 			types.EventTypeSlash,
 			sdk.NewAttribute(types.AttributeKeyAddress, address.String()),
 			sdk.NewAttribute(types.AttributeKeyPower, fmt.Sprintf("%d", power)),
 			sdk.NewAttribute(types.AttributeKeyReason, types.AttributeValueDoubleSign),
-		),
+		)),
 	)
 	k.slash(ctx, address, distributionHeight, power, fraction)
 	// todo fix once tendermint is patched
@@ -243,7 +243,7 @@ func (k Keeper) handleValidatorSignature(ctx sdk.Ctx, addr sdk.Address, power in
 		// slash them based on their power
 		k.slash(ctx, addr, slashHeight, power, k.SlashFractionDowntime(ctx))
 		// reset the signing info
-		signInfo.Reset()
+		signInfo.ResetSigningInfo()
 		// clear the validator missed at
 		k.clearValidatorMissed(ctx, addr)
 		// jail the validator to prevent consensus problems
@@ -252,5 +252,5 @@ func (k Keeper) handleValidatorSignature(ctx sdk.Ctx, addr sdk.Address, power in
 		signInfo.JailedUntil = ctx.BlockHeader().Time.Add(k.DowntimeJailDuration(ctx))
 	}
 	// Set the updated signing info
-	k.SetValidatorSigningInfo(ctx, addr, signInfo)
+	k.SetValidatorSigningInfo(ctx, addr, &signInfo)
 }
