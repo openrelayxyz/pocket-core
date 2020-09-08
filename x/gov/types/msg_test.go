@@ -2,13 +2,14 @@ package types
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/pokt-network/pocket-core/types"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestMsgChangeParam_ValidateBasic(t *testing.T) {
-	cdc := makeTestCodec()
+	cdc, _ := makeTestCodec()
 	bytes, _ := cdc.MarshalJSON(false)
 	m := MsgChangeParam{
 		FromAddress: getRandomValidatorAddress(),
@@ -35,19 +36,19 @@ func TestMsgChangeParam_ValidateBasic(t *testing.T) {
 }
 
 func TestAminoPrimitive(t *testing.T) {
-	cdc := makeTestCodec()
-	bytesbool, _ := cdc.MarshalJSON(false)
-	bytesint, _ := cdc.MarshalJSON(int64(23))
+	amino, _ := makeTestCodec()
+	bytesbool, _ := amino.MarshalJSON(false)
+	bytesint, _ := amino.MarshalJSON(int64(23))
 	assert.NotNil(t, bytesbool)
 	fmt.Println(string(bytesbool))
 	assert.NotNil(t, bytesint)
 	fmt.Println(string(bytesint))
 	var b bool
 	var i int64
-	err := cdc.UnmarshalJSON(bytesbool, &b)
+	err := amino.UnmarshalJSON(bytesbool, &b)
 	assert.Nil(t, err)
 
-	err = cdc.UnmarshalJSON(bytesint, &i)
+	err = amino.UnmarshalJSON(bytesint, &i)
 	assert.Nil(t, err)
 }
 
