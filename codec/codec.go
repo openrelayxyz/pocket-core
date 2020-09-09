@@ -8,8 +8,9 @@ import (
 )
 
 type Codec struct {
-	protoCdc  *ProtoCodec
-	legacyCdc *LegacyAmino
+	protoCdc        *ProtoCodec
+	legacyCdc       *LegacyAmino
+	afterUpgradeMod bool
 }
 
 func NewCodec(anyUnpacker types.AnyUnpacker) *Codec {
@@ -43,7 +44,7 @@ func (cdc *Codec) RegisterImplementation(iface interface{}, impls ...proto.Messa
 }
 
 func (cdc *Codec) MarshalBinaryBare(o interface{}) ([]byte, error) {
-	if PASSEDBLOCKHEIGHT {
+	if cdc.afterUpgradeMod {
 		p, ok := o.(ProtoMarshaler)
 		if !ok {
 			return nil, NotProtoCompatibleInterfaceError
@@ -54,7 +55,7 @@ func (cdc *Codec) MarshalBinaryBare(o interface{}) ([]byte, error) {
 }
 
 func (cdc *Codec) MarshalBinaryLengthPrefixed(o interface{}) ([]byte, error) {
-	if PASSEDBLOCKHEIGHT {
+	if cdc.afterUpgradeMod {
 		p, ok := o.(ProtoMarshaler)
 		if !ok {
 			return nil, NotProtoCompatibleInterfaceError
@@ -65,7 +66,7 @@ func (cdc *Codec) MarshalBinaryLengthPrefixed(o interface{}) ([]byte, error) {
 }
 
 func (cdc *Codec) UnmarshalBinaryBare(bz []byte, ptr interface{}) error {
-	if PASSEDBLOCKHEIGHT {
+	if cdc.afterUpgradeMod {
 		p, ok := ptr.(ProtoMarshaler)
 		if !ok {
 			return NotProtoCompatibleInterfaceError
@@ -76,7 +77,7 @@ func (cdc *Codec) UnmarshalBinaryBare(bz []byte, ptr interface{}) error {
 }
 
 func (cdc *Codec) UnmarshalBinaryLengthPrefixed(bz []byte, ptr interface{}) error {
-	if PASSEDBLOCKHEIGHT {
+	if cdc.afterUpgradeMod {
 		p, ok := ptr.(ProtoMarshaler)
 		if !ok {
 			return NotProtoCompatibleInterfaceError
@@ -148,4 +149,22 @@ func (cdc *Codec) MustUnmarshalJSON(bz []byte, ptr interface{}) {
 
 func RegisterEvidences(legacy *LegacyAmino, _ *ProtoCodec) {
 	tmTypes.RegisterEvidences(legacy.Amino)
+}
+
+func (cdc *Codec) AminoCodec() *LegacyAmino {
+	return cdc.legacyCdc
+}
+
+func (cdc *Codec) ProtoCodec() *ProtoCodec {
+	return cdc.protoCdc
+}
+
+func (cdc *Codec) SetAfterUpgradeMod(value bool) {
+	if cdc.afterUpgradeMod != value {
+		cdc.afterUpgradeMod = value
+	}
+}
+
+func (cdc *Codec) IsAfterUpgrade() bool {
+	return cdc.afterUpgradeMod
 }

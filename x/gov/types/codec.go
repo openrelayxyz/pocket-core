@@ -11,7 +11,7 @@ var ModuleCdc *codec.Codec
 func init() {
 	ModuleCdc = codec.NewCodec(types.NewInterfaceRegistry())
 	RegisterCodec(ModuleCdc)
-	ModuleCdc.Seal()
+	ModuleCdc.AminoCodec().Seal()
 }
 
 // RegisterCodec registers all necessary param module types with a given codec.

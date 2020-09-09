@@ -46,11 +46,11 @@ func NewTestKeybase() keys.Keybase {
 // : deadcode unused
 // create a codec used only for testing
 func makeTestCodec() *codec.Codec {
-	var cdc = codec.NewCodec(types2.NewInterfaceRegistry()))
+	var cdc = codec.NewCodec(types2.NewInterfaceRegistry())
 	auth.RegisterCodec(cdc)
 	gov.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
-	codec.RegisterCrypto(cdc)
+	crypto.RegisterAmino(cdc.AminoCodec().Amino)
 
 	return cdc
 }
@@ -179,7 +179,7 @@ func createTestValidators(ctx sdk.Ctx, numAccs int, valCoins sdk.Int, daoCoins s
 				StartHeight: ctx.BlockHeight(),
 				JailedUntil: time.Unix(0, 0),
 			}
-			nk.SetValidatorSigningInfo(ctx, val.GetAddress(), signingInfo)
+			nk.SetValidatorSigningInfo(ctx, val.GetAddress(), &signingInfo)
 		}
 		accs = append(accs, val)
 	}
@@ -199,7 +199,7 @@ func createTestValidators(ctx sdk.Ctx, numAccs int, valCoins sdk.Int, daoCoins s
 			StartHeight: ctx.BlockHeight(),
 			JailedUntil: time.Unix(0, 0),
 		}
-		nk.SetValidatorSigningInfo(ctx, val.GetAddress(), signingInfo)
+		nk.SetValidatorSigningInfo(ctx, val.GetAddress(), &signingInfo)
 	}
 	accs = append(accs, val)
 	// end self node logic

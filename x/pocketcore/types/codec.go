@@ -3,6 +3,7 @@ package types
 import (
 	"github.com/pokt-network/pocket-core/codec"
 	"github.com/pokt-network/pocket-core/codec/types"
+	"github.com/pokt-network/pocket-core/crypto"
 	sdk "github.com/pokt-network/pocket-core/types"
 	nodesTypes "github.com/pokt-network/pocket-core/x/nodes/types"
 )
@@ -13,7 +14,7 @@ var ModuleCdc *codec.Codec
 func init() {
 	ModuleCdc = codec.NewCodec(types.NewInterfaceRegistry())
 	RegisterCodec(ModuleCdc)
-	crypto.RegisterCrypto(ModuleCdc)
+	crypto.RegisterAmino(ModuleCdc.AminoCodec().Amino)
 }
 
 // RegisterCodec registers concrete types on the codec

@@ -9,6 +9,7 @@ package baseapp
 
 import (
 	"fmt"
+	"github.com/pokt-network/pocket-core/codec/types"
 	"github.com/tendermint/tendermint/evidence"
 	"github.com/tendermint/tendermint/node"
 	"github.com/tendermint/tendermint/state/txindex"
@@ -35,6 +36,8 @@ import (
 	"github.com/pokt-network/pocket-core/store"
 	sdk "github.com/pokt-network/pocket-core/types"
 )
+
+var cdc = codec.NewCodec(types.NewInterfaceRegistry())
 
 // Key to store the consensus params in the main store.
 var mainConsensusParamsKey = []byte("consensus_params")
@@ -540,7 +543,7 @@ func handleQueryApp(app *BaseApp, path []string, req abci.RequestQuery) (res abc
 			result = sdk.ErrUnknownRequest(fmt.Sprintf("Unknown query: %s", path)).Result()
 		}
 
-		value := codec.Cdc.MustMarshalBinaryLengthPrefixed(result)
+		value, _ := cdc.MarshalBinaryLengthPrefixed(&result)
 		return abci.ResponseQuery{
 			Code:      uint32(sdk.CodeOK),
 			Codespace: string(sdk.CodespaceRoot),
@@ -821,16 +824,16 @@ func (app *BaseApp) runMsg(ctx sdk.Ctx, msg sdk.Msg, mode runTxMode) (result sdk
 	// each result.
 	data = append(data, msgResult.Data...)
 	// append events from the message's execution and a message action event
-	events = events.AppendEvent(sdk.NewEvent(sdk.EventTypeMessage, sdk.NewAttribute(sdk.AttributeKeyAction, msg.Type())))
+	events = events.AppendEvent(sdk.Event(sdk.NewEvent(sdk.EventTypeMessage, sdk.NewAttribute(sdk.AttributeKeyAction, msg.Type()))))
 	events = events.AppendEvents(msgResult.Events)
 	// stop execution and return on first failed message
 	if !msgResult.IsOK() {
-		msgLogs = append(msgLogs, sdk.NewABCIMessageLog(uint16(0), false, msgResult.Log, events))
+		msgLogs = append(msgLogs, sdk.NewABCIMessageLog(uint32(0), false, msgResult.Log, events))
 
 		code = msgResult.Code
 		codespace = msgResult.Codespace
 	}
-	msgLogs = append(msgLogs, sdk.NewABCIMessageLog(uint16(0), true, msgResult.Log, events))
+	msgLogs = append(msgLogs, sdk.NewABCIMessageLog(uint32(0), true, msgResult.Log, events))
 
 	result = sdk.Result{
 		Code:      code,

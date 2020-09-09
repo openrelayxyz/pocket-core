@@ -17,7 +17,7 @@ func makeTestCodec() *codec.Codec {
 	auth.RegisterCodec(cdc)
 	RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
-	codec.RegisterCrypto(cdc)
+	crypto.RegisterAmino(cdc.AminoCodec().Amino)
 	return cdc
 }
 

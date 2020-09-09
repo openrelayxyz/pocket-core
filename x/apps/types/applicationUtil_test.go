@@ -2,7 +2,6 @@ package types
 
 import (
 	"encoding/json"
-	"github.com/tendermint/go-amino"
 	"strings"
 
 	"github.com/pokt-network/pocket-core/codec"
@@ -29,7 +28,7 @@ func init() {
 	}
 	cdc = codec.NewCodec(types2.NewInterfaceRegistry())
 	RegisterCodec(cdc)
-	crypto.RegisterCrypto(cdc)
+	crypto.RegisterAmino(cdc.AminoCodec().Amino)
 
 	application = Application{
 		Address:                 sdk.Address(pub.Address()),

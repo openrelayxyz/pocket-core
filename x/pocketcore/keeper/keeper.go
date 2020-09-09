@@ -38,3 +38,10 @@ func (k Keeper) GetBlock(height int) (*core_types.ResultBlock, error) {
 	h := int64(height)
 	return k.TmNode.Block(&h)
 }
+
+func (k Keeper) UpgradeCodec(ctx sdk.Ctx) {
+	if ctx.IsAfterUpgradeHeight() {
+		k.cdc.SetAfterUpgradeMod(true)
+		types.ModuleCdc.SetAfterUpgradeMod(true)
+	}
+}

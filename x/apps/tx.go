@@ -14,7 +14,7 @@ import (
 )
 
 func StakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, chains []string, amount sdk.Int, kp keys.KeyPair, passphrase string) (*sdk.TxResponse, error) {
-	if BLOCKHEIGHTPASSED {
+	if cdc.IsAfterUpgrade() {
 		fromAddr := kp.GetAddress()
 		msg := types.MsgAppStake{
 			PubKey: kp.PublicKey.RawString(),
@@ -29,14 +29,14 @@ func StakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, chain
 		if err != nil {
 			return nil, err
 		}
-		return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, msg)
+		return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, &msg)
 	}
 	return LegacyStakeTx(cdc, tmNode, keybase, chains, amount, kp, passphrase)
 }
 
 func UnstakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, address sdk.Address, passphrase string) (*sdk.TxResponse, error) {
 	msg := types.MsgBeginAppUnstake{Address: address}
-	txBuilder, cliCtx, err := newTx(cdc,& msg, address, tmNode, keybase, passphrase)
+	txBuilder, cliCtx, err := newTx(cdc, &msg, address, tmNode, keybase, passphrase)
 	if err != nil {
 		return nil, err
 	}

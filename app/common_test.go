@@ -221,7 +221,7 @@ func memCodec() *codec.Codec {
 			pocket.AppModuleBasic{},
 		).RegisterCodec(memCDC)
 		sdk.RegisterCodec(memCDC)
-		codec.RegisterCrypto(memCDC)
+		crypto.RegisterAmino(memCDC.AminoCodec().Amino)
 	}
 	return memCDC
 }

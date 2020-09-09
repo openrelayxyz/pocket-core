@@ -13,11 +13,11 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
 		switch msg := msg.(type) {
 		case *types.MsgChangeParam:
-			return handleMsgChangeParam(ctx, msg, k)
+			return handleMsgChangeParam(ctx, *msg, k)
 		case *types.MsgDAOTransfer:
-			return handleMsgDaoTransfer(ctx, msg, k)
+			return handleMsgDaoTransfer(ctx, *msg, k)
 		case *types.MsgUpgrade:
-			return handleMsgUpgrade(ctx, msg, k)
+			return handleMsgUpgrade(ctx, *msg, k)
 		default:
 			errMsg := fmt.Sprintf("unrecognized gov message type: %T", msg)
 			return sdk.ErrUnknownRequest(errMsg).Result()

@@ -41,3 +41,10 @@ func NewKeeper(cdc *codec.Codec, key *sdk.KVStoreKey, tkey *sdk.TransientStoreKe
 func (k Keeper) Logger(ctx sdk.Ctx) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
+
+func (k Keeper) UpgradeCodec(ctx sdk.Ctx) {
+	if ctx.IsAfterUpgradeHeight() {
+		k.cdc.SetAfterUpgradeMod(true)
+		types.ModuleCdc.SetAfterUpgradeMod(true)
+	}
+}

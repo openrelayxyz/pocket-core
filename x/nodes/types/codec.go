@@ -3,6 +3,7 @@ package types
 import (
 	"github.com/pokt-network/pocket-core/codec"
 	"github.com/pokt-network/pocket-core/codec/types"
+	"github.com/pokt-network/pocket-core/crypto"
 
 	sdk "github.com/pokt-network/pocket-core/types"
 	"github.com/pokt-network/pocket-core/x/nodes/exported"
@@ -24,6 +25,6 @@ var ModuleCdc *codec.Codec // generic sealed codec to be used throughout this mo
 func init() {
 	ModuleCdc = codec.NewCodec(types.NewInterfaceRegistry())
 	RegisterCodec(ModuleCdc)
-	codec.RegisterCrypto(ModuleCdc)
-	//ModuleCdc.Seal()
+	crypto.RegisterAmino(ModuleCdc.AminoCodec().Amino)
+	ModuleCdc.AminoCodec().Seal()
 }

@@ -85,7 +85,7 @@ func (a *Application) UnmarshalJSON(data []byte) error {
 
 // unmarshal the application
 func MarshalApplication(cdc *codec.Codec, application Application) (result []byte, err error) {
-	if BLOCKHEIGHTPASSED {
+	if cdc.IsAfterUpgrade() {
 		ae := application.ToProto()
 		return cdc.ProtoMarshalBinaryLengthPrefixed(&ae)
 	}
@@ -94,7 +94,7 @@ func MarshalApplication(cdc *codec.Codec, application Application) (result []byt
 
 // unmarshal the application
 func UnmarshalApplication(cdc *codec.Codec, appBytes []byte) (application Application, err error) {
-	if BLOCKHEIGHTPASSED {
+	if cdc.IsAfterUpgrade() {
 		var appEncodable ApplicationEncodable
 		err = cdc.ProtoUnmarshalBinaryLengthPrefixed(appBytes, &appEncodable)
 		if err != nil {

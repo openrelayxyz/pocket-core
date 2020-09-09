@@ -127,7 +127,7 @@ func handleMsgSend(ctx sdk.Ctx, msg types.MsgSend, k keeper.Keeper) sdk.Result {
 	return sdk.Result{Events: ctx.EventManager().Events()}
 }
 func handleLegacyMsgStake(ctx sdk.Ctx, msg types.LegacyMsgStake, k keeper.Keeper) sdk.Result {
-	if !BLOCKHEIGHTPASSED {
+	if !ctx.IsAfterUpgradeHeight() {
 		return handleStake(ctx, msg.ToProto(), k)
 	}
 	return sdk.ErrInternal("cannot execute a legacy msg: MsgStake after upgrade height").Result()

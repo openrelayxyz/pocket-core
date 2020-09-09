@@ -14,7 +14,7 @@ import (
 )
 
 func StakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, chains []string, serviceURL string, amount sdk.Int, kp keys.KeyPair, passphrase string) (*sdk.TxResponse, error) {
-	if BLOCKHEIGHTPASSED {
+	if cdc.IsAfterUpgrade() {
 		fromAddr := kp.GetAddress()
 		msg := types.MsgStake{
 			Publickey:  kp.PublicKey.RawString(),

@@ -72,7 +72,7 @@ func (k Keeper) valMissedAt(ctx sdk.Ctx, addr sdk.Address, index int64) (missed 
 		missed = false
 		return
 	}
-	if PASSEDBLOCKHEIGHT {
+	if ctx.IsAfterUpgradeHeight() {
 		k.cdc.UnmarshalBinaryLengthPrefixed(bz, &m)
 		return m.Value
 	} else {
@@ -85,7 +85,7 @@ func (k Keeper) valMissedAt(ctx sdk.Ctx, addr sdk.Address, index int64) (missed 
 func (k Keeper) SetValidatorMissedAt(ctx sdk.Ctx, addr sdk.Address, index int64, missed bool) {
 	m := types.ValidatorMissed{Value: missed}
 	store := ctx.KVStore(k.storeKey)
-	if PASSEDBLOCKHEIGHT {
+	if ctx.IsAfterUpgradeHeight() {
 		bz, _ := k.cdc.MarshalBinaryLengthPrefixed(&m)
 		_ = store.Set(types.GetValMissedBlockKey(addr, index), bz)
 	} else {
@@ -111,7 +111,7 @@ func (k Keeper) IterateAndExecuteOverMissedArray(ctx sdk.Ctx,
 	index := int64(0)
 	// Array may be sparse
 	for ; index < k.SignedBlocksWindow(ctx); index++ {
-		if PASSEDBLOCKHEIGHT {
+		if ctx.IsAfterUpgradeHeight() {
 			var missed = types.ValidatorMissed{}
 			bz, _ := store.Get(types.GetValMissedBlockKey(address, index))
 			if bz == nil {

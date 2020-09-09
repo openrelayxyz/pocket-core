@@ -62,7 +62,7 @@ func makeTestCodec() *codec.Codec {
 	auth.RegisterCodec(cdc)
 	gov.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
-	codec.RegisterCrypto(cdc)
+	crypto.RegisterAmino(cdc.AminoCodec().Amino)
 
 	return cdc
 }
@@ -249,7 +249,7 @@ func createTestValidators(ctx sdk.Ctx, numAccs int, valCoins sdk.Int, nk *nodesK
 				StartHeight: ctx.BlockHeight(),
 				JailedUntil: time.Unix(0, 0),
 			}
-			nk.SetValidatorSigningInfo(ctx, val.GetAddress(), signingInfo)
+			nk.SetValidatorSigningInfo(ctx, val.GetAddress(), &signingInfo)
 		}
 		accs = append(accs, val)
 	}
@@ -270,7 +270,7 @@ func createTestValidators(ctx sdk.Ctx, numAccs int, valCoins sdk.Int, nk *nodesK
 			StartHeight: ctx.BlockHeight(),
 			JailedUntil: time.Unix(0, 0),
 		}
-		nk.SetValidatorSigningInfo(ctx, val.GetAddress(), signingInfo)
+		nk.SetValidatorSigningInfo(ctx, val.GetAddress(), &signingInfo)
 	}
 	accs = append(accs, val)
 	// end self node logic
@@ -595,6 +595,20 @@ func (_m *Ctx) IsCheckTx() bool {
 
 // IsZero provides a mock function with given fields:
 func (_m *Ctx) IsZero() bool {
+	ret := _m.Called()
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func() bool); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
+}
+
+// IsZero provides a mock function with given fields:
+func (_m *Ctx) IsAfterUpgradeHeight() bool {
 	ret := _m.Called()
 
 	var r0 bool

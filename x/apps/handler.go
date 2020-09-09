@@ -119,7 +119,7 @@ func handleMsgUnjail(ctx sdk.Ctx, msg types.MsgAppUnjail, k keeper.Keeper) sdk.R
 
 // Legacy Apps Amino Handlers below
 func handleLegacyMsgStake(ctx sdk.Ctx, msg types.LegacyMsgAppStake, k keeper.Keeper) sdk.Result {
-	if !BLOCKHEIGHTPASSED {
+	if !ctx.IsAfterUpgradeHeight() {
 		return handleStake(ctx, msg.ToProto(), k)
 	}
 	return sdk.ErrInternal("cannot execute a legacy msg: AppStake after upgrade height").Result()

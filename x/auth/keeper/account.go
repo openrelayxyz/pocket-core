@@ -185,7 +185,7 @@ func (k Keeper) EncodeAccount(acc exported.Account) ([]byte, error) {
 }
 
 func (k Keeper) EncodeBaseAccount(acc *types.BaseAccount) ([]byte, error) {
-	if BLOCKHEIGHTPASSED {
+	if k.cdc.IsAfterUpgrade() {
 		ba := acc.ToProto()
 		return k.cdc.ProtoMarshalBinaryBare(&ba)
 	} else {
@@ -195,7 +195,7 @@ func (k Keeper) EncodeBaseAccount(acc *types.BaseAccount) ([]byte, error) {
 
 // "DecodeModuleAccount" - encodes account interface into protobuf
 func (k Keeper) EncodeModuleAccount(macc *types.ModuleAccount) ([]byte, error) {
-	if BLOCKHEIGHTPASSED {
+	if k.cdc.IsAfterUpgrade() {
 		ma := macc.ToProto()
 		return k.cdc.ProtoMarshalBinaryBare(&ma)
 	} else {

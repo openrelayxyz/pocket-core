@@ -34,7 +34,7 @@ func makeTestCodec() *codec.Codec {
 	var cdc = codec.NewCodec(cdcTypes.NewInterfaceRegistry())
 	types.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
-	codec.RegisterCrypto(cdc)
+	crypto.RegisterAmino(cdc.AminoCodec().Amino)
 
 	return cdc
 }

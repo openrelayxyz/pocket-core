@@ -13,7 +13,7 @@ var Cdc *codec.LegacyAmino
 
 func init() {
 	Cdc = codec.NewLegacyAminoCodec()
-	crypto.RegisterCrypto(Cdc, nil)
+	crypto.RegisterAmino(Cdc.Amino)
 	codec.RegisterEvidences(Cdc, nil)
 	Cdc.Seal()
 }

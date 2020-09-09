@@ -64,7 +64,13 @@ func NewTx(msgs sdk.Msg, fee sdk.Coins, sig StdSignature, memo string, entropy i
 }
 
 // GetMsg returns the all the transaction's messages.
-func (tx StdTx) GetMsg() sdk.Msg { return tx.Msg }
+func (tx StdTx) GetMsg() (res sdk.Msg) {
+	err := ModuleCdc.ProtoCodec().UnpackAny(&tx.Msg, &res)
+	if err != nil {
+		panic("unable to retrive msg: " + err.Error())
+	}
+	return
+}
 
 // ValidateBasic does a simple and lightweight validation check that doesn't
 // require access to any other information.
@@ -203,7 +209,7 @@ func (tx LegacyStdTx) GetSigner() sdk.Address {
 // StdSignature represents a sig
 type LegacyStdSignature struct {
 	posCrypto.PublicKey `json:"pub_key" yaml:"pub_key"` // technically optional if the public key is in the world state
-	Signature           []byte `json:"signature" yaml:"signature"`
+	Signature           []byte                          `json:"signature" yaml:"signature"`
 }
 
 func (ss LegacyStdSignature) GetSignature() []byte {

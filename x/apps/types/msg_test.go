@@ -28,7 +28,7 @@ func init() {
 
 	cdc := codec.NewCodec(types.NewInterfaceRegistry())
 	RegisterCodec(cdc)
-	crypto.RegisterCrypto(cdc)
+	crypto.RegisterAmino(cdc.AminoCodec().Amino)
 
 	msgAppStake = MsgAppStake{
 		PubKey: pub.RawString(),

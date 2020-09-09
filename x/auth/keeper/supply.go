@@ -37,7 +37,7 @@ func (k Keeper) SetSupply(ctx sdk.Ctx, supply exported.SupplyI) {
 func (k Keeper) EncodeSupply(supply exported.SupplyI) ([]byte, error) {
 	var bz []byte
 	var err error
-	if BLOCKHEIGHTPASSED {
+	if k.cdc.IsAfterUpgrade() {
 		bz, err = k.cdc.ProtoMarshalBinaryLengthPrefixed(supply.(*types.Supply))
 	} else {
 		bz, err = k.cdc.LegacyMarshalBinaryLengthPrefixed(supply) // TODO only kept this way for backwards compatibility.. test if breaks when using supply.(*Supply)

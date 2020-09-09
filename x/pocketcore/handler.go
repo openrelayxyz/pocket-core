@@ -99,7 +99,7 @@ func processSelf(ctx sdk.Ctx, k keeper.Keeper, signer sdk.Address, header types.
 
 // "handleProofMsg" - General handler for the proof message
 func handleLegacyProofMsg(ctx sdk.Ctx, k keeper.Keeper, proof types.LegacyMsgProof) sdk.Result {
-	if !BLOCKHEIGHTPASSED {
+	if !ctx.IsAfterUpgradeHeight() {
 		return handleProofMsg(ctx, k, proof.ToProto())
 	}
 	return sdk.ErrInternal("invalid amino msg (legacyProofMsg) passed the upgrade height").Result()
