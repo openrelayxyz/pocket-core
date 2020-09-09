@@ -198,5 +198,5 @@ func testComponents(t *testing.T) (*codec.LegacyAmino, sdk.Context, sdk.StoreKey
 	mkey := sdk.ParamsKey
 	tkey := sdk.ParamsTKey
 	ctx, keeper := createTestKeeperAndContext(t, false)
-	return keeper.legacyCdc, ctx, mkey, tkey, keeper
+	return keeper.cdc.AminoCodec(), ctx, mkey, tkey, keeper
 }

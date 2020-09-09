@@ -1,7 +1,6 @@
 package types
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/pokt-network/pocket-core/types"
@@ -9,7 +8,7 @@ import (
 )
 
 func TestMsgChangeParam_ValidateBasic(t *testing.T) {
-	cdc, _ := makeTestCodec()
+	cdc := makeTestCodec()
 	bytes, _ := cdc.MarshalJSON(false)
 	m := MsgChangeParam{
 		FromAddress: getRandomValidatorAddress(),
@@ -36,19 +35,17 @@ func TestMsgChangeParam_ValidateBasic(t *testing.T) {
 }
 
 func TestAminoPrimitive(t *testing.T) {
-	amino, _ := makeTestCodec()
-	bytesbool, _ := amino.MarshalJSON(false)
-	bytesint, _ := amino.MarshalJSON(int64(23))
+	cdc := makeTestCodec()
+	bytesbool, _ := cdc.MarshalJSON(false)
+	bytesint, _ := cdc.MarshalJSON(int64(23))
 	assert.NotNil(t, bytesbool)
-	fmt.Println(string(bytesbool))
 	assert.NotNil(t, bytesint)
-	fmt.Println(string(bytesint))
 	var b bool
 	var i int64
-	err := amino.UnmarshalJSON(bytesbool, &b)
+	err := cdc.UnmarshalJSON(bytesbool, &b)
 	assert.Nil(t, err)
 
-	err = amino.UnmarshalJSON(bytesint, &i)
+	err = cdc.UnmarshalJSON(bytesint, &i)
 	assert.Nil(t, err)
 }
 
