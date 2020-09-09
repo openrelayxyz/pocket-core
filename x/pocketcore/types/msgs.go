@@ -3,6 +3,7 @@ package types
 import (
 	"encoding/hex"
 	"fmt"
+
 	sdk "github.com/pokt-network/pocket-core/types"
 )
 

@@ -4,9 +4,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"log"
+
 	"github.com/pokt-network/pocket-core/crypto"
 	sdk "github.com/pokt-network/pocket-core/types"
-	"log"
 )
 
 // "Proof" - An interface representation of an economic proof of work/burn (relay or challenge)
@@ -331,13 +332,13 @@ func (c ChallengeProofInvalidData) Validate(appSupportedBlockchains []string, se
 	if err != nil {
 		return NewSignatureError(ModuleName, err)
 	}
-	if !pubKey1.VerifyBytes(majResponse.Proof.Hash(), sig1) {
+	if !pubKey1.VerifyBytes(majResponse.Hash(), sig1) {
 		return NewInvalidSignatureError(ModuleName)
 	}
-	if !pubKey2.VerifyBytes(majResponse2.Proof.Hash(), sig2) {
+	if !pubKey2.VerifyBytes(majResponse2.Hash(), sig2) {
 		return NewInvalidSignatureError(ModuleName)
 	}
-	if !pubKey3.VerifyBytes(c.MinorityResponse.Proof.Hash(), sig3) {
+	if !pubKey3.VerifyBytes(c.MinorityResponse.Hash(), sig3) {
 		return NewInvalidSignatureError(ModuleName)
 	}
 	return nil
