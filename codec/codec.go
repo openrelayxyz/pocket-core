@@ -2,6 +2,7 @@ package codec
 
 import (
 	"errors"
+
 	"github.com/gogo/protobuf/proto"
 	"github.com/pokt-network/pocket-core/codec/types"
 	tmTypes "github.com/tendermint/tendermint/types"
@@ -108,7 +109,7 @@ func (cdc *Codec) ProtoMarshalBinaryLengthPrefixed(o ProtoMarshaler) ([]byte, er
 }
 
 func (cdc *Codec) LegacyMarshalBinaryLengthPrefixed(o interface{}) ([]byte, error) {
-	return cdc.legacyCdc.MarshalBinaryBare(o)
+	return cdc.legacyCdc.MarshalBinaryLengthPrefixed(o)
 }
 
 func (cdc *Codec) ProtoUnmarshalBinaryLengthPrefixed(bz []byte, ptr ProtoMarshaler) error {
@@ -116,7 +117,7 @@ func (cdc *Codec) ProtoUnmarshalBinaryLengthPrefixed(bz []byte, ptr ProtoMarshal
 }
 
 func (cdc *Codec) LegacyUnmarshalBinaryLengthPrefixed(bz []byte, ptr interface{}) error {
-	return cdc.legacyCdc.UnmarshalBinaryBare(bz, ptr)
+	return cdc.legacyCdc.UnmarshalBinaryLengthPrefixed(bz, ptr)
 }
 
 func (cdc *Codec) MarshalJSONIndent(o interface{}, prefix string, indent string) ([]byte, error) {

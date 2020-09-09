@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+
 	sdk "github.com/pokt-network/pocket-core/types"
 	"github.com/pokt-network/pocket-core/x/auth/exported"
 	"github.com/pokt-network/pocket-core/x/auth/types"
@@ -31,7 +32,11 @@ func (k Keeper) SetSupply(ctx sdk.Ctx, supply exported.SupplyI) {
 		ctx.Logger().Error(err.Error())
 		return
 	}
-	_ = store.Set(types.SupplyKeyPrefix, bz)
+	err = store.Set(types.SupplyKeyPrefix, bz)
+	if err != nil {
+		ctx.Logger().Error(err.Error())
+		return
+	}
 }
 
 func (k Keeper) EncodeSupply(supply exported.SupplyI) ([]byte, error) {
