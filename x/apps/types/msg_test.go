@@ -2,10 +2,11 @@ package types
 
 import (
 	"fmt"
-	"github.com/pokt-network/pocket-core/codec/types"
 	"math/rand"
 	"reflect"
 	"testing"
+
+	"github.com/pokt-network/pocket-core/codec/types"
 
 	"github.com/pokt-network/pocket-core/codec"
 	"github.com/pokt-network/pocket-core/crypto"
@@ -66,7 +67,7 @@ func TestMsgApp_GetSignBytes(t *testing.T) {
 	type args struct {
 		msgAppStake MsgAppStake
 	}
-	res, err := ModuleCdc.MarshalBinaryLengthPrefixed(&msgAppStake)
+	res, err := ModuleCdc.MarshalJSON(&msgAppStake)
 	if err != nil {
 		panic(err)
 	}
@@ -208,7 +209,7 @@ func TestMsgBeginAppUnstake_GetSignBytes(t *testing.T) {
 	type args struct {
 		msgBeginAppUnstake MsgBeginAppUnstake
 	}
-	res, err := ModuleCdc.MarshalBinaryLengthPrefixed(&msgBeginAppUnstake)
+	res, err := ModuleCdc.MarshalJSON(&msgBeginAppUnstake)
 	if err != nil {
 		panic(err)
 	}
@@ -381,7 +382,7 @@ func TestMsgAppUnjail_GetSignBytes(t *testing.T) {
 	type args struct {
 		msgAppUnjail MsgAppUnjail
 	}
-	res, err := ModuleCdc.MarshalBinaryLengthPrefixed(&msgAppUnjail)
+	res, err := ModuleCdc.MarshalJSON(&msgAppUnjail)
 	if err != nil {
 		panic(err)
 	}

@@ -89,7 +89,7 @@ func MarshalApplication(cdc *codec.Codec, application Application) (result []byt
 		ae := application.ToProto()
 		return cdc.ProtoMarshalBinaryLengthPrefixed(&ae)
 	}
-	return cdc.LegacyMarshalBinaryBare(application)
+	return cdc.LegacyMarshalBinaryLengthPrefixed(application)
 }
 
 // unmarshal the application
