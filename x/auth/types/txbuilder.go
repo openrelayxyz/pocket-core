@@ -90,7 +90,7 @@ func (bldr TxBuilder) WithMemo(memo string) TxBuilder {
 
 // BuildAndSign builds a single message to be signed, and signs a transaction
 // with the built message given a address, private key, and a set of messages.
-func (bldr TxBuilder) BuildAndSign(address sdk.Address, privateKey crypto.PrivateKey, msg sdk.Msg) ([]byte, error) {
+func (bldr TxBuilder) BuildAndSign(address sdk.Address, privateKey crypto.PrivateKey, msg sdk.Msg, afterUpgrade bool) ([]byte, error) {
 	if bldr.chainID == "" {
 		return nil, errors.New("cant build and sign transaciton: the chainID is empty")
 	}
@@ -107,12 +107,12 @@ func (bldr TxBuilder) BuildAndSign(address sdk.Address, privateKey crypto.Privat
 		Signature: sigBytes,
 		PublicKey: privateKey.PublicKey().RawString(),
 	}
-	return bldr.txEncoder(NewTx(msg, bldr.fees, sig, bldr.memo, entropy))
+	return bldr.txEncoder(NewTx(msg, bldr.fees, sig, bldr.memo, entropy, afterUpgrade))
 }
 
 // BuildAndSignWithKeyBase builds a single message to be signed, and signs a transaction
 // with the built message given a address, passphrase, and a set of messages.
-func (bldr TxBuilder) BuildAndSignWithKeyBase(address sdk.Address, passphrase string, msg sdk.Msg) ([]byte, error) {
+func (bldr TxBuilder) BuildAndSignWithKeyBase(address sdk.Address, passphrase string, msg sdk.Msg, afterUpgrade bool) ([]byte, error) {
 	if bldr.keybase == nil {
 		return nil, errors.New("cant build and sign transaciton: the keybase is nil")
 	}
@@ -132,7 +132,7 @@ func (bldr TxBuilder) BuildAndSignWithKeyBase(address sdk.Address, passphrase st
 		Signature: sigBytes,
 		PublicKey: pk.RawString(),
 	}
-	return bldr.txEncoder(NewTx(msg, bldr.fees, sig, bldr.memo, entropy))
+	return bldr.txEncoder(NewTx(msg, bldr.fees, sig, bldr.memo, entropy, afterUpgrade))
 }
 
 func (bldr TxBuilder) SignMultisigTransaction(address sdk.Address, keys []crypto.PublicKey, passphrase string, txBytes []byte) (signedTx []byte, err error) {
@@ -209,7 +209,7 @@ func (bldr TxBuilder) BuildAndSignMultisigTransaction(address sdk.Address, publi
 		Signature: ms.Marshal(),
 	}
 	// create a new standard transaction object
-	tx := NewTx(m, fee, sig, "", entropy)
+	tx := NewTx(m, fee, sig, "", entropy, false)
 	// encode it using the default encoder
 	return bldr.TxEncoder()(tx)
 }

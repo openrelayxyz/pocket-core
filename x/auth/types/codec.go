@@ -10,7 +10,6 @@ import (
 
 // RegisterCodec registers concrete types on the codec
 func RegisterCodec(cdc *codec.Codec) {
-	cdc.RegisterInterface("x.auth.Account", (*exported.Account)(nil), nil)
 	cdc.RegisterInterface("x.auth.ModuleAccount", (*exported.ModuleAccountI)(nil), &ModuleAccountEncodable{})
 	cdc.RegisterInterface("x.auth.Account", (*exported.Account)(nil), &BaseAccountEncodable{}, &ModuleAccountEncodable{})
 	cdc.RegisterInterface("x.auth.Supply", (*exported.SupplyI)(nil), &Supply{})

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pokt-network/pocket-core/codec"
+	"github.com/pokt-network/pocket-core/codec/types"
 	posCrypto "github.com/pokt-network/pocket-core/crypto"
 	sdk "github.com/pokt-network/pocket-core/types"
 	"github.com/tendermint/tendermint/crypto"
@@ -36,10 +37,11 @@ type StdSignatureI interface {
 
 // StdTx is a standard way to wrap a Msg with Fee and Sigs.
 // NOTE: the first signature is the fee payer (Sigs must not be nil).
-func NewTx(msgs sdk.Msg, fee sdk.Coins, sig StdSignature, memo string, entropy int64) sdk.Tx {
-	if BLOCKHEIGHTPASSED {
+func NewTx(msgs sdk.Msg, fee sdk.Coins, sig StdSignature, memo string, entropy int64, afterUpgradeHeight bool) sdk.Tx {
+	if afterUpgradeHeight {
+		any, _ := types.NewAnyWithValue(msgs)
 		return StdTx{
-			Msg:       msgs,
+			Msg:       *any,
 			Fee:       fee,
 			Signature: sig,
 			Memo:      memo,
@@ -297,6 +299,6 @@ func NewTestTx(ctx sdk.Ctx, msgs sdk.Msg, priv posCrypto.PrivateKey, entropy int
 		os.Exit(1)
 	}
 	s := StdSignature{PublicKey: priv.PublicKey().RawString(), Signature: sig}
-	tx := NewTx(msgs, fee, s, "", entropy)
+	tx := NewTx(msgs, fee, s, "", entropy, ctx.IsAfterUpgradeHeight())
 	return tx
 }

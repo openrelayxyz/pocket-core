@@ -25,6 +25,7 @@ import (
 	"github.com/pokt-network/pocket-core/x/pocketcore/types"
 	"github.com/spf13/cobra"
 	con "github.com/tendermint/tendermint/config"
+	cryptoamino "github.com/tendermint/tendermint/crypto/encoding/amino"
 	"github.com/tendermint/tendermint/libs/cli/flags"
 	"github.com/tendermint/tendermint/libs/log"
 	cmn "github.com/tendermint/tendermint/libs/os"
@@ -674,6 +675,7 @@ func MakeCodec() {
 	sdk.RegisterCodec(cdc)
 	// register the crypto types
 	crypto.RegisterAmino(cdc.AminoCodec().Amino)
+	cryptoamino.RegisterAmino(cdc.AminoCodec().Amino)
 }
 
 func Credentials() string {

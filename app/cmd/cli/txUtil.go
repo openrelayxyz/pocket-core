@@ -333,6 +333,6 @@ func newTxBz(cdc *codec.Codec, msg sdk.Msg, fromAddr sdk.Address, chainID string
 		return nil, err
 	}
 	s := authTypes.StdSignature{PublicKey: pubKey.RawString(), Signature: sig}
-	tx := authTypes.NewTx(msg, fees, s, memo, entropy)
+	tx := authTypes.NewTx(msg, fees, s, memo, entropy, cdc.IsAfterUpgrade())
 	return auth.DefaultTxEncoder(cdc)(tx)
 }
