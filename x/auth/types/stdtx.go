@@ -67,12 +67,13 @@ func NewTx(msgs sdk.Msg, fee sdk.Coins, sig StdSignature, memo string, entropy i
 }
 
 // GetMsg returns the all the transaction's messages.
-func (tx StdTx) GetMsg() (res sdk.Msg) {
+func (tx StdTx) GetMsg() sdk.LegacyMsg {
+	var res sdk.Msg
 	err := ModuleCdc.ProtoCodec().UnpackAny(&tx.Msg, &res)
 	if err != nil {
 		panic("unable to retrive msg: " + err.Error())
 	}
-	return
+	return res
 }
 
 // ValidateBasic does a simple and lightweight validation check that doesn't
@@ -149,7 +150,7 @@ func (tx StdTx) WithSignature(i StdSignatureI) (StdTxI, error) {
 }
 
 // StdSignBytes returns the bytes to sign for a transaction.
-func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msg sdk.Msg, memo string) ([]byte, error) {
+func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msg sdk.LegacyMsg, memo string) ([]byte, error) {
 	msgsBytes := msg.GetSignBytes()
 	var feeBytes json.RawMessage
 	feeBytes, err := fee.MarshalJSON()
@@ -173,7 +174,7 @@ func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msg sdk.Msg, mem
 // ---------------------------------------------------------------------------------------------------------------------
 
 type LegacyStdTx struct {
-	Msg       sdk.Msg            `json:"msg" yaml:"msg"`
+	Msg       sdk.LegacyMsg      `json:"msg" yaml:"msg"`
 	Fee       sdk.Coins          `json:"fee" yaml:"fee"`
 	Signature LegacyStdSignature `json:"signature" yaml:"signature"`
 	Memo      string             `json:"memo" yaml:"memo"`
@@ -227,7 +228,7 @@ func (ss LegacyStdSignature) GetPublicKey() string {
 }
 
 // GetMsg returns the all the transaction's messages.
-func (tx LegacyStdTx) GetMsg() sdk.Msg { return tx.Msg }
+func (tx LegacyStdTx) GetMsg() sdk.LegacyMsg { return tx.Msg }
 
 // ValidateBasic does a simple and lightweight validation check that doesn't
 // require access to any other information.

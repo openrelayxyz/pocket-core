@@ -771,7 +771,7 @@ func (app *BaseApp) DeliverTx(req abci.RequestDeliverTx) (res abci.ResponseDeliv
 }
 
 // validateBasicTxMsgs executes basic validator calls for messages.
-func validateBasicTxMsgs(msg sdk.Msg) sdk.Error {
+func validateBasicTxMsgs(msg sdk.LegacyMsg) sdk.Error {
 	if msg == nil {
 		return sdk.ErrUnknownRequest("Tx.GetMsg() must return at least one message")
 	}
@@ -799,7 +799,7 @@ func (app *BaseApp) getContextForTx(mode runTxMode, txBytes []byte) (ctx sdk.Ctx
 
 // runMsg iterates through all the messages and executes them.
 // nolint: gocyclo
-func (app *BaseApp) runMsg(ctx sdk.Ctx, msg sdk.Msg, mode runTxMode) (result sdk.Result) {
+func (app *BaseApp) runMsg(ctx sdk.Ctx, msg sdk.LegacyMsg, mode runTxMode) (result sdk.Result) {
 	msgLogs := make(sdk.ABCIMessageLogs, 0, 1)
 
 	var (

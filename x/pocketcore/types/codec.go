@@ -31,4 +31,5 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterStructure(nodesTypes.Validator{}, "pos/Validator") // todo does this really need to depend on nodes/types
 	cdc.RegisterInterface("x.pocketcore.Proof", (*Proof)(nil), &RelayProof{}, &ChallengeProofInvalidData{})
 	cdc.RegisterImplementation((*sdk.Msg)(nil), &MsgClaim{}, &MsgProof{}, LegacyMsgProof{})
+	cdc.RegisterImplementation((*sdk.LegacyMsg)(nil), &MsgClaim{}, &MsgProof{}, LegacyMsgProof{})
 }

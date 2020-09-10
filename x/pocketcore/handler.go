@@ -11,14 +11,18 @@ var _ sdk.Msg = types.LegacyMsgProof{}
 
 // "NewHandler" - Returns a handler for "pocketCore" type messages.
 func NewHandler(keeper keeper.Keeper) sdk.Handler {
-	return func(ctx sdk.Ctx, msg sdk.Msg) sdk.Result {
+	return func(ctx sdk.Ctx, msg sdk.LegacyMsg) sdk.Result {
 		switch msg := msg.(type) {
 		// handle claim message
 		case *types.MsgClaim: // TODO XX not doing a legacy msgClaim could break leagacy XX
 			return handleClaimMsg(ctx, keeper, *msg)
+		case types.MsgClaim: // TODO XX not doing a legacy msgClaim could break leagacy XX
+			return handleClaimMsg(ctx, keeper, msg)
 		// handle proof message
 		case *types.MsgProof:
 			return handleProofMsg(ctx, keeper, *msg)
+		case types.MsgProof:
+			return handleProofMsg(ctx, keeper, msg)
 		// handle legacy proof message
 		case types.LegacyMsgProof:
 			return handleLegacyProofMsg(ctx, keeper, msg)

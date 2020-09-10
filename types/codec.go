@@ -11,5 +11,6 @@ import "github.com/pokt-network/pocket-core/codec"
 // }
 func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterInterface("types/msg", (*Msg)(nil))
+	cdc.RegisterInterface("types/Legacymsg", (*LegacyMsg)(nil))
 	cdc.RegisterInterface("types/tx", (*Tx)(nil))
 }

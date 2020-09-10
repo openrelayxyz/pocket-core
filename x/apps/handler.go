@@ -11,7 +11,7 @@ import (
 var _ sdk.Msg = types.LegacyMsgAppStake{}
 
 func NewHandler(k keeper.Keeper) sdk.Handler {
-	return func(ctx sdk.Ctx, msg sdk.Msg) sdk.Result {
+	return func(ctx sdk.Ctx, msg sdk.LegacyMsg) sdk.Result {
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
 		switch msg := msg.(type) {
 		case *types.MsgAppStake:
@@ -20,6 +20,12 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 			return handleMsgBeginUnstake(ctx, *msg, k)
 		case *types.MsgAppUnjail:
 			return handleMsgUnjail(ctx, *msg, k)
+		case types.MsgAppStake:
+			return handleStake(ctx, msg, k)
+		case types.MsgBeginAppUnstake:
+			return handleMsgBeginUnstake(ctx, msg, k)
+		case types.MsgAppUnjail:
+			return handleMsgUnjail(ctx, msg, k)
 		case types.LegacyMsgAppStake:
 			return handleLegacyMsgStake(ctx, msg, k)
 		default:
