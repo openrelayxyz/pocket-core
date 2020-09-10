@@ -45,47 +45,53 @@ func (cdc *Codec) RegisterImplementation(iface interface{}, impls ...proto.Messa
 }
 
 func (cdc *Codec) MarshalBinaryBare(o interface{}) ([]byte, error) {
-	if cdc.afterUpgradeMod {
-		p, ok := o.(ProtoMarshaler)
-		if !ok {
+	p, ok := o.(ProtoMarshaler)
+	if !ok {
+		if cdc.afterUpgradeMod {
 			return nil, NotProtoCompatibleInterfaceError
 		}
+		return cdc.legacyCdc.MarshalBinaryBare(o)
+	} else {
 		return cdc.protoCdc.MarshalBinaryBare(p)
 	}
-	return cdc.legacyCdc.MarshalBinaryBare(o)
 }
 
 func (cdc *Codec) MarshalBinaryLengthPrefixed(o interface{}) ([]byte, error) {
-	if cdc.afterUpgradeMod {
-		p, ok := o.(ProtoMarshaler)
-		if !ok {
+	p, ok := o.(ProtoMarshaler)
+	if !ok {
+		if cdc.afterUpgradeMod {
 			return nil, NotProtoCompatibleInterfaceError
 		}
+		return cdc.legacyCdc.MarshalBinaryLengthPrefixed(o)
+	} else {
 		return cdc.protoCdc.MarshalBinaryLengthPrefixed(p)
 	}
-	return cdc.legacyCdc.MarshalBinaryLengthPrefixed(o)
 }
 
 func (cdc *Codec) UnmarshalBinaryBare(bz []byte, ptr interface{}) error {
-	if cdc.afterUpgradeMod {
-		p, ok := ptr.(ProtoMarshaler)
-		if !ok {
+	p, ok := ptr.(ProtoMarshaler)
+	if !ok {
+		if cdc.afterUpgradeMod {
 			return NotProtoCompatibleInterfaceError
+		} else {
+			return cdc.legacyCdc.UnmarshalBinaryBare(bz, ptr)
 		}
+	} else {
 		return cdc.protoCdc.UnmarshalBinaryBare(bz, p)
 	}
-	return cdc.legacyCdc.UnmarshalBinaryBare(bz, ptr)
 }
 
 func (cdc *Codec) UnmarshalBinaryLengthPrefixed(bz []byte, ptr interface{}) error {
-	if cdc.afterUpgradeMod {
-		p, ok := ptr.(ProtoMarshaler)
-		if !ok {
+	p, ok := ptr.(ProtoMarshaler)
+	if !ok {
+		if cdc.afterUpgradeMod {
 			return NotProtoCompatibleInterfaceError
+		} else {
+			return cdc.legacyCdc.UnmarshalBinaryLengthPrefixed(bz, ptr)
 		}
+	} else {
 		return cdc.protoCdc.UnmarshalBinaryLengthPrefixed(bz, p)
 	}
-	return cdc.legacyCdc.UnmarshalBinaryLengthPrefixed(bz, ptr)
 }
 
 func (cdc *Codec) ProtoMarshalBinaryBare(o ProtoMarshaler) ([]byte, error) {

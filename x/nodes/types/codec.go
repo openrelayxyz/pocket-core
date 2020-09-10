@@ -15,7 +15,8 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterStructure(MsgBeginUnstake{}, "pos/MsgBeginUnstake")
 	cdc.RegisterStructure(MsgUnjail{}, "pos/MsgUnjail")
 	cdc.RegisterStructure(MsgSend{}, "pos/Send")
-	cdc.RegisterImplementation((*sdk.Msg)(nil), &MsgStake{}, &MsgUnjail{}, &MsgBeginUnstake{}, &MsgSend{})
+	cdc.RegisterStructure(LegacyMsgStake{}, "pos/LegacyMsgStake")
+	cdc.RegisterImplementation((*sdk.Msg)(nil), &MsgStake{}, &MsgUnjail{}, &MsgBeginUnstake{}, &MsgSend{}, LegacyMsgStake{})
 	cdc.RegisterInterface("nodes/validatorI", (*exported.ValidatorI)(nil), &ValidatorProto{})
 
 }

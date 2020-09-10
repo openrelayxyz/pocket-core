@@ -10,6 +10,7 @@ import (
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/multisig"
 	"gopkg.in/yaml.v2"
+	"log"
 	"os"
 )
 
@@ -197,7 +198,7 @@ func (tx LegacyStdTx) GetFee() sdk.Coins {
 }
 
 func (tx LegacyStdTx) GetMemo() string {
-	return tx.GetMemo()
+	return tx.Memo
 }
 
 func (tx LegacyStdTx) GetSignature() StdSignatureI {
@@ -243,24 +244,50 @@ func (tx LegacyStdTx) ValidateBasic() sdk.Error {
 // DefaultTxDecoder logic for standard transaction decoding
 func DefaultTxDecoder(cdc *codec.Codec) sdk.TxDecoder {
 	return func(txBytes []byte) (sdk.Tx, sdk.Error) {
-		var tx = StdTx{}
-		if len(txBytes) == 0 {
-			return nil, sdk.ErrTxDecode("txBytes are empty")
+		if cdc.IsAfterUpgrade() {
+			var tx = StdTx{}
+			if len(txBytes) == 0 {
+				return nil, sdk.ErrTxDecode("txBytes are empty")
+			}
+			// StdTx.Msg is an interface. The concrete types
+			// are registered by MakeTxCodec
+			err := cdc.UnmarshalBinaryLengthPrefixed(txBytes, &tx)
+			if err != nil {
+				return nil, sdk.ErrTxDecode("error decoding transaction").TraceSDK(err.Error())
+			}
+			return tx, nil
+		} else {
+			var tx = LegacyStdTx{}
+			if len(txBytes) == 0 {
+				return nil, sdk.ErrTxDecode("txBytes are empty")
+			}
+			// StdTx.Msg is an interface. The concrete types
+			// are registered by MakeTxCodec
+			err := cdc.UnmarshalBinaryLengthPrefixed(txBytes, &tx)
+			if err != nil {
+				return nil, sdk.ErrTxDecode("error decoding transaction").TraceSDK(err.Error())
+			}
+			return tx, nil
 		}
-		// StdTx.Msg is an interface. The concrete types
-		// are registered by MakeTxCodec
-		err := cdc.UnmarshalBinaryLengthPrefixed(txBytes, &tx)
-		if err != nil {
-			return nil, sdk.ErrTxDecode("error decoding transaction").TraceSDK(err.Error())
-		}
-		return tx, nil
+
 	}
 }
 
 // DefaultTxEncoder logic for standard transaction encoding
 func DefaultTxEncoder(cdc *codec.Codec) sdk.TxEncoder {
 	return func(tx sdk.Tx) ([]byte, error) {
-		return cdc.MarshalBinaryLengthPrefixed(tx)
+		if cdc.IsAfterUpgrade() {
+			t, ok := tx.(StdTx)
+			if !ok {
+				log.Fatal("tx must be of type stdTx")
+			}
+			return cdc.MarshalBinaryLengthPrefixed(&t)
+		}
+		t, ok := tx.(LegacyStdTx)
+		if !ok {
+			log.Fatal("tx must be of type LegacyStdTx")
+		}
+		return cdc.MarshalBinaryLengthPrefixed(&t)
 	}
 }
 

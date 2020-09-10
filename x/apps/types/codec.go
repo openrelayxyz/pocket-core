@@ -10,9 +10,10 @@ import (
 // RegisterCodec registers concrete types on the codec
 func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterStructure(MsgAppStake{}, "apps/MsgAppStake")
+	cdc.RegisterStructure(LegacyMsgAppStake{}, "apps/LegacyMsgAppStake")
 	cdc.RegisterStructure(MsgBeginAppUnstake{}, "apps/MsgAppBeginUnstake")
 	cdc.RegisterStructure(MsgAppUnjail{}, "apps/MsgAppUnjail")
-	cdc.RegisterImplementation((*sdk.Msg)(nil), &MsgAppStake{}, &MsgBeginAppUnstake{}, &MsgAppUnjail{})
+	cdc.RegisterImplementation((*sdk.Msg)(nil), &MsgAppStake{}, &MsgBeginAppUnstake{}, &MsgAppUnjail{}, LegacyMsgAppStake{})
 	ModuleCdc = cdc
 }
 
