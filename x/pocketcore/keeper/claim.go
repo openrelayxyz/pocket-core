@@ -166,7 +166,7 @@ func (k Keeper) SetClaim(ctx sdk.Ctx, msg pc.MsgClaim) error {
 		msg.ExpirationHeight = ctx.BlockHeight() + k.ClaimExpiration(sessionCtx)*k.BlocksPerSession(sessionCtx)
 	}
 	// marshal the message into amino
-	bz, err := k.cdc.MarshalBinaryBare(msg)
+	bz, err := k.cdc.MarshalBinaryBare(&msg)
 	if err != nil {
 		panic(err)
 	}
