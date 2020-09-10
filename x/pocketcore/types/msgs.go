@@ -122,7 +122,8 @@ func (msg MsgProof) ValidateBasic() sdk.Error {
 
 // "GetSignBytes" - Encodes the message for signing
 func (msg MsgProof) GetSignBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
+	return bz
 }
 
 // GetSigners defines whose signature is required
