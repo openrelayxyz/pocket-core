@@ -267,36 +267,36 @@ func TestMsgProof_ValidateBasic(t *testing.T) {
 		msg      MsgProof
 		hasError bool
 	}{
-		// {
-		// 	name:     "Invalid Proof Message, signature",
-		// 	msg:      invalidProofMsgSignature,
-		// 	hasError: true,
-		// },
-		// {
-		// 	name:     "Invalid Proof Message, session block height",
-		// 	msg:      invalidProofMsgSessionBlkHeight,
-		// 	hasError: true,
-		// },
-		// {
-		// 	name:     "Invalid Proof Message, hashsum",
-		// 	msg:      invalidProofMsgHashes,
-		// 	hasError: true,
-		// },
-		// {
-		// 	name:     "Invalid Proof Message, leafnode index",
-		// 	msg:      invalidProofMsgIndex,
-		// 	hasError: true,
-		// },
-		// {
-		// 	name:     "Invalid Proof Message, token",
-		// 	msg:      invalidProofMsgToken,
-		// 	hasError: true,
-		// },
-		// {
-		// 	name:     "Invalid Proof Message, blockchain",
-		// 	msg:      invalidProofMsgBlkchn,
-		// 	hasError: true,
-		// },
+		{
+			name:     "Invalid Proof Message, signature",
+			msg:      invalidProofMsgSignature,
+			hasError: true,
+		},
+		{
+			name:     "Invalid Proof Message, session block height",
+			msg:      invalidProofMsgSessionBlkHeight,
+			hasError: true,
+		},
+		{
+			name:     "Invalid Proof Message, hashsum",
+			msg:      invalidProofMsgHashes,
+			hasError: true,
+		},
+		{
+			name:     "Invalid Proof Message, leafnode index",
+			msg:      invalidProofMsgIndex,
+			hasError: true,
+		},
+		{
+			name:     "Invalid Proof Message, token",
+			msg:      invalidProofMsgToken,
+			hasError: true,
+		},
+		{
+			name:     "Invalid Proof Message, blockchain",
+			msg:      invalidProofMsgBlkchn,
+			hasError: true,
+		},
 		{
 			name:     "Valid Proof Message",
 			msg:      validProofMessage,
