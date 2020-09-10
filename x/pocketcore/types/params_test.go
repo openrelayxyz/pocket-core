@@ -89,5 +89,5 @@ func TestParams_ParamSetPairs(t *testing.T) {
 
 func TestParams_String(t *testing.T) {
 	df := DefaultParams()
-	assert.NotPanics(t, func() { fmt.Sprintf("%s", df.String()) })
+	assert.NotPanics(t, func() { _ = fmt.Sprintf("%s", df.String()) })
 }

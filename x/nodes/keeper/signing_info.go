@@ -14,7 +14,7 @@ func (k Keeper) GetValidatorSigningInfo(ctx sdk.Ctx, addr sdk.Address) (info typ
 		found = false
 		return
 	}
-	k.cdc.UnmarshalBinaryLengthPrefixed(bz, &info)
+	_ = k.cdc.UnmarshalBinaryLengthPrefixed(bz, &info)
 	found = true
 	return
 }
@@ -73,15 +73,15 @@ func (k Keeper) valMissedAt(ctx sdk.Ctx, addr sdk.Address, index int64) (missed 
 		return
 	}
 	if ctx.IsAfterUpgradeHeight() {
-		k.cdc.UnmarshalBinaryLengthPrefixed(bz, &m)
+		_ = k.cdc.UnmarshalBinaryLengthPrefixed(bz, &m)
 		return m.Value
 	} else {
-		k.cdc.UnmarshalBinaryLengthPrefixed(bz, &missed)
+		_ = k.cdc.UnmarshalBinaryLengthPrefixed(bz, &missed)
 		return missed
 	}
 }
 
-// SetValidatorMissedAt - Store missed validaor
+// SetValidatorMissedAt - Store missed validator
 func (k Keeper) SetValidatorMissedAt(ctx sdk.Ctx, addr sdk.Address, index int64, missed bool) {
 	m := types.ValidatorMissed{Value: missed}
 	store := ctx.KVStore(k.storeKey)

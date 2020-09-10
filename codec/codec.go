@@ -151,7 +151,6 @@ func (cdc *Codec) MustUnmarshalJSON(bz []byte, ptr interface{}) {
 	if err != nil {
 		panic(err)
 	}
-	return
 }
 
 func RegisterEvidences(legacy *LegacyAmino, _ *ProtoCodec) {
