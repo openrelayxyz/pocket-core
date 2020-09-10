@@ -169,17 +169,36 @@ func (bldr TxBuilder) SignMultisigTransaction(address sdk.Address, keys []crypto
 	} else {
 		ms = ms.AddSignatureByIndex(sigBytes, len(ms.Signatures()))
 	}
-	sig := StdSignature{
-		PublicKey: tx.GetSignature().GetPublicKey(),
-		Signature: ms.Marshal(),
+	_, ok := tx.GetSignature().(*StdSignature)
+	if ok {
+		sig := StdSignature{
+			PublicKey: tx.GetSignature().GetPublicKey(),
+			Signature: ms.Marshal(),
+		}
+		// replace the old multi-signature with the new multi-signature (containing the additional signature)
+		tx, err = tx.WithSignature(&sig)
+		if err != nil {
+			return nil, err
+		}
+		// encode using the standard encoder
+		return bldr.TxEncoder()(tx)
+	} else {
+		pk := tx.GetSignature().GetPublicKey()
+		pubKey, _ = crypto.NewPublicKey(pk)
+
+		sig := LegacyStdSignature{
+			PublicKey: pubKey,
+			Signature: ms.Marshal(),
+		}
+		// replace the old multi-signature with the new multi-signature (containing the additional signature)
+		tx, err = tx.WithSignature(sig)
+		if err != nil {
+			return nil, err
+		}
+		// encode using the standard encoder
+		return bldr.TxEncoder()(tx)
 	}
-	// replace the old multi-signature with the new multi-signature (containing the additional signature)
-	tx, err = tx.WithSignature(&sig)
-	if err != nil {
-		return nil, err
-	}
-	// encode using the standard encoder
-	return bldr.TxEncoder()(tx)
+
 }
 
 func (bldr TxBuilder) BuildAndSignMultisigTransaction(address sdk.Address, publicKey crypto.PublicKeyMultiSig, m sdk.Msg, passphrase string, fees int64) (signedTx []byte, err error) {
