@@ -33,39 +33,35 @@ func (v Validator) String() string {
 
 // Returns the proto endcoding of a validator
 func MarshalValidator(cdc *codec.Codec, validator Validator) ([]byte, error) {
-
-	return cdc.MarshalBinaryLengthPrefixed(&ValidatorProto{
-		Address:                 validator.Address,
-		PublicKey:               validator.PublicKey.RawString(),
-		Jailed:                  validator.Jailed,
-		Status:                  validator.Status,
-		Chains:                  validator.Chains,
-		ServiceURL:              validator.ServiceURL,
-		StakedTokens:            validator.StakedTokens,
-		UnstakingCompletionTime: validator.UnstakingCompletionTime,
-	})
+	if cdc.IsAfterUpgrade() {
+		validator.ToProto()
+		return cdc.MarshalBinaryLengthPrefixed(&ValidatorProto{
+			Address:                 validator.Address,
+			PublicKey:               validator.PublicKey.RawString(),
+			Jailed:                  validator.Jailed,
+			Status:                  validator.Status,
+			Chains:                  validator.Chains,
+			ServiceURL:              validator.ServiceURL,
+			StakedTokens:            validator.StakedTokens,
+			UnstakingCompletionTime: validator.UnstakingCompletionTime,
+		})
+	} else {
+		return cdc.MarshalBinaryLengthPrefixed(validator)
+	}
 }
 
 // MUST decode the validator from the bytes
 func UnmarshalValidator(cdc *codec.Codec, valBytes []byte) (v Validator, err error) {
-	validator, err := UnmarshalProtoValidator(cdc, valBytes)
-	if err != nil {
+	if cdc.IsAfterUpgrade() {
+		validator, err := UnmarshalProtoValidator(cdc, valBytes)
+		if err != nil {
+			return v, err
+		}
+		return validator.FromProto(), nil
+	} else {
+		err = cdc.UnmarshalBinaryLengthPrefixed(valBytes, &v)
 		return
 	}
-	pubkey, err := crypto.NewPublicKey(validator.PublicKey)
-	if err != nil {
-		return
-	}
-	return Validator{
-		Address:                 validator.Address,
-		PublicKey:               pubkey,
-		Jailed:                  validator.Jailed,
-		Status:                  validator.Status,
-		Chains:                  validator.Chains,
-		ServiceURL:              validator.ServiceURL,
-		StakedTokens:            validator.StakedTokens,
-		UnstakingCompletionTime: validator.UnstakingCompletionTime,
-	}, nil
 }
 
 func UnmarshalProtoValidator(cdc *codec.Codec, valBytes []byte) (v ValidatorProto, err error) {
