@@ -86,7 +86,7 @@ func (k Keeper) GetPreviousProposer(ctx sdk.Ctx) (addr sdk.Address) {
 		return a.Address
 	} else {
 		_ = k.cdc.UnmarshalBinaryLengthPrefixed(b, &addr)
-		return a.Address
+		return addr
 	}
 
 }
