@@ -81,14 +81,26 @@ func (k Keeper) GetPreviousProposer(ctx sdk.Ctx) (addr sdk.Address) {
 		k.Logger(ctx).Error("Previous proposer not set")
 		os.Exit(1)
 	}
-	_ = k.cdc.UnmarshalBinaryLengthPrefixed(b, &a)
-	return a.Address
+	if ctx.IsAfterUpgradeHeight() {
+		_ = k.cdc.UnmarshalBinaryLengthPrefixed(b, &a)
+		return a.Address
+	} else {
+		_ = k.cdc.UnmarshalBinaryLengthPrefixed(b, &addr)
+		return a.Address
+	}
+
 }
 
 // SetPreviousProposer -  Store proposer public key for this block
 func (k Keeper) SetPreviousProposer(ctx sdk.Ctx, consAddr sdk.Address) {
 	a := sdk.AddressProto{Address: consAddr}
 	store := ctx.KVStore(k.storeKey)
-	b, _ := k.cdc.MarshalBinaryLengthPrefixed(&a)
-	_ = store.Set(types.ProposerKey, b)
+	if ctx.IsAfterUpgradeHeight() {
+		b, _ := k.cdc.MarshalBinaryLengthPrefixed(&a)
+		_ = store.Set(types.ProposerKey, b)
+	} else {
+		b, _ := k.cdc.MarshalBinaryLengthPrefixed(consAddr)
+		_ = store.Set(types.ProposerKey, b)
+	}
+
 }
