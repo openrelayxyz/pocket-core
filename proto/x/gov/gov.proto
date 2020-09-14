@@ -30,5 +30,5 @@ message Upgrade {
 
 message ACLPair {
 	string key = 1 [(gogoproto.jsontag) = "acl_key"];
-	bytes address = 2 [(gogoproto.jsontag) = "address,omitempty", (gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.Address"];
+	bytes addr = 2 [(gogoproto.jsontag) = "address,omitempty", (gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.Address"];
 }

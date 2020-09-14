@@ -26,7 +26,7 @@ type ACL []ACLPair // cant use map cause of amino concrete marshal in tx
 func (a ACL) Validate(adjacencyMap map[string]bool) error {
 	for _, aclPair := range a {
 		key := aclPair.Key
-		val := aclPair.Address
+		val := aclPair.Addr
 		_, ok := adjacencyMap[key]
 		if !ok {
 			return ErrInvalidACL(ModuleName, fmt.Errorf("the key: %s is not a recognized parameter", key))
@@ -51,7 +51,7 @@ func (a ACL) Validate(adjacencyMap map[string]bool) error {
 func (a ACL) GetOwner(permKey string) sdk.Address {
 	for _, aclPair := range a {
 		if aclPair.Key == permKey {
-			return aclPair.Address
+			return aclPair.Addr
 		}
 	}
 	return nil
@@ -60,14 +60,14 @@ func (a ACL) GetOwner(permKey string) sdk.Address {
 func (a *ACL) SetOwner(permKey string, ownerValue sdk.Address) {
 	for i, aclPair := range *a {
 		if aclPair.Key == permKey {
-			aclPair.Address = ownerValue
+			aclPair.Addr = ownerValue
 			(*a)[i] = aclPair
 			return
 		}
 	}
 	temp := append(*a, ACLPair{
 		Key:     permKey,
-		Address: ownerValue,
+		Addr: ownerValue,
 	})
 	*a = temp
 }
@@ -75,7 +75,7 @@ func (a *ACL) SetOwner(permKey string, ownerValue sdk.Address) {
 func (a ACL) GetAll() map[string]sdk.Address {
 	m := make(map[string]sdk.Address)
 	for _, aclPair := range a {
-		m[aclPair.Key] = aclPair.Address
+		m[aclPair.Key] = aclPair.Addr
 	}
 	return m
 }
