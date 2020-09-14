@@ -24,8 +24,8 @@ message MsgUpgrade {
 }
 
 message Upgrade {
-	int64 height = 1 [(gogoproto.jsontag) = "height"];
-	string version = 2 [(gogoproto.jsontag) = "version"];
+	int64 height = 1 [(gogoproto.jsontag) = "Height"];
+	string version = 2 [(gogoproto.jsontag) = "Version"];
 }
 
 message ACLPair {
