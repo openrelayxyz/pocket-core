@@ -68,6 +68,7 @@ func TestMsgApp_GetSignBytes(t *testing.T) {
 		msgAppStake MsgAppStake
 	}
 	res, err := ModuleCdc.MarshalJSON(&msgAppStake)
+	res = sdk.MustSortJSON(res)
 	if err != nil {
 		panic(err)
 	}
