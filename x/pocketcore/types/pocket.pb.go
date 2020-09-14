@@ -234,8 +234,33 @@ type isProofI_Proof interface {
 type ProofI_RelayProof struct {
 	RelayProof *RelayProof `protobuf:"bytes,1,opt,name=relayProof,proto3,oneof" json:"relayProof,omitempty"`
 }
+
+func (m *ProofI_RelayProof) Reset() {
+	panic("implement me")
+}
+
+func (m *ProofI_RelayProof) String() string {
+	panic("implement me")
+}
+
+func (m *ProofI_RelayProof) ProtoMessage() {
+	panic("implement me")
+}
+
 type ProofI_ChallengeProof struct {
 	ChallengeProof *ChallengeProofInvalidData `protobuf:"bytes,2,opt,name=challengeProof,proto3,oneof" json:"challengeProof,omitempty"`
+}
+
+func (m *ProofI_ChallengeProof) Reset() {
+	panic("implement me")
+}
+
+func (m *ProofI_ChallengeProof) String() string {
+	panic("implement me")
+}
+
+func (m *ProofI_ChallengeProof) ProtoMessage() {
+	panic("implement me")
 }
 
 func (*ProofI_RelayProof) isProofI_Proof()     {}

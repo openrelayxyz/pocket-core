@@ -179,7 +179,7 @@ func createTestValidators(ctx sdk.Ctx, numAccs int, valCoins sdk.Int, daoCoins s
 				StartHeight: ctx.BlockHeight(),
 				JailedUntil: time.Unix(0, 0),
 			}
-			nk.SetValidatorSigningInfo(ctx, val.GetAddress(), &signingInfo)
+			nk.SetValidatorSigningInfo(ctx, val.GetAddress(), signingInfo)
 		}
 		accs = append(accs, val)
 	}
@@ -199,7 +199,7 @@ func createTestValidators(ctx sdk.Ctx, numAccs int, valCoins sdk.Int, daoCoins s
 			StartHeight: ctx.BlockHeight(),
 			JailedUntil: time.Unix(0, 0),
 		}
-		nk.SetValidatorSigningInfo(ctx, val.GetAddress(), &signingInfo)
+		nk.SetValidatorSigningInfo(ctx, val.GetAddress(), signingInfo)
 	}
 	accs = append(accs, val)
 	// end self node logic

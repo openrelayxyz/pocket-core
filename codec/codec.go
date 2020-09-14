@@ -52,7 +52,10 @@ func (cdc *Codec) MarshalBinaryBare(o interface{}) ([]byte, error) {
 		}
 		return cdc.legacyCdc.MarshalBinaryBare(o)
 	} else {
-		return cdc.protoCdc.MarshalBinaryBare(p)
+		if cdc.afterUpgradeMod {
+			return cdc.protoCdc.MarshalBinaryBare(p)
+		}
+		return cdc.legacyCdc.MarshalBinaryBare(p)
 	}
 }
 
@@ -64,7 +67,10 @@ func (cdc *Codec) MarshalBinaryLengthPrefixed(o interface{}) ([]byte, error) {
 		}
 		return cdc.legacyCdc.MarshalBinaryLengthPrefixed(o)
 	} else {
-		return cdc.protoCdc.MarshalBinaryLengthPrefixed(p)
+		if cdc.afterUpgradeMod {
+			return cdc.protoCdc.MarshalBinaryLengthPrefixed(p)
+		}
+		return cdc.legacyCdc.MarshalBinaryLengthPrefixed(p)
 	}
 }
 
@@ -77,7 +83,10 @@ func (cdc *Codec) UnmarshalBinaryBare(bz []byte, ptr interface{}) error {
 			return cdc.legacyCdc.UnmarshalBinaryBare(bz, ptr)
 		}
 	} else {
-		return cdc.protoCdc.UnmarshalBinaryBare(bz, p)
+		if cdc.afterUpgradeMod {
+			return cdc.protoCdc.UnmarshalBinaryBare(bz, p)
+		}
+		return cdc.legacyCdc.UnmarshalBinaryBare(bz, ptr)
 	}
 }
 
@@ -90,7 +99,10 @@ func (cdc *Codec) UnmarshalBinaryLengthPrefixed(bz []byte, ptr interface{}) erro
 			return cdc.legacyCdc.UnmarshalBinaryLengthPrefixed(bz, ptr)
 		}
 	} else {
-		return cdc.protoCdc.UnmarshalBinaryLengthPrefixed(bz, p)
+		if cdc.afterUpgradeMod {
+			return cdc.protoCdc.UnmarshalBinaryLengthPrefixed(bz, p)
+		}
+		return cdc.legacyCdc.UnmarshalBinaryLengthPrefixed(bz, ptr)
 	}
 }
 
