@@ -34,7 +34,7 @@ func (msg MsgAppStake) GetSigner() sdk.Address {
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgAppStake) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(&msg)
-	return bz
+	return sdk.MustSortJSON(bz)
 }
 
 // ValidateBasic quick validity check for staking an application

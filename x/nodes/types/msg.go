@@ -35,8 +35,8 @@ func (msg MsgStake) GetSigner() sdk.Address {
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgStake) GetSignBytes() []byte {
-	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
-	return bz
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
 }
 
 // ValidateBasic quick validity check, stateless
@@ -82,8 +82,8 @@ func (msg MsgBeginUnstake) GetSigner() sdk.Address {
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgBeginUnstake) GetSignBytes() []byte {
-	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
-	return bz
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
 }
 
 // ValidateBasic quick validity check, stateless
@@ -114,8 +114,8 @@ func (msg MsgUnjail) GetSigner() sdk.Address {
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgUnjail) GetSignBytes() []byte {
-	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
-	return bz
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
 }
 
 // ValidateBasic quick validity check, stateless
@@ -146,8 +146,8 @@ func (msg MsgSend) GetSigner() sdk.Address {
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgSend) GetSignBytes() []byte {
-	bz, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&msg)
-	return bz
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
 }
 
 // ValidateBasic quick validity check, stateless

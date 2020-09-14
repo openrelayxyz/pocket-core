@@ -25,7 +25,7 @@ func TestMsgBeginUnstake_GetSignBytes(t *testing.T) {
 		ValidatorAddress: va,
 	}
 
-	encodedmsg, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&mesg)
+	encodedmsg, _ := ModuleCdc.MarshalJSON(&mesg)
 
 	tests := []struct {
 		name   string
@@ -200,7 +200,8 @@ func TestMsgSend_GetSignBytes(t *testing.T) {
 		Amount:      sdk.OneInt(),
 	}
 
-	encmesg, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&mesg)
+	encmesg, _ := ModuleCdc.MarshalJSON(&mesg)
+	encmesg = sdk.MustSortJSON(encmesg)
 
 	tests := []struct {
 		name   string
@@ -442,7 +443,8 @@ func TestMsgStake_GetSignBytes(t *testing.T) {
 		Value:      value,
 		ServiceUrl: surl,
 	}
-	encmesg, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&mesg)
+	encmesg, _ := ModuleCdc.MarshalJSON(&mesg)
+	encmesg = sdk.MustSortJSON(encmesg)
 
 	tests := []struct {
 		name   string
@@ -691,7 +693,7 @@ func TestMsgUnjail_GetSignBytes(t *testing.T) {
 		Address: va,
 	}
 
-	encmesg, _ := ModuleCdc.MarshalBinaryLengthPrefixed(&mesg)
+	encmesg, _ := ModuleCdc.MarshalJSON(&mesg)
 
 	tests := []struct {
 		name   string
