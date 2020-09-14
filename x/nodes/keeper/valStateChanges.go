@@ -55,41 +55,36 @@ func (k Keeper) UpdateTendermintValidators(ctx sdk.Ctx) (updates []abci.Validato
 		copy(valAddrBytes[:], valAddr[:])
 		// check the previous state: if found calculate current power...
 		prevStatePowerBytes, found := prevStatePowerMap[valAddrBytes]
+		curStatePower := validator.ConsensusPower()
 		var curStatePowerBytes []byte
-		if ctx.IsAfterUpgradeHeight() {
-			curStatePower := sdk.IntProto{Int: sdk.NewInt(validator.ConsensusPower())}
-			curStatePowerBytes, _ = k.cdc.MarshalBinaryLengthPrefixed(&curStatePower)
-			// if not found or the power has changed -> add this validator to the updated list
-			if !found || !bytes.Equal(prevStatePowerBytes, curStatePowerBytes) {
-				ctx.Logger().Info(fmt.Sprintf("Updating Validator-Set to Tendermint: %s power changed to %d", validator.Address, validator.ConsensusPower()))
-				updates = append(updates, validator.ABCIValidatorUpdate())
-				// update the previous state as this will soon be the previous state
-				k.SetPrevStateValPower(ctx, valAddr, curStatePower.Int.Int64())
+		var err error
+		if k.cdc.IsAfterUpgrade() {
+			i := sdk.IntProto{
+				Int: sdk.NewInt(curStatePower),
 			}
-			// remove the validator from power map, this structure is used to keep track of who is no longer staked
-			delete(prevStatePowerMap, valAddrBytes)
-			// keep count of the number of validators to ensure we don't go over the maximum number of validators
-			count++
-			// update the total power
-			totalPower = totalPower.Add(sdk.NewInt(curStatePower.Int.Int64()))
+			curStatePowerBytes, err = k.cdc.MarshalBinaryLengthPrefixed(i)
+			if err != nil {
+				panic(err)
+			}
 		} else {
-			curStatePower := validator.ConsensusPower()
-			curStatePowerBytes, _ = k.cdc.MarshalBinaryLengthPrefixed(curStatePower)
-			// if not found or the power has changed -> add this validator to the updated list
-			if !found || !bytes.Equal(prevStatePowerBytes, curStatePowerBytes) {
-				ctx.Logger().Info(fmt.Sprintf("Updating Validator-Set to Tendermint: %s power changed to %d", validator.Address, validator.ConsensusPower()))
-				updates = append(updates, validator.ABCIValidatorUpdate())
-				// update the previous state as this will soon be the previous state
-				k.SetPrevStateValPower(ctx, valAddr, curStatePower)
+			curStatePowerBytes, err = k.cdc.MarshalBinaryLengthPrefixed(curStatePower)
+			if err != nil {
+				panic(err)
 			}
-			// remove the validator from power map, this structure is used to keep track of who is no longer staked
-			delete(prevStatePowerMap, valAddrBytes)
-			// keep count of the number of validators to ensure we don't go over the maximum number of validators
-			count++
-			// update the total power
-			totalPower = totalPower.Add(sdk.NewInt(curStatePower))
 		}
-
+		// if not found or the power has changed -> add this validator to the updated list
+		if !found || !bytes.Equal(prevStatePowerBytes, curStatePowerBytes) {
+			ctx.Logger().Info(fmt.Sprintf("Updating Validator-Set to Tendermint: %s power changed to %d", validator.Address, validator.ConsensusPower()))
+			updates = append(updates, validator.ABCIValidatorUpdate())
+			// update the previous state as this will soon be the previous state
+			k.SetPrevStateValPower(ctx, valAddr, curStatePower)
+		}
+		// remove the validator from power map, this structure is used to keep track of who is no longer staked
+		delete(prevStatePowerMap, valAddrBytes)
+		// keep count of the number of validators to ensure we don't go over the maximum number of validators
+		count++
+		// update the total power
+		totalPower = totalPower.Add(sdk.NewInt(curStatePower))
 	}
 	// sort the no-longer-staked validators
 	noLongerStaked := sortNoLongerStakedValidators(prevStatePowerMap)
