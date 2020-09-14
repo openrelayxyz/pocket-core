@@ -55,21 +55,41 @@ func (k Keeper) UpdateTendermintValidators(ctx sdk.Ctx) (updates []abci.Validato
 		copy(valAddrBytes[:], valAddr[:])
 		// check the previous state: if found calculate current power...
 		prevStatePowerBytes, found := prevStatePowerMap[valAddrBytes]
-		curStatePower := sdk.IntProto{Int: sdk.NewInt(validator.ConsensusPower())}
-		curStatePowerBytes, _ := k.cdc.MarshalBinaryLengthPrefixed(&curStatePower)
-		// if not found or the power has changed -> add this validator to the updated list
-		if !found || !bytes.Equal(prevStatePowerBytes, curStatePowerBytes) {
-			ctx.Logger().Info(fmt.Sprintf("Updating Validator-Set to Tendermint: %s power changed to %d", validator.Address, validator.ConsensusPower()))
-			updates = append(updates, validator.ABCIValidatorUpdate())
-			// update the previous state as this will soon be the previous state
-			k.SetPrevStateValPower(ctx, valAddr, curStatePower.Int.Int64())
+		var curStatePowerBytes []byte
+		if ctx.IsAfterUpgradeHeight() {
+			curStatePower := sdk.IntProto{Int: sdk.NewInt(validator.ConsensusPower())}
+			curStatePowerBytes, _ = k.cdc.MarshalBinaryLengthPrefixed(&curStatePower)
+			// if not found or the power has changed -> add this validator to the updated list
+			if !found || !bytes.Equal(prevStatePowerBytes, curStatePowerBytes) {
+				ctx.Logger().Info(fmt.Sprintf("Updating Validator-Set to Tendermint: %s power changed to %d", validator.Address, validator.ConsensusPower()))
+				updates = append(updates, validator.ABCIValidatorUpdate())
+				// update the previous state as this will soon be the previous state
+				k.SetPrevStateValPower(ctx, valAddr, curStatePower.Int.Int64())
+			}
+			// remove the validator from power map, this structure is used to keep track of who is no longer staked
+			delete(prevStatePowerMap, valAddrBytes)
+			// keep count of the number of validators to ensure we don't go over the maximum number of validators
+			count++
+			// update the total power
+			totalPower = totalPower.Add(sdk.NewInt(curStatePower.Int.Int64()))
+		} else {
+			curStatePower := validator.ConsensusPower()
+			curStatePowerBytes, _ = k.cdc.MarshalBinaryLengthPrefixed(curStatePower)
+			// if not found or the power has changed -> add this validator to the updated list
+			if !found || !bytes.Equal(prevStatePowerBytes, curStatePowerBytes) {
+				ctx.Logger().Info(fmt.Sprintf("Updating Validator-Set to Tendermint: %s power changed to %d", validator.Address, validator.ConsensusPower()))
+				updates = append(updates, validator.ABCIValidatorUpdate())
+				// update the previous state as this will soon be the previous state
+				k.SetPrevStateValPower(ctx, valAddr, curStatePower)
+			}
+			// remove the validator from power map, this structure is used to keep track of who is no longer staked
+			delete(prevStatePowerMap, valAddrBytes)
+			// keep count of the number of validators to ensure we don't go over the maximum number of validators
+			count++
+			// update the total power
+			totalPower = totalPower.Add(sdk.NewInt(curStatePower))
 		}
-		// remove the validator from power map, this structure is used to keep track of who is no longer staked
-		delete(prevStatePowerMap, valAddrBytes)
-		// keep count of the number of validators to ensure we don't go over the maximum number of validators
-		count++
-		// update the total power
-		totalPower = totalPower.Add(sdk.NewInt(curStatePower.Int.Int64()))
+
 	}
 	// sort the no-longer-staked validators
 	noLongerStaked := sortNoLongerStakedValidators(prevStatePowerMap)
@@ -160,7 +180,7 @@ func (k Keeper) StakeValidator(ctx sdk.Ctx, validator types.Validator, amount sd
 			StartHeight: ctx.BlockHeight(),
 			JailedUntil: time.Unix(0, 0),
 		}
-		k.SetValidatorSigningInfo(ctx, validator.GetAddress(), &signingInfo)
+		k.SetValidatorSigningInfo(ctx, validator.GetAddress(), signingInfo)
 	}
 	ctx.Logger().Info("Successfully staked validator: " + validator.Address.String())
 	return nil
@@ -393,7 +413,7 @@ func (k Keeper) IncrementJailedValidators(ctx sdk.Ctx) {
 				}
 				k.DeleteValidator(ctx, addr)
 			} else {
-				k.SetValidatorSigningInfo(ctx, addr, &signInfo)
+				k.SetValidatorSigningInfo(ctx, addr, signInfo)
 			}
 		}
 	}

@@ -42,7 +42,7 @@ func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, supplyKeeper types.AuthKeepe
 				StartHeight: ctx.BlockHeight(),
 				JailedUntil: time.Unix(0, 0),
 			}
-			keeper.SetValidatorSigningInfo(ctx, validator.GetAddress(), &signingInfo)
+			keeper.SetValidatorSigningInfo(ctx, validator.GetAddress(), signingInfo)
 		}
 		// if the validator is staked then add their tokens to the staked pool
 		if validator.IsStaked() {
@@ -99,7 +99,7 @@ func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, supplyKeeper types.AuthKeepe
 			keeper.Logger(ctx).Error(fmt.Sprintf("unable to convert address from hex in genesis signing info for addr: %s err: %v", addr, err))
 			os.Exit(1)
 		}
-		keeper.SetValidatorSigningInfo(ctx, address, &info)
+		keeper.SetValidatorSigningInfo(ctx, address, info)
 	}
 	// update missed block information from genesis state
 	for addr, array := range data.MissedBlocks {
