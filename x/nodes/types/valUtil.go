@@ -39,7 +39,7 @@ func MarshalValidator(cdc *codec.Codec, validator Validator) ([]byte, error) {
 			Address:                 validator.Address,
 			PublicKey:               validator.PublicKey.RawString(),
 			Jailed:                  validator.Jailed,
-			Status:                  validator.Status,
+			Status:                  int32(validator.Status),
 			Chains:                  validator.Chains,
 			ServiceURL:              validator.ServiceURL,
 			StakedTokens:            validator.StakedTokens,
@@ -84,7 +84,7 @@ func (v Validator) MarshalJSON() ([]byte, error) {
 		Address:                 v.Address,
 		PublicKey:               v.PublicKey.RawString(),
 		Jailed:                  v.Jailed,
-		Status:                  v.Status,
+		Status:                  int32(v.Status),
 		ServiceURL:              v.ServiceURL,
 		Chains:                  v.Chains,
 		StakedTokens:            v.StakedTokens,
@@ -109,7 +109,7 @@ func (v *Validator) UnmarshalJSON(data []byte) error {
 		Chains:                  bv.Chains,
 		ServiceURL:              bv.ServiceURL,
 		StakedTokens:            bv.StakedTokens,
-		Status:                  bv.Status,
+		Status:                  sdk.StakeStatus(bv.Status),
 		UnstakingCompletionTime: bv.UnstakingCompletionTime,
 	}
 	return nil
@@ -175,7 +175,7 @@ func (v ValidatorProto) IsStaked() bool             { return v.GetStatus().Equal
 func (v ValidatorProto) IsUnstaked() bool           { return v.GetStatus().Equal(sdk.Unstaked) }
 func (v ValidatorProto) IsUnstaking() bool          { return v.GetStatus().Equal(sdk.Unstaking) }
 func (v ValidatorProto) IsJailed() bool             { return v.Jailed }
-func (v ValidatorProto) GetStatus() sdk.StakeStatus { return v.Status }
+func (v ValidatorProto) GetStatus() sdk.StakeStatus { return sdk.StakeStatus(v.Status) }
 func (v ValidatorProto) GetAddress() sdk.Address    { return v.Address }
 func (v ValidatorProto) GetTokens() sdk.Int         { return v.StakedTokens }
 func (v ValidatorProto) GetPublicKey() crypto.PublicKey {
@@ -198,7 +198,7 @@ func (v ValidatorProto) FromProto() Validator {
 		Address:                 v.Address,
 		PublicKey:               pubkey,
 		Jailed:                  v.Jailed,
-		Status:                  v.Status,
+		Status:                  sdk.StakeStatus(v.Status),
 		ServiceURL:              v.ServiceURL,
 		Chains:                  v.Chains,
 		StakedTokens:            v.StakedTokens,
@@ -212,7 +212,7 @@ func (v Validator) ToProto() ValidatorProto {
 		Address:                 v.Address,
 		PublicKey:               v.PublicKey.RawString(),
 		Jailed:                  v.Jailed,
-		Status:                  v.Status,
+		Status:                  int32(v.Status),
 		ServiceURL:              v.ServiceURL,
 		Chains:                  v.Chains,
 		StakedTokens:            v.StakedTokens,

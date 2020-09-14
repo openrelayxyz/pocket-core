@@ -35,13 +35,13 @@ func TokensFromConsensusPower(power int64) Int {
 }
 
 // StakeStatus is the status of a validator
-type StakeStatus int32
+type StakeStatus byte
 
 // staking constants
 const (
-	Unstaked  StakeStatus = 0
-	Unstaking StakeStatus = 1
-	Staked    StakeStatus = 2
+	Unstaked  StakeStatus = 0x00
+	Unstaking StakeStatus = 0x01
+	Staked    StakeStatus = 0x02
 
 	StakeStatusUnstaked  = "Unstaked"
 	StakeStatusUnstaking = "Unstaking"
@@ -56,11 +56,11 @@ func (b StakeStatus) Equal(b2 StakeStatus) bool {
 // String implements the Stringer interface for StakeStatus.
 func (b StakeStatus) String() string {
 	switch b {
-	case 0:
+	case 0x00:
 		return StakeStatusUnstaked
-	case 1:
+	case 0x01:
 		return StakeStatusUnstaking
-	case 2:
+	case 0x02:
 		return StakeStatusStaked
 	default:
 		panic("invalid stake status")
