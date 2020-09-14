@@ -80,7 +80,7 @@ func (v Validators) JSON() (out []byte, err error) {
 
 // MarshalJSON marshals the validator to JSON using Hex
 func (v Validator) MarshalJSON() ([]byte, error) {
-	return ModuleCdc.MarshalJSON(ValidatorProto{
+	return json.Marshal(ValidatorProto{
 		Address:                 v.Address,
 		PublicKey:               v.PublicKey.RawString(),
 		Jailed:                  v.Jailed,
@@ -95,7 +95,7 @@ func (v Validator) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON unmarshals the validator from JSON using Hex
 func (v *Validator) UnmarshalJSON(data []byte) error {
 	bv := &ValidatorProto{}
-	if err := ModuleCdc.UnmarshalJSON(data, bv); err != nil {
+	if err := json.Unmarshal(data, bv); err != nil {
 		return err
 	}
 	publicKey, err := crypto.NewPublicKey(bv.PublicKey)
