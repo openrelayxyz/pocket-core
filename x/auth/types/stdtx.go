@@ -152,7 +152,7 @@ func (tx StdTx) WithSignature(i StdSignatureI) (StdTxI, error) {
 // StdSignBytes returns the bytes to sign for a transaction.
 func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msg sdk.LegacyMsg, memo string) ([]byte, error) {
 	msgsBytes := msg.GetSignBytes()
-	var feeBytes json.RawMessage
+	var feeBytes sdk.Raw
 	feeBytes, err := fee.MarshalJSON()
 	if err != nil {
 		return nil, fmt.Errorf("could not marshal fee to json for StdSignBytes function: %v", err.Error())
