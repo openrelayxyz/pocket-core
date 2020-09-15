@@ -214,27 +214,23 @@ func (k Keeper) DecodeAccount(bz []byte) (exported.Account, error) {
 
 func (k Keeper) DecodeBaseAccount(bz []byte) (exported.Account, error) {
 	baseAccount, legacyBaseAcc := types.BaseAccountEncodable{}, types.BaseAccount{}
-	err := k.cdc.ProtoUnmarshalBinaryBare(bz, &baseAccount)
-	if err == nil {
+	if k.cdc.IsAfterUpgrade() {
+		err := k.cdc.ProtoUnmarshalBinaryBare(bz, &baseAccount)
 		return &baseAccount, err
-	}
-	err = k.cdc.LegacyUnmarshalBinaryBare(bz, &legacyBaseAcc)
-	if err == nil {
+	} else {
+		err := k.cdc.LegacyUnmarshalBinaryBare(bz, &legacyBaseAcc)
 		return &legacyBaseAcc, err
 	}
-	return nil, fmt.Errorf("can't decode account: unrecognized account type")
 }
 
 // "DecodeModuleAccount" - encodes account interface into protobuf
 func (k Keeper) DecodeModuleAccount(bz []byte) (exported.ModuleAccountI, error) {
 	moduleAcc, legacyModuleAcc := types.ModuleAccountEncodable{}, types.ModuleAccount{}
-	err := k.cdc.ProtoUnmarshalBinaryBare(bz, &moduleAcc)
-	if err == nil {
+	if k.cdc.IsAfterUpgrade() {
+		err := k.cdc.ProtoUnmarshalBinaryBare(bz, &moduleAcc)
 		return &moduleAcc, err
-	}
-	err = k.cdc.LegacyUnmarshalBinaryBare(bz, &legacyModuleAcc)
-	if err == nil {
+	} else {
+		err := k.cdc.LegacyUnmarshalBinaryBare(bz, &legacyModuleAcc)
 		return &legacyModuleAcc, err
 	}
-	return nil, fmt.Errorf("can't decode account: unrecognized account type")
 }
