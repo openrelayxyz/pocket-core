@@ -37,7 +37,7 @@ func StakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, chain
 }
 
 func UnstakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, address sdk.Address, passphrase string) (*sdk.TxResponse, error) {
-	msg := types.MsgBeginUnstake{ValidatorAddress: address}
+	msg := types.MsgBeginUnstake{Address: address}
 	txBuilder, cliCtx, err := newTx(cdc, &msg, address, tmNode, keybase, passphrase)
 	if err != nil {
 		return nil, err
