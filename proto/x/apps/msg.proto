@@ -31,8 +31,8 @@ message MsgBeginAppUnstake {
 
   bytes Address = 1 [
     (gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.Address",
-    (gogoproto.jsontag) = "address",
-    (gogoproto.moretags) = "yaml:\"address\""];
+    (gogoproto.jsontag) = "application_address",
+    (gogoproto.moretags) = "yaml:\"application_address\""];
 }
 
 message MsgAppUnjail {

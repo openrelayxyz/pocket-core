@@ -38,8 +38,8 @@ message ApplicationEncodable {
   string staked_tokens           = 6 [
     (gogoproto.customtype) = "github.com/pokt-network/pocket-core/types.Int",
     (gogoproto.nullable)   = false,
-    (gogoproto.jsontag) = "staked_tokens",
-    (gogoproto.moretags) = "yaml:\"staked_tokens\""];
+    (gogoproto.jsontag) = "tokens",
+    (gogoproto.moretags) = "yaml:\"tokens\""];
   string max_relays           = 7 [
     (gogoproto.customtype) = "github.com/pokt-network/pocket-core/types.Int",
     (gogoproto.nullable)   = false,

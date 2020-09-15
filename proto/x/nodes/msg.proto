@@ -37,7 +37,7 @@ message MsgUnjail {
 	option (gogoproto.goproto_stringer) = true;
 	option (gogoproto.goproto_getters)  = false;
 
-	bytes Address = 1 [
+	bytes ValidatorAddr = 1 [
 		(gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.Address",
 		(gogoproto.jsontag) = "address",
 		(gogoproto.moretags) = "yaml:\"address\""
