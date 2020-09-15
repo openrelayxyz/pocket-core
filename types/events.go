@@ -2,9 +2,10 @@ package types
 
 import (
 	"fmt"
-	"github.com/tendermint/tendermint/libs/kv"
 	"sort"
 	"strings"
+
+	"github.com/tendermint/tendermint/libs/kv"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -50,25 +51,25 @@ type (
 
 	// Attribute defines an attribute wrapper where the key and value are
 	// strings instead of raw bytes.
-	Attribute struct {
-		Key   string `json:"key"`
-		Value string `json:"value,omitempty"`
-	}
+	//Attribute struct {
+	//	Key   string `json:"key"`
+	//	Value string `json:"value,omitempty"`
+	//}
 
 	// Events defines a slice of Event objects
-	Events []Event
+	Events []abci.Event
 )
 
 // NewEvent creates a new Event object with a given type and slice of one or more
 // attributes.
-func NewEvent(ty string, attrs ...Attribute) Event {
+func NewEvent(ty string, attrs ...Attribute) abci.Event {
 	e := Event{Type: ty}
 
 	for _, attr := range attrs {
 		e.Attributes = append(e.Attributes, NewAttribute(attr.Key, attr.Value).ToKVPair())
 	}
 
-	return e
+	return abci.Event(e)
 }
 
 // NewAttribute returns a new key/value Attribute object.
@@ -100,7 +101,7 @@ func (e Event) AppendAttributes(attrs ...Attribute) Event {
 
 // AppendEvent adds an Event to a slice of events.
 func (e Events) AppendEvent(event Event) Events {
-	return append(e, event)
+	return append(e, abci.Event(event))
 }
 
 // AppendEvents adds a slice of Event objects to an exist slice of Event objects.
@@ -143,10 +144,10 @@ var (
 type (
 	// StringAttribute defines en Event object wrapper where all the attributes
 	// contain key/value pairs that are strings instead of raw bytes.
-	StringEvent struct {
-		Type       string      `json:"type,omitempty"`
-		Attributes []Attribute `json:"attributes,omitempty"`
-	}
+	//StringEvent struct {
+	//	Type       string      `json:"type,omitempty"`
+	//	Attributes []Attribute `json:"attributes,omitempty"`
+	//}
 
 	// StringAttributes defines a slice of StringEvents objects.
 	StringEvents []StringEvent

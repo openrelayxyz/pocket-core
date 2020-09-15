@@ -7,6 +7,7 @@ import (
 	sdk "github.com/pokt-network/pocket-core/types"
 	appexported "github.com/pokt-network/pocket-core/x/apps/exported"
 	nodeexported "github.com/pokt-network/pocket-core/x/nodes/exported"
+	"github.com/pokt-network/pocket-core/x/nodes/types"
 	"log"
 )
 
@@ -15,6 +16,22 @@ type Session struct {
 	SessionHeader `json:"header"`
 	SessionKey    `json:"key"`
 	SessionNodes  `json:"nodes"`
+}
+
+func (s Session) ToProto() SessionEncodable {
+	return SessionEncodable{
+		SessionHeader: s.SessionHeader,
+		SessionKey:    s.SessionKey,
+		SessionNodes:  s.SessionNodes.ToSessionNodesEncodable(),
+	}
+}
+
+func (se SessionEncodable) ToSession() Session {
+	return Session{
+		SessionHeader: se.SessionHeader,
+		SessionKey:    se.SessionKey,
+		SessionNodes:  se.SessionNodes.ToSessionNodes(),
+	}
 }
 
 // "NewSession" - create a new session from seed data
@@ -81,16 +98,18 @@ func (s Session) Validate(node nodeexported.ValidatorI, app appexported.Applicat
 
 var _ CacheObject = Session{} // satisfies the cache object interface
 
-func (s Session) Marshal() ([]byte, error) {
-	return ModuleCdc.MarshalBinaryBare(s)
+func (s Session) MarshalObject() ([]byte, error) {
+	se := s.ToProto()
+	return ModuleCdc.MarshalBinaryBare(&se)
 }
 
-func (s Session) Unmarshal(b []byte) (CacheObject, error) {
-	err := ModuleCdc.UnmarshalBinaryBare(b, &s)
+func (s Session) UnmarshalObject(b []byte) (CacheObject, error) {
+	var se SessionEncodable
+	err := ModuleCdc.UnmarshalBinaryBare(b, &se)
 	if err != nil {
 		return s, fmt.Errorf("error unmarshalling session object: %s", err.Error())
 	}
-	return s, nil
+	return se.ToSession(), nil
 }
 
 func (s Session) Key() ([]byte, error) {
@@ -195,6 +214,27 @@ func (sn SessionNodes) ContainsAddress(addr sdk.Address) bool {
 	return false
 }
 
+func (sn SessionNodes) ToSessionNodesEncodable() (res SessionNodesEncodable) {
+	for _, vp := range sn {
+		v, ok := vp.(types.Validator)
+		if ok {
+			res = append(res, v.ToProto())
+		} else {
+			res = append(res, vp.(types.ValidatorProto))
+		}
+	}
+	return
+}
+
+type SessionNodesEncodable []types.ValidatorProto // TODO try to use exported.Node
+
+func (sne SessionNodesEncodable) ToSessionNodes() (res SessionNodes) {
+	for _, vp := range sne {
+		res = append(res, vp)
+	}
+	return
+}
+
 // "SessionKey" - the merkleHash identifier of the session
 type SessionKey []byte
 
@@ -235,13 +275,6 @@ func NewSessionKey(appPubKey string, chain string, blockHash string) (SessionKey
 // "Validate" - Validates the session key
 func (sk SessionKey) Validate() sdk.Error {
 	return HashVerification(hex.EncodeToString(sk))
-}
-
-// "Sessionheader" - The header of the session
-type SessionHeader struct {
-	ApplicationPubKey  string `json:"app_public_key"` // the application public key
-	Chain              string `json:"chain"`          // the nonnative chain in the session
-	SessionBlockHeight int64  `json:"session_height"` // the session block height
 }
 
 // "ValidateHeader" - Validates the header of the session

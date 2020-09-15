@@ -25,6 +25,8 @@ and standard additions here would be better just to add to the Context struct
 
 //var _ Ctx = Context
 
+const UpgradeHeight = 7000
+
 type Context struct {
 	ctx           context.Context
 	ms            MultiStore
@@ -86,6 +88,7 @@ type Ctx interface {
 	CacheContext() (cc Context, writeCache func())
 	IsZero() bool
 	AppVersion() string
+	IsAfterUpgradeHeight() bool
 }
 
 // Proposed rename, not done to avoid API breakage
@@ -106,6 +109,9 @@ func (c Context) IsCheckTx() bool             { return c.checkTx }
 func (c Context) MinGasPrices() DecCoins      { return c.minGasPrice }
 func (c Context) EventManager() *EventManager { return c.eventManager }
 func (c Context) AppVersion() string          { return c.appVersion }
+func (c Context) IsAfterUpgradeHeight() bool {
+	return c.header.Height >= UpgradeHeight
+}
 
 // clone the header before returning
 func (c Context) BlockHeader() abci.Header {

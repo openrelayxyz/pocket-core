@@ -29,6 +29,7 @@ package module
 
 import (
 	"encoding/json"
+
 	"github.com/pokt-network/pocket-core/codec"
 	sdk "github.com/pokt-network/pocket-core/types"
 	abci "github.com/tendermint/tendermint/abci/types"
