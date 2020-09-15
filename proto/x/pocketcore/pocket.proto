@@ -20,7 +20,7 @@ message SessionEncodable {
 
 	SessionHeader sessionHeader = 1 [(gogoproto.jsontag)="header", (gogoproto.nullable)=false];
 	bytes sessionKey = 2 [(gogoproto.jsontag)="key", (gogoproto.casttype)="SessionKey"];
-	repeated x.nodes.ValidatorProto sessionNodes = 3 [(gogoproto.jsontag)="key", (gogoproto.nullable)=false, (gogoproto.castrepeated)="SessionNodesEncodable"];
+	repeated x.nodes.ValidatorProto sessionNodes = 3 [(gogoproto.jsontag)="nodes", (gogoproto.nullable)=false, (gogoproto.castrepeated)="SessionNodesEncodable"];
 }
 
 message MsgClaim {

@@ -29,7 +29,7 @@ message ModuleAccountEncodable {
 
 	BaseAccountEncodable base_account_encodable = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true, (gogoproto.moretags) = "yaml:\"base_account\""];
 	string name = 2 [(gogoproto.jsontag) = "name", (gogoproto.moretags) = "yaml:\"name\""];
-	repeated string permissions = 3 [(gogoproto.jsontag) = "name", (gogoproto.moretags) = "yaml:\"name\""];
+	repeated string permissions = 3 [(gogoproto.jsontag) = "permissions", (gogoproto.moretags) = "yaml:\"permissions\""];
 }
 
 // Fee Multiplier derfines a key value multiplier for the fee of the
