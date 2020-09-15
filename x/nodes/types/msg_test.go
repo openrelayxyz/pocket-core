@@ -22,7 +22,7 @@ func TestMsgBeginUnstake_GetSignBytes(t *testing.T) {
 	va := sdk.Address(pub.Address())
 
 	mesg := MsgBeginUnstake{
-		ValidatorAddress: va,
+		Address: va,
 	}
 
 	encodedmsg, _ := ModuleCdc.MarshalJSON(&mesg)
@@ -37,7 +37,7 @@ func TestMsgBeginUnstake_GetSignBytes(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgBeginUnstake{
-				ValidatorAddress: tt.fields.Address,
+				Address: tt.fields.Address,
 			}
 			if got := msg.GetSignBytes(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetSignBytes() = %s, want %s", got, tt.want)
@@ -59,7 +59,7 @@ func TestMsgBeginUnstake_GetSigners(t *testing.T) {
 	va := sdk.Address(pub.Address())
 
 	mesg := MsgBeginUnstake{
-		ValidatorAddress: va,
+		Address: va,
 	}
 
 	tests := []struct {
@@ -67,12 +67,12 @@ func TestMsgBeginUnstake_GetSigners(t *testing.T) {
 		fields fields
 		want   sdk.Address
 	}{
-		{"Test GetSigners", fields{va}, sdk.Address(mesg.ValidatorAddress)},
+		{"Test GetSigners", fields{va}, sdk.Address(mesg.Address)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgBeginUnstake{
-				ValidatorAddress: tt.fields.Address,
+				Address: tt.fields.Address,
 			}
 			if got := msg.GetSigner(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetSigners() = %v, want %v", got, tt.want)
@@ -103,7 +103,7 @@ func TestMsgBeginUnstake_Route(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgBeginUnstake{
-				ValidatorAddress: tt.fields.Address,
+				Address: tt.fields.Address,
 			}
 			if got := msg.Route(); got != tt.want {
 				t.Errorf("Route() = %v, want %v", got, tt.want)
@@ -134,7 +134,7 @@ func TestMsgBeginUnstake_Type(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgBeginUnstake{
-				ValidatorAddress: tt.fields.Address,
+				Address: tt.fields.Address,
 			}
 			if got := msg.Type(); got != tt.want {
 				t.Errorf("Type() = %v, want %v", got, tt.want)
@@ -166,7 +166,7 @@ func TestMsgBeginUnstake_ValidateBasic(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgBeginUnstake{
-				ValidatorAddress: tt.fields.Address,
+				Address: tt.fields.Address,
 			}
 			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ValidateBasic() = %v, want %v", got, tt.want)
@@ -690,7 +690,7 @@ func TestMsgUnjail_GetSignBytes(t *testing.T) {
 	va := sdk.Address(pub.Address())
 
 	mesg := MsgUnjail{
-		Address: va,
+		ValidatorAddr: va,
 	}
 
 	encmesg, _ := ModuleCdc.MarshalJSON(&mesg)
@@ -705,7 +705,7 @@ func TestMsgUnjail_GetSignBytes(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgUnjail{
-				Address: tt.fields.ValidatorAddr,
+				ValidatorAddr: tt.fields.ValidatorAddr,
 			}
 			if got := msg.GetSignBytes(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetSignBytes() = %v, want %v", got, tt.want)
@@ -736,7 +736,7 @@ func TestMsgUnjail_GetSigners(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgUnjail{
-				Address: tt.fields.ValidatorAddr,
+				ValidatorAddr: tt.fields.ValidatorAddr,
 			}
 			if got := msg.GetSigner(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetSigners() = %v, want %v", got, tt.want)
@@ -767,7 +767,7 @@ func TestMsgUnjail_Route(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgUnjail{
-				Address: tt.fields.ValidatorAddr,
+				ValidatorAddr: tt.fields.ValidatorAddr,
 			}
 			if got := msg.Route(); got != tt.want {
 				t.Errorf("Route() = %v, want %v", got, tt.want)
@@ -798,7 +798,7 @@ func TestMsgUnjail_Type(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgUnjail{
-				Address: tt.fields.ValidatorAddr,
+				ValidatorAddr: tt.fields.ValidatorAddr,
 			}
 			if got := msg.Type(); got != tt.want {
 				t.Errorf("Type() = %v, want %v", got, tt.want)
@@ -830,7 +830,7 @@ func TestMsgUnjail_ValidateBasic(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgUnjail{
-				Address: tt.fields.ValidatorAddr,
+				ValidatorAddr: tt.fields.ValidatorAddr,
 			}
 			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ValidateBasic() = %v, want %v", got, tt.want)
