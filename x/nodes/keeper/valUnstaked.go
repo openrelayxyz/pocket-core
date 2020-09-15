@@ -80,7 +80,7 @@ func (k Keeper) getAllUnstakingValidators(ctx sdk.Ctx) (validators []types.Valid
 		defer iterator.Close()
 		for ; iterator.Valid(); iterator.Next() {
 			var addrs sdk.Addresses
-			k.cdc.UnmarshalBinaryLengthPrefixed(iterator.Value(), &addrs)
+			_ = k.cdc.UnmarshalBinaryLengthPrefixed(iterator.Value(), &addrs)
 			for _, addr := range addrs.Arr {
 				validator, found := k.GetValidator(ctx, addr)
 				if !found {
@@ -98,7 +98,7 @@ func (k Keeper) getAllUnstakingValidators(ctx sdk.Ctx) (validators []types.Valid
 		defer iterator.Close()
 		for ; iterator.Valid(); iterator.Next() {
 			var addrs []sdk.Address
-			k.cdc.UnmarshalBinaryLengthPrefixed(iterator.Value(), &addrs)
+			_ = k.cdc.UnmarshalBinaryLengthPrefixed(iterator.Value(), &addrs)
 			for _, addr := range addrs {
 				validator, found := k.GetValidator(ctx, addr)
 				if !found {
@@ -122,7 +122,7 @@ func (k Keeper) getUnstakingValidators(ctx sdk.Ctx, unstakingTime time.Time) (va
 		if bz == nil {
 			return
 		}
-		k.cdc.UnmarshalBinaryLengthPrefixed(bz, &Addrs)
+		_ = k.cdc.UnmarshalBinaryLengthPrefixed(bz, &Addrs)
 		return Addrs.Arr
 	} else {
 		valAddrs = make([]sdk.Address, 0)
@@ -131,7 +131,7 @@ func (k Keeper) getUnstakingValidators(ctx sdk.Ctx, unstakingTime time.Time) (va
 		if bz == nil {
 			return
 		}
-		k.cdc.UnmarshalBinaryLengthPrefixed(bz, &valAddrs)
+		_ = k.cdc.UnmarshalBinaryLengthPrefixed(bz, &valAddrs)
 		return
 	}
 
@@ -145,7 +145,7 @@ func (k Keeper) setUnstakingValidators(ctx sdk.Ctx, unstakingTime time.Time, key
 		_ = store.Set(types.KeyForUnstakingValidators(unstakingTime), bz)
 	} else {
 		bz, _ := k.cdc.MarshalBinaryLengthPrefixed(keys)
-		store.Set(types.KeyForUnstakingValidators(unstakingTime), bz)
+		_ = store.Set(types.KeyForUnstakingValidators(unstakingTime), bz)
 	}
 
 }
@@ -170,11 +170,11 @@ func (k Keeper) getMatureValidators(ctx sdk.Ctx) (matureValsAddrs []sdk.Address)
 	for ; unstakingValsIterator.Valid(); unstakingValsIterator.Next() {
 		if ctx.IsAfterUpgradeHeight() {
 			var validators sdk.Addresses
-			k.cdc.UnmarshalBinaryLengthPrefixed(unstakingValsIterator.Value(), &validators)
+			_ = k.cdc.UnmarshalBinaryLengthPrefixed(unstakingValsIterator.Value(), &validators)
 			matureValsAddrs = append(matureValsAddrs, validators.Arr...)
 		} else {
 			var validators []sdk.Address
-			k.cdc.UnmarshalBinaryLengthPrefixed(unstakingValsIterator.Value(), &validators)
+			_ = k.cdc.UnmarshalBinaryLengthPrefixed(unstakingValsIterator.Value(), &validators)
 			matureValsAddrs = append(matureValsAddrs, validators...)
 		}
 
@@ -190,7 +190,7 @@ func (k Keeper) unstakeAllMatureValidators(ctx sdk.Ctx) {
 	for ; unstakingValidatorsIterator.Valid(); unstakingValidatorsIterator.Next() {
 		if ctx.IsAfterUpgradeHeight() {
 			var unstakingVals sdk.Addresses
-			k.cdc.UnmarshalBinaryLengthPrefixed(unstakingValidatorsIterator.Value(), &unstakingVals)
+			_ = k.cdc.UnmarshalBinaryLengthPrefixed(unstakingValidatorsIterator.Value(), &unstakingVals)
 			for _, valAddr := range unstakingVals.Arr {
 				val, found := k.GetValidator(ctx, valAddr)
 				if !found {
@@ -208,7 +208,7 @@ func (k Keeper) unstakeAllMatureValidators(ctx sdk.Ctx) {
 			_ = store.Delete(unstakingValidatorsIterator.Key())
 		} else {
 			var unstakingVals []sdk.Address
-			k.cdc.UnmarshalBinaryLengthPrefixed(unstakingValidatorsIterator.Value(), &unstakingVals)
+			_ = k.cdc.UnmarshalBinaryLengthPrefixed(unstakingValidatorsIterator.Value(), &unstakingVals)
 			for _, valAddr := range unstakingVals {
 				val, found := k.GetValidator(ctx, valAddr)
 				if !found {
@@ -223,7 +223,7 @@ func (k Keeper) unstakeAllMatureValidators(ctx sdk.Ctx) {
 				k.FinishUnstakingValidator(ctx, val)
 				k.DeleteValidator(ctx, valAddr)
 			}
-			store.Delete(unstakingValidatorsIterator.Key())
+			_ = store.Delete(unstakingValidatorsIterator.Key())
 		}
 
 	}

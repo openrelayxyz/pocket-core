@@ -18,7 +18,7 @@ func (k Keeper) GetSupply(ctx sdk.Ctx) (supply exported.SupplyI) {
 	}
 	supply, err := k.DecodeSupply(b)
 	if err != nil {
-		ctx.Logger().Error(fmt.Sprintf(err.Error()))
+		ctx.Logger().Error(fmt.Sprint(err.Error()))
 		return
 	}
 	return supply

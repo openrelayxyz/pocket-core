@@ -17,10 +17,10 @@ func (k Keeper) PrevStateValidatorsPower(ctx sdk.Ctx) (power sdk.Int) {
 		return sdk.ZeroInt()
 	}
 	if ctx.IsAfterUpgradeHeight() {
-		k.cdc.UnmarshalBinaryLengthPrefixed(b, &p)
+		_ = k.cdc.UnmarshalBinaryLengthPrefixed(b, &p)
 		return p.Int
 	} else {
-		k.cdc.UnmarshalBinaryLengthPrefixed(b, &power)
+		_ = k.cdc.UnmarshalBinaryLengthPrefixed(b, &power)
 		return power
 	}
 }
@@ -55,13 +55,13 @@ func (k Keeper) IterateAndExecuteOverPrevStateValsByPower(
 		addr := sdk.Address(iter.Key()[len(types.PrevStateValidatorsPowerKey):])
 		if ctx.IsAfterUpgradeHeight() {
 			var power types.Power
-			k.cdc.UnmarshalBinaryLengthPrefixed(iter.Value(), &power)
+			_ = k.cdc.UnmarshalBinaryLengthPrefixed(iter.Value(), &power)
 			if handler(addr, power.Value) {
 				break
 			}
 		} else {
 			var power int64
-			k.cdc.UnmarshalBinaryLengthPrefixed(iter.Value(), &power)
+			_ = k.cdc.UnmarshalBinaryLengthPrefixed(iter.Value(), &power)
 			if handler(addr, power) {
 				break
 			}
@@ -100,7 +100,7 @@ func (k Keeper) SetPrevStateValPower(ctx sdk.Ctx, addr sdk.Address, power int64)
 		_ = store.Set(types.KeyForValidatorPrevStateStateByPower(addr), bz)
 	} else {
 		bz, _ := k.cdc.MarshalBinaryLengthPrefixed(power)
-		store.Set(types.KeyForValidatorPrevStateStateByPower(addr), bz)
+		_ = store.Set(types.KeyForValidatorPrevStateStateByPower(addr), bz)
 	}
 }
 
