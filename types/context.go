@@ -3,7 +3,11 @@ package types
 import (
 	"context"
 	"errors"
+	"fmt"
+	"github.com/pokt-network/pocket-core/codec"
+	"github.com/tendermint/tendermint/crypto/merkle"
 	"github.com/tendermint/tendermint/store"
+	"reflect"
 	"time"
 
 	"github.com/gogo/protobuf/proto"
@@ -24,8 +28,6 @@ and standard additions here would be better just to add to the Context struct
 */
 
 //var _ Ctx = Context
-
-const UpgradeHeight = 7000
 
 type Context struct {
 	ctx           context.Context
@@ -88,7 +90,7 @@ type Ctx interface {
 	CacheContext() (cc Context, writeCache func())
 	IsZero() bool
 	AppVersion() string
-	IsAfterUpgradeHeight() bool
+	BlockHash(cdc *codec.Codec) ([]byte, error)
 }
 
 // Proposed rename, not done to avoid API breakage
@@ -109,14 +111,111 @@ func (c Context) IsCheckTx() bool             { return c.checkTx }
 func (c Context) MinGasPrices() DecCoins      { return c.minGasPrice }
 func (c Context) EventManager() *EventManager { return c.eventManager }
 func (c Context) AppVersion() string          { return c.appVersion }
-func (c Context) IsAfterUpgradeHeight() bool {
-	return c.header.Height >= UpgradeHeight
-}
 
 // clone the header before returning
 func (c Context) BlockHeader() abci.Header {
 	var msg = proto.Clone(&c.header).(*abci.Header)
 	return *msg
+}
+
+const blockHashError = "cannot get the block hash header"
+
+// clone the header before returning
+func (c Context) BlockHash(cdc *codec.Codec) ([]byte, error) {
+	if c.header.Equal(abci.Header{}) {
+		return nil, errors.New(blockHashError + ": the header is empty")
+	}
+	versionBz, err := cdcEncode(c.header.Version, cdc)
+	if err != nil {
+		return nil, fmt.Errorf("%s: header.version: %s", blockHashError, err.Error())
+	}
+	chainIDBz, err := cdcEncode(c.header.ChainID, cdc)
+	if err != nil {
+		return nil, fmt.Errorf("%s: header.chainID: %s", blockHashError, err.Error())
+	}
+	heightBz, err := cdcEncode(c.header.Height, cdc)
+	if err != nil {
+		return nil, fmt.Errorf("%s: header.height: %s", blockHashError, err.Error())
+	}
+	timeBz, err := cdcEncode(c.header.Time, cdc)
+	if err != nil {
+		return nil, fmt.Errorf("%s: header.time: %s", blockHashError, err.Error())
+	}
+	numTxBz, err := cdcEncode(c.header.NumTxs, cdc)
+	if err != nil {
+		return nil, fmt.Errorf("%s: header.NumTxs: %s", blockHashError, err.Error())
+	}
+	totalTxsBz, err := cdcEncode(c.header.TotalTxs, cdc)
+	if err != nil {
+		return nil, fmt.Errorf("%s: header.TotalTxs: %s", blockHashError, err.Error())
+	}
+	lastBlockIDsBz, err := cdcEncode(c.header.LastBlockId, cdc)
+	if err != nil {
+		return nil, fmt.Errorf("%s: header.LastBlockID: %s", blockHashError, err.Error())
+	}
+	lastCommitHashBz, err := cdcEncode(c.header.LastCommitHash, cdc)
+	if err != nil {
+		return nil, fmt.Errorf("%s: header.LastCommitHash: %s", blockHashError, err.Error())
+	}
+	dataHashBz, err := cdcEncode(c.header.DataHash, cdc)
+	if err != nil {
+		return nil, fmt.Errorf("%s: header.DataHash: %s", blockHashError, err.Error())
+	}
+	validatorsHashBz, err := cdcEncode(c.header.ValidatorsHash, cdc)
+	if err != nil {
+		return nil, fmt.Errorf("%s: header.ValidatorsHash: %s", blockHashError, err.Error())
+	}
+	nexValidatorsHashBz, err := cdcEncode(c.header.NextValidatorsHash, cdc)
+	if err != nil {
+		return nil, fmt.Errorf("%s: header.NextValidatorsHash: %s", blockHashError, err.Error())
+	}
+	consensusHashBz, err := cdcEncode(c.header.ConsensusHash, cdc)
+	if err != nil {
+		return nil, fmt.Errorf("%s: header.ConsensusHash: %s", blockHashError, err.Error())
+	}
+	appHashBz, err := cdcEncode(c.header.AppHash, cdc)
+	if err != nil {
+		return nil, fmt.Errorf("%s: header.AppHash: %s", blockHashError, err.Error())
+	}
+	lastResultHashBz, err := cdcEncode(c.header.LastResultsHash, cdc)
+	if err != nil {
+		return nil, fmt.Errorf("%s: header.LastResultHash: %s", blockHashError, err.Error())
+	}
+	evidenceHashBz, err := cdcEncode(c.header.EvidenceHash, cdc)
+	if err != nil {
+		return nil, fmt.Errorf("%s: header.EvidenceHash: %s", blockHashError, err.Error())
+	}
+	proposerAddressBz, err := cdcEncode(c.header.ProposerAddress, cdc)
+	if err != nil {
+		return nil, fmt.Errorf("%s: header.ProposerAddress: %s", blockHashError, err.Error())
+	}
+	return merkle.SimpleHashFromByteSlices([][]byte{
+		versionBz,
+		chainIDBz,
+		heightBz,
+		timeBz,
+		numTxBz,
+		totalTxsBz,
+		lastBlockIDsBz,
+		lastCommitHashBz,
+		dataHashBz,
+		validatorsHashBz,
+		nexValidatorsHashBz,
+		consensusHashBz,
+		appHashBz,
+		lastResultHashBz,
+		evidenceHashBz,
+		proposerAddressBz,
+	}), nil
+}
+
+// cdcEncode returns nil if the input is nil, otherwise returns
+// cdc.MustMarshalBinaryBare(item)
+func cdcEncode(item interface{}, cdc *codec.Codec) ([]byte, error) {
+	if item != nil && !IsTypedNil(item) && !IsEmpty(item) {
+		return cdc.MarshalBinaryBare(item)
+	}
+	return nil, nil
 }
 
 func (c Context) ConsensusParams() *abci.ConsensusParams {
@@ -166,7 +265,7 @@ func (c Context) PrevCtx(height int64) (Context, error) {
 		return Context{}, errors.New("block at height not found")
 	}
 	hash := blck.LastBlockID.Hash
-	if hash == nil {
+	if []byte(hash) == nil {
 		hash = blck.ConsensusHash
 	}
 	var header = abci.Header{
@@ -174,14 +273,16 @@ func (c Context) PrevCtx(height int64) (Context, error) {
 			Block: blck.Version.Block.Uint64(),
 			App:   blck.Version.App.Uint64(),
 		},
-		ChainID: blck.ChainID,
-		Height:  blck.Height,
-		Time:    blck.Time,
+		ChainID:  blck.ChainID,
+		Height:   blck.Height,
+		Time:     blck.Time,
+		NumTxs:   blck.NumTxs,
+		TotalTxs: blck.TotalTxs,
 		LastBlockId: abci.BlockID{
 			Hash: hash,
 			PartsHeader: abci.PartSetHeader{
 				Total: int32(blck.LastBlockID.PartsHeader.Total),
-				Hash:  blck.Hash(),
+				Hash:  blck.LastBlockID.PartsHeader.Hash,
 			},
 		},
 		LastCommitHash:     blck.LastCommitHash,
@@ -342,4 +443,25 @@ func (c Context) CacheContext() (cc Context, writeCache func()) {
 	cms := c.MultiStore().CacheMultiStore()
 	cc = c.WithMultiStore(cms).WithEventManager(NewEventManager())
 	return cc, cms.Write
+}
+
+func IsTypedNil(o interface{}) bool {
+	rv := reflect.ValueOf(o)
+	switch rv.Kind() {
+	case reflect.Chan, reflect.Func, reflect.Map, reflect.Ptr, reflect.Slice:
+		return rv.IsNil()
+	default:
+		return false
+	}
+}
+
+// Returns true if it has zero length.
+func IsEmpty(o interface{}) bool {
+	rv := reflect.ValueOf(o)
+	switch rv.Kind() {
+	case reflect.Array, reflect.Chan, reflect.Map, reflect.Slice, reflect.String:
+		return rv.Len() == 0
+	default:
+		return false
+	}
 }
