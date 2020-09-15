@@ -5,7 +5,7 @@ import "gogoproto/gogo.proto";
 
 option go_package = "github.com/pokt-network/pocket-core/x/nodes/types";
 
-message MsgStake {
+message MsgNodesStake {
 	option (gogoproto.equal) = true;
 	option (gogoproto.goproto_stringer) = true;
 	option (gogoproto.goproto_getters)  = false;

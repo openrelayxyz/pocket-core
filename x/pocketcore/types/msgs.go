@@ -90,6 +90,82 @@ func (msg MsgClaim) IsEmpty() bool {
 // ---------------------------------------------------------------------------------------------------------------------
 
 // "GetFee" - Returns the fee (sdk.Int) of the messgae type
+func (msg MsgProtoProof) GetFee() sdk.Int {
+	return sdk.NewInt(PocketFeeMap[msg.Type()])
+}
+
+// "Route" - Returns module router key
+func (msg MsgProtoProof) Route() string { return RouterKey }
+
+// "Type" - Returns message name
+func (msg MsgProtoProof) Type() string { return MsgProofName }
+
+// "ValidateBasic" - Storeless validity check for proof message
+func (msg MsgProtoProof) ValidateBasic() sdk.Error {
+	// verify valid number of levels for merkle proofs
+	if len(msg.MerkleProof.HashRanges) < 3 {
+		return NewInvalidLeafCousinProofsComboError(ModuleName)
+	}
+	// validate the target range
+	if !msg.MerkleProof.Target.isValidRange() {
+		return NewInvalidMerkleRangeError(ModuleName)
+	}
+	// validate the leaf
+	if err := msg.GetLeaf().ValidateBasic(); err != nil {
+		return err
+	}
+	if _, err := msg.EvidenceType.Byte(); err != nil {
+		return NewInvalidEvidenceErr(ModuleName)
+	}
+	return nil
+}
+
+// "GetSignBytes" - Encodes the message for signing
+func (msg MsgProtoProof) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// GetSigners defines whose signature is required
+func (msg MsgProtoProof) GetSigner() sdk.Address {
+	return msg.GetLeaf().GetSigner()
+}
+
+func (msg MsgProtoProof) GetLeaf() Proof {
+	return msg.Leaf.FromProto()
+}
+
+// Legacy Amino Msg Below
+//----------------------------------------------------------------------------------------------------------------------
+
+// "MsgProof" - Proves the previous claim by providing the merkle Proof and the leaf node
+type MsgProof struct {
+	MerkleProof  MerkleProof  `json:"merkle_proofs"` // the merkleProof needed to verify the proofs
+	Leaf         Proof        `json:"leaf"`          // the needed to verify the Proof
+	EvidenceType EvidenceType `json:"evidence_type"` // the type of evidence
+}
+
+func (msg MsgProof) Reset() {
+	panic("amino only msg")
+}
+
+func (msg MsgProof) String() string {
+	return fmt.Sprintf("MerkleProof: %s\nLeaf: %v\nEvidenceType: %d\n", msg.MerkleProof.String(), msg.Leaf, msg.EvidenceType)
+}
+
+func (msg MsgProof) ProtoMessage() {
+	panic("amino only msg")
+}
+
+func (msg MsgProof) ToProto() MsgProtoProof {
+	return MsgProtoProof{
+		MerkleProof:  msg.MerkleProof,
+		Leaf:         msg.Leaf.ToProto(),
+		EvidenceType: msg.EvidenceType,
+	}
+}
+
+// "GetFee" - Returns the fee (sdk.Int) of the messgae type
 func (msg MsgProof) GetFee() sdk.Int {
 	return sdk.NewInt(PocketFeeMap[msg.Type()])
 }
@@ -111,82 +187,6 @@ func (msg MsgProof) ValidateBasic() sdk.Error {
 		return NewInvalidMerkleRangeError(ModuleName)
 	}
 	// validate the leaf
-	if err := msg.GetLeaf().ValidateBasic(); err != nil {
-		return err
-	}
-	if _, err := msg.EvidenceType.Byte(); err != nil {
-		return NewInvalidEvidenceErr(ModuleName)
-	}
-	return nil
-}
-
-// "GetSignBytes" - Encodes the message for signing
-func (msg MsgProof) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
-}
-
-// GetSigners defines whose signature is required
-func (msg MsgProof) GetSigner() sdk.Address {
-	return msg.GetLeaf().GetSigner()
-}
-
-func (msg MsgProof) GetLeaf() Proof {
-	return msg.Leaf.FromProto()
-}
-
-// Legacy Amino Msg Below
-//----------------------------------------------------------------------------------------------------------------------
-
-// "LegacyMsgProof" - Proves the previous claim by providing the merkle Proof and the leaf node
-type LegacyMsgProof struct {
-	MerkleProof  MerkleProof  `json:"merkle_proofs"` // the merkleProof needed to verify the proofs
-	Leaf         Proof        `json:"leaf"`          // the needed to verify the Proof
-	EvidenceType EvidenceType `json:"evidence_type"` // the type of evidence
-}
-
-func (msg LegacyMsgProof) Reset() {
-	panic("amino only msg")
-}
-
-func (msg LegacyMsgProof) String() string {
-	return fmt.Sprintf("MerkleProof: %s\nLeaf: %v\nEvidenceType: %d\n", msg.MerkleProof.String(), msg.Leaf, msg.EvidenceType)
-}
-
-func (msg LegacyMsgProof) ProtoMessage() {
-	panic("amino only msg")
-}
-
-func (msg LegacyMsgProof) ToProto() MsgProof {
-	return MsgProof{
-		MerkleProof:  msg.MerkleProof,
-		Leaf:         msg.Leaf.ToProto(),
-		EvidenceType: msg.EvidenceType,
-	}
-}
-
-// "GetFee" - Returns the fee (sdk.Int) of the messgae type
-func (msg LegacyMsgProof) GetFee() sdk.Int {
-	return sdk.NewInt(PocketFeeMap[msg.Type()])
-}
-
-// "Route" - Returns module router key
-func (msg LegacyMsgProof) Route() string { return RouterKey }
-
-// "Type" - Returns message name
-func (msg LegacyMsgProof) Type() string { return MsgProofName }
-
-// "ValidateBasic" - Storeless validity check for proof message
-func (msg LegacyMsgProof) ValidateBasic() sdk.Error {
-	// verify valid number of levels for merkle proofs
-	if len(msg.MerkleProof.HashRanges) < 3 {
-		return NewInvalidLeafCousinProofsComboError(ModuleName)
-	}
-	// validate the target range
-	if !msg.MerkleProof.Target.isValidRange() {
-		return NewInvalidMerkleRangeError(ModuleName)
-	}
-	// validate the leaf
 	if err := msg.Leaf.ValidateBasic(); err != nil {
 		return err
 	}
@@ -197,11 +197,11 @@ func (msg LegacyMsgProof) ValidateBasic() sdk.Error {
 }
 
 // "GetSignBytes" - Encodes the message for signing
-func (msg LegacyMsgProof) GetSignBytes() []byte {
+func (msg MsgProof) GetSignBytes() []byte {
 	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners defines whose signature is required
-func (msg LegacyMsgProof) GetSigner() sdk.Address {
+func (msg MsgProof) GetSigner() sdk.Address {
 	return msg.Leaf.GetSigner()
 }

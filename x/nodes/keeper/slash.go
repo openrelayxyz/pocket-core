@@ -211,7 +211,7 @@ func (k Keeper) handleValidatorSignature(ctx sdk.Ctx, addr sdk.Address, power in
 	}
 	// reset the validator signing info every blocks window
 	if ctx.BlockHeight()%k.SignedBlocksWindow(ctx) == 0 {
-		signInfo.Reset()
+		signInfo.ResetSigningInfo()
 		// clear the validator missed at
 		k.clearValidatorMissed(ctx, addr)
 	}

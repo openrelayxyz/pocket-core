@@ -12,7 +12,7 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 	return func(ctx sdk.Ctx, msg sdk.LegacyMsg) sdk.Result {
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
 		switch msg := msg.(type) {
-		case *types.MsgStake:
+		case *types.MsgNodeStake:
 			return handleStake(ctx, *msg, k)
 		case *types.MsgBeginUnstake:
 			return handleMsgBeginUnstake(ctx, *msg, k)
@@ -20,7 +20,7 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 			return handleMsgUnjail(ctx, *msg, k)
 		case *types.MsgSend:
 			return handleMsgSend(ctx, *msg, k)
-		case types.MsgStake:
+		case types.MsgNodeStake:
 			return handleStake(ctx, msg, k)
 		case types.MsgBeginUnstake:
 			return handleMsgBeginUnstake(ctx, msg, k)
@@ -28,7 +28,7 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 			return handleMsgUnjail(ctx, msg, k)
 		case types.MsgSend:
 			return handleMsgSend(ctx, msg, k)
-		case types.LegacyMsgStake:
+		case types.MsgStake:
 			return handleLegacyMsgStake(ctx, msg, k)
 		default:
 			errMsg := fmt.Sprintf("unrecognized staking message type: %T", msg)
@@ -37,7 +37,7 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 	}
 }
 
-func handleStake(ctx sdk.Ctx, msg types.MsgStake, k keeper.Keeper) sdk.Result {
+func handleStake(ctx sdk.Ctx, msg types.MsgNodeStake, k keeper.Keeper) sdk.Result {
 	pk, er := crypto.NewPublicKey(msg.Publickey)
 	if er != nil {
 		return sdk.ErrInvalidPubKey(er.Error()).Result()
@@ -134,9 +134,9 @@ func handleMsgSend(ctx sdk.Ctx, msg types.MsgSend, k keeper.Keeper) sdk.Result {
 	)
 	return sdk.Result{Events: ctx.EventManager().Events()}
 }
-func handleLegacyMsgStake(ctx sdk.Ctx, msg types.LegacyMsgStake, k keeper.Keeper) sdk.Result {
+func handleLegacyMsgStake(ctx sdk.Ctx, msg types.MsgStake, k keeper.Keeper) sdk.Result {
 	if !ctx.IsAfterUpgradeHeight() {
 		return handleStake(ctx, msg.ToProto(), k)
 	}
-	return sdk.ErrInternal("cannot execute a legacy msg: MsgStake after upgrade height").Result()
+	return sdk.ErrInternal("cannot execute a legacy msg: MsgNodeStake after upgrade height").Result()
 }

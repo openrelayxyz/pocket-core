@@ -146,22 +146,22 @@ func (m *MsgClaim) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgClaim proto.InternalMessageInfo
 
-type MsgProof struct {
+type MsgProtoProof struct {
 	MerkleProof  MerkleProof  `protobuf:"bytes,1,opt,name=merkleProof,proto3" json:"merkle_proofs"`
 	Leaf         ProofI       `protobuf:"bytes,2,opt,name=leaf,proto3" json:"leaf"`
 	EvidenceType EvidenceType `protobuf:"varint,3,opt,name=evidenceType,proto3,casttype=EvidenceType" json:"evidence_type"`
 }
 
-func (m *MsgProof) Reset()         { *m = MsgProof{} }
-func (m *MsgProof) String() string { return proto.CompactTextString(m) }
-func (*MsgProof) ProtoMessage()    {}
-func (*MsgProof) Descriptor() ([]byte, []int) {
+func (m *MsgProtoProof) Reset()         { *m = MsgProtoProof{} }
+func (m *MsgProtoProof) String() string { return proto.CompactTextString(m) }
+func (*MsgProtoProof) ProtoMessage()    {}
+func (*MsgProtoProof) Descriptor() ([]byte, []int) {
 	return fileDescriptor_fd7cbfa14fd73888, []int{3}
 }
-func (m *MsgProof) XXX_Unmarshal(b []byte) error {
+func (m *MsgProtoProof) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgProof) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgProtoProof) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
 		return xxx_messageInfo_MsgProof.Marshal(b, m, deterministic)
 	} else {
@@ -173,13 +173,13 @@ func (m *MsgProof) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return b[:n], nil
 	}
 }
-func (m *MsgProof) XXX_Merge(src proto.Message) {
+func (m *MsgProtoProof) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_MsgProof.Merge(m, src)
 }
-func (m *MsgProof) XXX_Size() int {
+func (m *MsgProtoProof) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgProof) XXX_DiscardUnknown() {
+func (m *MsgProtoProof) XXX_DiscardUnknown() {
 	xxx_messageInfo_MsgProof.DiscardUnknown(m)
 }
 
@@ -606,7 +606,7 @@ func init() {
 	proto.RegisterType((*SessionHeader)(nil), "x.pocketcore.SessionHeader")
 	proto.RegisterType((*SessionEncodable)(nil), "x.pocketcore.SessionEncodable")
 	proto.RegisterType((*MsgClaim)(nil), "x.pocketcore.MsgClaim")
-	proto.RegisterType((*MsgProof)(nil), "x.pocketcore.MsgProof")
+	proto.RegisterType((*MsgProtoProof)(nil), "x.pocketcore.MsgProtoProof")
 	proto.RegisterType((*ProofI)(nil), "x.pocketcore.ProofI")
 	proto.RegisterType((*EvidenceEncodable)(nil), "x.pocketcore.EvidenceEncodable")
 	proto.RegisterType((*RelayProof)(nil), "x.pocketcore.RelayProof")
@@ -869,7 +869,7 @@ func (m *MsgClaim) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgProof) Marshal() (dAtA []byte, err error) {
+func (m *MsgProtoProof) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -879,12 +879,12 @@ func (m *MsgProof) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgProof) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgProtoProof) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgProof) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgProtoProof) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1483,7 +1483,7 @@ func (m *MsgClaim) Size() (n int) {
 	return n
 }
 
-func (m *MsgProof) Size() (n int) {
+func (m *MsgProtoProof) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -2218,7 +2218,7 @@ func (m *MsgClaim) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgProof) Unmarshal(dAtA []byte) error {
+func (m *MsgProtoProof) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2241,10 +2241,10 @@ func (m *MsgProof) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgProof: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgProtoProof: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgProof: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgProtoProof: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:

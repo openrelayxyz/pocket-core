@@ -28,7 +28,7 @@ func ClaimTx(kp crypto.PrivateKey, cliCtx util.CLIContext, txBuilder auth.TxBuil
 // "ProofTx" - A transaction to prove the claim that was previously sent (Merkle Proofs and leaf/cousin)
 func ProofTx(cliCtx util.CLIContext, txBuilder auth.TxBuilder, merkleProof types.MerkleProof, leafNode types.Proof, evidenceType types.EvidenceType) (*sdk.TxResponse, error) {
 	if cliCtx.Codec.IsAfterUpgrade() {
-		msg := types.MsgProof{
+		msg := types.MsgProtoProof{
 			MerkleProof:  merkleProof,
 			Leaf:         leafNode.ToProto(),
 			EvidenceType: evidenceType,
@@ -43,7 +43,7 @@ func ProofTx(cliCtx util.CLIContext, txBuilder auth.TxBuilder, merkleProof types
 }
 
 func LegacyProofTx(cliCtx util.CLIContext, txBuilder auth.TxBuilder, merkleProof types.MerkleProof, leafNode types.Proof, evidenceType types.EvidenceType) (*sdk.TxResponse, error) {
-	msg := types.LegacyMsgProof{
+	msg := types.MsgProof{
 		MerkleProof:  merkleProof,
 		Leaf:         leafNode,
 		EvidenceType: evidenceType,

@@ -8,11 +8,11 @@ import (
 
 // ensure Msg interface compliance at compile time
 var (
-	_ sdk.Msg = &MsgStake{}
+	_ sdk.Msg = &MsgNodeStake{}
 	_ sdk.Msg = &MsgBeginUnstake{}
 	_ sdk.Msg = &MsgUnjail{}
 	_ sdk.Msg = &MsgSend{}
-	_ sdk.Msg = &LegacyMsgStake{}
+	_ sdk.Msg = &MsgStake{}
 )
 
 const (
@@ -25,7 +25,7 @@ const (
 //----------------------------------------------------------------------------------------------------------------------
 
 // GetSigners retrun address(es) that must sign over msg.GetSignBytes()
-func (msg MsgStake) GetSigner() sdk.Address {
+func (msg MsgNodeStake) GetSigner() sdk.Address {
 	pubkey, err := crypto.NewPublicKey(msg.Publickey)
 	if err != nil {
 		return sdk.Address{}
@@ -34,13 +34,13 @@ func (msg MsgStake) GetSigner() sdk.Address {
 }
 
 // GetSignBytes returns the message bytes to sign over.
-func (msg MsgStake) GetSignBytes() []byte {
+func (msg MsgNodeStake) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
 // ValidateBasic quick validity check, stateless
-func (msg MsgStake) ValidateBasic() sdk.Error {
+func (msg MsgNodeStake) ValidateBasic() sdk.Error {
 	if msg.Publickey == "" {
 		return ErrNilValidatorAddr(DefaultCodespace)
 	}
@@ -63,13 +63,13 @@ func (msg MsgStake) ValidateBasic() sdk.Error {
 }
 
 // Route provides router key for msg
-func (msg MsgStake) Route() string { return RouterKey }
+func (msg MsgNodeStake) Route() string { return RouterKey }
 
 // Type provides msg name
-func (msg MsgStake) Type() string { return MsgStakeName }
+func (msg MsgNodeStake) Type() string { return MsgStakeName }
 
 // GetFee get fee for msg
-func (msg MsgStake) GetFee() sdk.Int {
+func (msg MsgNodeStake) GetFee() sdk.Int {
 	return sdk.NewInt(NodeFeeMap[msg.Type()])
 }
 
@@ -177,26 +177,26 @@ func (msg MsgSend) GetFee() sdk.Int {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-// LegacyMsgStake - struct for staking transactions
-type LegacyMsgStake struct {
+// MsgStake - struct for staking transactions
+type MsgStake struct {
 	PublicKey  crypto.PublicKey `json:"public_key" yaml:"public_key"`
 	Chains     []string         `json:"chains" yaml:"chains"`
 	Value      sdk.Int          `json:"value" yaml:"value"`
 	ServiceURL string           `json:"service_url" yaml:"service_url"`
 } // GetSigners retrun address(es) that must sign over msg.GetSignBytes()
 
-func (msg LegacyMsgStake) GetSigner() sdk.Address {
+func (msg MsgStake) GetSigner() sdk.Address {
 	return sdk.Address(msg.PublicKey.Address())
 }
 
 // GetSignBytes returns the message bytes to sign over.
-func (msg LegacyMsgStake) GetSignBytes() []byte {
+func (msg MsgStake) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
 // ValidateBasic quick validity check, stateless
-func (msg LegacyMsgStake) ValidateBasic() sdk.Error {
+func (msg MsgStake) ValidateBasic() sdk.Error {
 	if msg.PublicKey == nil || msg.PublicKey.RawString() == "" {
 		return ErrNilValidatorAddr(DefaultCodespace)
 	}
@@ -219,30 +219,30 @@ func (msg LegacyMsgStake) ValidateBasic() sdk.Error {
 }
 
 // Route provides router key for msg
-func (msg LegacyMsgStake) Route() string { return RouterKey }
+func (msg MsgStake) Route() string { return RouterKey }
 
 // Type provides msg name
-func (msg LegacyMsgStake) Type() string { return MsgStakeName }
+func (msg MsgStake) Type() string { return MsgStakeName }
 
 // GetFee get fee for msg
-func (msg LegacyMsgStake) GetFee() sdk.Int {
+func (msg MsgStake) GetFee() sdk.Int {
 	return sdk.NewInt(NodeFeeMap[msg.Type()])
 }
-func (msg LegacyMsgStake) Reset() {
+func (msg MsgStake) Reset() {
 	panic("amino only msg")
 }
 
-func (msg LegacyMsgStake) String() string {
+func (msg MsgStake) String() string {
 	return fmt.Sprintf("Public Key: %s\nChains: %s\nValue: %s\n", msg.PublicKey.RawString(), msg.Chains, msg.Value.String())
 }
 
-func (msg LegacyMsgStake) ProtoMessage() {
+func (msg MsgStake) ProtoMessage() {
 	panic("amino only msg")
 }
 
 // GetFee get fee for msg
-func (msg LegacyMsgStake) ToProto() MsgStake {
-	return MsgStake{
+func (msg MsgStake) ToProto() MsgNodeStake {
+	return MsgNodeStake{
 		Publickey:  msg.PublicKey.RawString(),
 		Chains:     msg.Chains,
 		Value:      msg.Value,

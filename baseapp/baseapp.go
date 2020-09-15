@@ -954,7 +954,9 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 			}
 		}
 	}()
-
+	if ctx.BlockHeight() == 25 {
+		fmt.Println(25)
+	}
 	var msgs = tx.GetMsg()
 	if err := validateBasicTxMsgs(msgs); err != nil {
 		return err.Result()

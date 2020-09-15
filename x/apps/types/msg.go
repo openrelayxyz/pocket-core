@@ -9,7 +9,7 @@ import (
 
 // ensure Msg interface compliance at compile time
 var (
-	_ sdk.Msg = &MsgAppStake{}
+	_ sdk.Msg = &MsgApplicationStake{}
 	_ sdk.Msg = &MsgBeginAppUnstake{}
 	_ sdk.Msg = &MsgAppUnjail{}
 )
@@ -23,7 +23,7 @@ const (
 //----------------------------------------------------------------------------------------------------------------------
 
 // GetSigners return address(es) that must sign over msg.GetSignBytes()
-func (msg MsgAppStake) GetSigner() sdk.Address {
+func (msg MsgApplicationStake) GetSigner() sdk.Address {
 	res, err := crypto.NewPublicKey(msg.PubKey)
 	if err != nil {
 		return nil
@@ -32,13 +32,13 @@ func (msg MsgAppStake) GetSigner() sdk.Address {
 }
 
 // GetSignBytes returns the message bytes to sign over.
-func (msg MsgAppStake) GetSignBytes() []byte {
+func (msg MsgApplicationStake) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(&msg)
 	return sdk.MustSortJSON(bz)
 }
 
 // ValidateBasic quick validity check for staking an application
-func (msg MsgAppStake) ValidateBasic() sdk.Error {
+func (msg MsgApplicationStake) ValidateBasic() sdk.Error {
 	if msg.PubKey == "" {
 		return ErrNilApplicationAddr(DefaultCodespace)
 	}
@@ -64,13 +64,13 @@ func (msg MsgAppStake) ValidateBasic() sdk.Error {
 }
 
 // Route provides router key for msg
-func (msg MsgAppStake) Route() string { return RouterKey }
+func (msg MsgApplicationStake) Route() string { return RouterKey }
 
 // Type provides msg name
-func (msg MsgAppStake) Type() string { return MsgAppStakeName }
+func (msg MsgApplicationStake) Type() string { return MsgAppStakeName }
 
 // GetFee get fee for msg
-func (msg MsgAppStake) GetFee() sdk.Int {
+func (msg MsgApplicationStake) GetFee() sdk.Int {
 	return sdk.NewInt(AppFeeMap[msg.Type()])
 }
 
@@ -139,38 +139,38 @@ func (msg MsgAppUnjail) ValidateBasic() sdk.Error {
 
 // Legacy Apps Amino Msg below
 // ---------------------------------------------------------------------------------------------------------------------
-// MsgAppStake - struct for staking transactions
-type LegacyMsgAppStake struct {
+// MsgApplicationStake - struct for staking transactions
+type MsgAppStake struct {
 	PubKey crypto.PublicKey `json:"pubkey" yaml:"pubkey"`
 	Chains []string         `json:"chains" yaml:"chains"`
 	Value  sdk.Int          `json:"value" yaml:"value"`
 }
 
-func (msg LegacyMsgAppStake) Reset() {
+func (msg MsgAppStake) Reset() {
 	panic("amino only msg")
 }
 
-func (msg LegacyMsgAppStake) String() string {
+func (msg MsgAppStake) String() string {
 	return fmt.Sprintf("Public Key: %s\nChains: %s\nValue: %s\n", msg.PubKey.RawString(), msg.Chains, msg.Value.String())
 }
 
-func (msg LegacyMsgAppStake) ProtoMessage() {
+func (msg MsgAppStake) ProtoMessage() {
 	panic("amino only msg")
 }
 
 // GetSigners return address(es) that must sign over msg.GetSignBytes()
-func (msg LegacyMsgAppStake) GetSigner() sdk.Address {
+func (msg MsgAppStake) GetSigner() sdk.Address {
 	return sdk.Address(msg.PubKey.Address())
 }
 
 // GetSignBytes returns the message bytes to sign over.
-func (msg LegacyMsgAppStake) GetSignBytes() []byte {
+func (msg MsgAppStake) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
 // ValidateBasic quick validity check for staking an application
-func (msg LegacyMsgAppStake) ValidateBasic() sdk.Error {
+func (msg MsgAppStake) ValidateBasic() sdk.Error {
 	if msg.PubKey == nil || msg.PubKey.RawString() == "" {
 		return ErrNilApplicationAddr(DefaultCodespace)
 	}
@@ -189,18 +189,18 @@ func (msg LegacyMsgAppStake) ValidateBasic() sdk.Error {
 }
 
 // Route provides router key for msg
-func (msg LegacyMsgAppStake) Route() string { return RouterKey }
+func (msg MsgAppStake) Route() string { return RouterKey }
 
 // Type provides msg name
-func (msg LegacyMsgAppStake) Type() string { return MsgAppStakeName }
+func (msg MsgAppStake) Type() string { return MsgAppStakeName }
 
 // GetFee get fee for msg
-func (msg LegacyMsgAppStake) GetFee() sdk.Int {
+func (msg MsgAppStake) GetFee() sdk.Int {
 	return sdk.NewInt(AppFeeMap[msg.Type()])
 }
 
-func (msg LegacyMsgAppStake) ToProto() MsgAppStake {
-	return MsgAppStake{
+func (msg MsgAppStake) ToProto() MsgApplicationStake {
+	return MsgApplicationStake{
 		PubKey: msg.PubKey.RawString(),
 		Chains: msg.Chains,
 		Value:  msg.Value,

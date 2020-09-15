@@ -27,7 +27,7 @@ func (i ValidatorSigningInfo) String() string {
   Start Height:          %d
   Entropy Offset:        %d
   Jailed Until:          %v
-  Missed Blocks Counter: %d
+  Missed Blocks Counter: %dp
   Jailed Blocks Counter: %d`,
 		i.Address, i.StartHeight, i.Index, i.JailedUntil, i.MissedBlocksCounter, i.JailedBlocksCounter)
 }

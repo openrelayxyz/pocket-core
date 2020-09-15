@@ -8,25 +8,25 @@ import (
 	"github.com/pokt-network/pocket-core/x/apps/types"
 )
 
-var _ sdk.Msg = types.LegacyMsgAppStake{}
+var _ sdk.Msg = types.MsgAppStake{}
 
 func NewHandler(k keeper.Keeper) sdk.Handler {
 	return func(ctx sdk.Ctx, msg sdk.LegacyMsg) sdk.Result {
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
 		switch msg := msg.(type) {
-		case *types.MsgAppStake:
+		case *types.MsgApplicationStake:
 			return handleStake(ctx, *msg, k)
 		case *types.MsgBeginAppUnstake:
 			return handleMsgBeginUnstake(ctx, *msg, k)
 		case *types.MsgAppUnjail:
 			return handleMsgUnjail(ctx, *msg, k)
-		case types.MsgAppStake:
+		case types.MsgApplicationStake:
 			return handleStake(ctx, msg, k)
 		case types.MsgBeginAppUnstake:
 			return handleMsgBeginUnstake(ctx, msg, k)
 		case types.MsgAppUnjail:
 			return handleMsgUnjail(ctx, msg, k)
-		case types.LegacyMsgAppStake:
+		case types.MsgAppStake:
 			return handleLegacyMsgStake(ctx, msg, k)
 		default:
 			errMsg := fmt.Sprintf("unrecognized staking message type: %T", msg)
@@ -35,7 +35,7 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 	}
 }
 
-func handleStake(ctx sdk.Ctx, msg types.MsgAppStake, k keeper.Keeper) sdk.Result {
+func handleStake(ctx sdk.Ctx, msg types.MsgApplicationStake, k keeper.Keeper) sdk.Result {
 	pk, er := crypto.NewPublicKey(msg.PubKey)
 	if er != nil {
 		return sdk.ErrInvalidPubKey(er.Error()).Result()
@@ -124,7 +124,7 @@ func handleMsgUnjail(ctx sdk.Ctx, msg types.MsgAppUnjail, k keeper.Keeper) sdk.R
 }
 
 // Legacy Apps Amino Handlers below
-func handleLegacyMsgStake(ctx sdk.Ctx, msg types.LegacyMsgAppStake, k keeper.Keeper) sdk.Result {
+func handleLegacyMsgStake(ctx sdk.Ctx, msg types.MsgAppStake, k keeper.Keeper) sdk.Result {
 	if !ctx.IsAfterUpgradeHeight() {
 		return handleStake(ctx, msg.ToProto(), k)
 	}

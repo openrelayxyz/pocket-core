@@ -13,7 +13,7 @@ import (
 	sdk "github.com/pokt-network/pocket-core/types"
 )
 
-var msgAppStake MsgAppStake
+var msgAppStake MsgApplicationStake
 var msgBeginAppUnstake MsgBeginAppUnstake
 var msgAppUnjail MsgAppUnjail
 var pk crypto.Ed25519PublicKey
@@ -31,7 +31,7 @@ func init() {
 	RegisterCodec(cdc)
 	crypto.RegisterAmino(cdc.AminoCodec().Amino)
 
-	msgAppStake = MsgAppStake{
+	msgAppStake = MsgApplicationStake{
 		PubKey: pub.RawString(),
 		Chains: []string{"0001"},
 		Value:  sdk.NewInt(10),
@@ -42,7 +42,7 @@ func init() {
 
 func TestMsgApp_GetSigners(t *testing.T) {
 	type args struct {
-		msgAppStake MsgAppStake
+		msgAppStake MsgApplicationStake
 	}
 	tests := []struct {
 		name string
@@ -65,7 +65,7 @@ func TestMsgApp_GetSigners(t *testing.T) {
 }
 func TestMsgApp_GetSignBytes(t *testing.T) {
 	type args struct {
-		msgAppStake MsgAppStake
+		msgAppStake MsgApplicationStake
 	}
 	res, err := ModuleCdc.MarshalJSON(&msgAppStake)
 	res = sdk.MustSortJSON(res)
@@ -93,7 +93,7 @@ func TestMsgApp_GetSignBytes(t *testing.T) {
 }
 func TestMsgApp_Route(t *testing.T) {
 	type args struct {
-		msgAppStake MsgAppStake
+		msgAppStake MsgApplicationStake
 	}
 	tests := []struct {
 		name string
@@ -116,7 +116,7 @@ func TestMsgApp_Route(t *testing.T) {
 }
 func TestMsgApp_Type(t *testing.T) {
 	type args struct {
-		msgAppStake MsgAppStake
+		msgAppStake MsgApplicationStake
 	}
 	tests := []struct {
 		name string
@@ -139,7 +139,7 @@ func TestMsgApp_Type(t *testing.T) {
 }
 func TestMsgApp_ValidateBasic(t *testing.T) {
 	type args struct {
-		msgAppStake MsgAppStake
+		msgAppStake MsgApplicationStake
 	}
 	tests := []struct {
 		name string
@@ -149,22 +149,22 @@ func TestMsgApp_ValidateBasic(t *testing.T) {
 	}{
 		{
 			name: "errs if no Address",
-			args: args{MsgAppStake{}},
+			args: args{MsgApplicationStake{}},
 			want: ErrNilApplicationAddr(DefaultCodespace),
 		},
 		{
 			name: "errs if no stake lower than zero",
-			args: args{MsgAppStake{PubKey: msgAppStake.PubKey, Value: sdk.NewInt(-1)}},
+			args: args{MsgApplicationStake{PubKey: msgAppStake.PubKey, Value: sdk.NewInt(-1)}},
 			want: ErrBadStakeAmount(DefaultCodespace),
 		},
 		{
 			name: "errs if no native chains supported",
-			args: args{MsgAppStake{PubKey: msgAppStake.PubKey, Value: sdk.NewInt(1), Chains: []string{}}},
+			args: args{MsgApplicationStake{PubKey: msgAppStake.PubKey, Value: sdk.NewInt(1), Chains: []string{}}},
 			want: ErrNoChains(DefaultCodespace),
 		},
 		{
 			name: "returns err",
-			args: args{MsgAppStake{PubKey: msgAppStake.PubKey, Value: msgAppStake.Value, Chains: []string{"aaaaaa"}}},
+			args: args{MsgApplicationStake{PubKey: msgAppStake.PubKey, Value: msgAppStake.Value, Chains: []string{"aaaaaa"}}},
 			want: ErrInvalidNetworkIdentifier("application", fmt.Errorf("net id length is > 2")),
 		},
 		{

@@ -25,23 +25,23 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-type MsgStake struct {
+type MsgNodeStake struct {
 	Publickey  string                                        `protobuf:"bytes,1,opt,name=Publickey,proto3" json:"public_key" yaml:"public_key"`
 	Chains     []string                                      `protobuf:"bytes,2,rep,name=Chains,proto3" json:"chains" yaml:"chains"`
 	Value      github_com_pokt_network_pocket_core_types.Int `protobuf:"bytes,3,opt,name=value,proto3,customtype=github.com/pokt-network/pocket-core/types.Int" json:"value" yaml:"value"`
 	ServiceUrl string                                        `protobuf:"bytes,4,opt,name=ServiceUrl,proto3" json:"service_url" yaml:"service_url"`
 }
 
-func (m *MsgStake) Reset()         { *m = MsgStake{} }
-func (m *MsgStake) String() string { return proto.CompactTextString(m) }
-func (*MsgStake) ProtoMessage()    {}
-func (*MsgStake) Descriptor() ([]byte, []int) {
+func (m *MsgNodeStake) Reset()         { *m = MsgNodeStake{} }
+func (m *MsgNodeStake) String() string { return proto.CompactTextString(m) }
+func (*MsgNodeStake) ProtoMessage()    {}
+func (*MsgNodeStake) Descriptor() ([]byte, []int) {
 	return fileDescriptor_0de9b62fa75e413f, []int{0}
 }
-func (m *MsgStake) XXX_Unmarshal(b []byte) error {
+func (m *MsgNodeStake) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgStake) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgNodeStake) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
 		return xxx_messageInfo_MsgStake.Marshal(b, m, deterministic)
 	} else {
@@ -53,13 +53,13 @@ func (m *MsgStake) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return b[:n], nil
 	}
 }
-func (m *MsgStake) XXX_Merge(src proto.Message) {
+func (m *MsgNodeStake) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_MsgStake.Merge(m, src)
 }
-func (m *MsgStake) XXX_Size() int {
+func (m *MsgNodeStake) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgStake) XXX_DiscardUnknown() {
+func (m *MsgNodeStake) XXX_DiscardUnknown() {
 	xxx_messageInfo_MsgStake.DiscardUnknown(m)
 }
 
@@ -193,7 +193,7 @@ func (m *MsgSend) GetToAddress() github_com_pokt_network_pocket_core_types.Addre
 }
 
 func init() {
-	proto.RegisterType((*MsgStake)(nil), "x.nodes.MsgStake")
+	proto.RegisterType((*MsgNodeStake)(nil), "x.nodes.MsgNodeStake")
 	proto.RegisterType((*MsgBeginUnstake)(nil), "x.nodes.MsgBeginUnstake")
 	proto.RegisterType((*MsgUnjail)(nil), "x.nodes.MsgUnjail")
 	proto.RegisterType((*MsgSend)(nil), "x.nodes.MsgSend")
@@ -239,14 +239,14 @@ var fileDescriptor_0de9b62fa75e413f = []byte{
 	0x00, 0x00, 0xff, 0xff, 0x5a, 0x6d, 0x76, 0xe6, 0x80, 0x04, 0x00, 0x00,
 }
 
-func (this *MsgStake) Equal(that interface{}) bool {
+func (this *MsgNodeStake) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*MsgStake)
+	that1, ok := that.(*MsgNodeStake)
 	if !ok {
-		that2, ok := that.(MsgStake)
+		that2, ok := that.(MsgNodeStake)
 		if ok {
 			that1 = &that2
 		} else {
@@ -355,7 +355,7 @@ func (this *MsgSend) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (m *MsgStake) Marshal() (dAtA []byte, err error) {
+func (m *MsgNodeStake) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -365,12 +365,12 @@ func (m *MsgStake) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgStake) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgNodeStake) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgStake) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgNodeStake) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -529,7 +529,7 @@ func encodeVarintMsg(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func (m *MsgStake) Size() (n int) {
+func (m *MsgNodeStake) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -605,7 +605,7 @@ func sovMsg(x uint64) (n int) {
 func sozMsg(x uint64) (n int) {
 	return sovMsg(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (m *MsgStake) Unmarshal(dAtA []byte) error {
+func (m *MsgNodeStake) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -628,10 +628,10 @@ func (m *MsgStake) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgStake: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgNodeStake: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgStake: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgNodeStake: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:

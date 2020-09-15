@@ -151,17 +151,17 @@ func TestMsgClaim_GetSignBytes(t *testing.T) {
 }
 
 func TestMsgProof_Route(t *testing.T) {
-	assert.Equal(t, MsgProof{}.Route(), RouterKey)
+	assert.Equal(t, MsgProtoProof{}.Route(), RouterKey)
 }
 
 func TestMsgProof_Type(t *testing.T) {
-	assert.Equal(t, MsgProof{}.Type(), MsgProofName)
+	assert.Equal(t, MsgProtoProof{}.Type(), MsgProofName)
 }
 
 func TestMsgProof_GetSigners(t *testing.T) {
 	pk := getRandomPubKey()
 	addr := types.Address(pk.Address())
-	signers := MsgProof{
+	signers := MsgProtoProof{
 		MerkleProof: MerkleProof{},
 		Leaf: RelayProof{
 			Entropy:            0,
@@ -187,7 +187,7 @@ func TestMsgProof_ValidateBasic(t *testing.T) {
 	hash2 := merkleHash([]byte("fake2"))
 	hash3 := merkleHash([]byte("fake3"))
 	hash4 := merkleHash([]byte("fake4"))
-	validProofMessage := MsgProof{
+	validProofMessage := MsgProtoProof{
 		MerkleProof: MerkleProof{
 			TargetIndex: 0,
 			HashRanges: []HashRange{
@@ -264,7 +264,7 @@ func TestMsgProof_ValidateBasic(t *testing.T) {
 	invalidProofMsgSignature.Leaf = vprLeaf.ToProto()
 	tests := []struct {
 		name     string
-		msg      MsgProof
+		msg      MsgProtoProof
 		hasError bool
 	}{
 		{
@@ -313,6 +313,6 @@ func TestMsgProof_ValidateBasic(t *testing.T) {
 
 func TestMsgProof_GetSignBytes(t *testing.T) {
 	assert.NotPanics(t, func() {
-		MsgProof{}.GetSignBytes()
+		MsgProtoProof{}.GetSignBytes()
 	})
 }

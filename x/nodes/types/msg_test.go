@@ -437,7 +437,7 @@ func TestMsgStake_GetSignBytes(t *testing.T) {
 	value := sdk.OneInt()
 	surl := "www.pokt.network"
 
-	mesg := MsgStake{
+	mesg := MsgNodeStake{
 		Publickey:  pub.RawString(),
 		Chains:     chains,
 		Value:      value,
@@ -460,7 +460,7 @@ func TestMsgStake_GetSignBytes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			msg := MsgStake{
+			msg := MsgNodeStake{
 				Publickey:  tt.fields.PubKey.RawString(),
 				Chains:     tt.fields.Chains,
 				Value:      tt.fields.Value,
@@ -505,7 +505,7 @@ func TestMsgStake_GetSigners(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			msg := MsgStake{
+			msg := MsgNodeStake{
 				Publickey:  tt.fields.PubKey.RawString(),
 				Chains:     tt.fields.Chains,
 				Value:      tt.fields.Value,
@@ -550,7 +550,7 @@ func TestMsgStake_Route(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			msg := MsgStake{
+			msg := MsgNodeStake{
 				Publickey:  tt.fields.PubKey.RawString(),
 				Chains:     tt.fields.Chains,
 				Value:      tt.fields.Value,
@@ -595,7 +595,7 @@ func TestMsgStake_Type(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			msg := MsgStake{
+			msg := MsgNodeStake{
 				Publickey:  tt.fields.PubKey.RawString(),
 				Chains:     tt.fields.Chains,
 				Value:      tt.fields.Value,
@@ -664,7 +664,7 @@ func TestMsgStake_ValidateBasic(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			msg := MsgStake{
+			msg := MsgNodeStake{
 				Publickey:  tt.fields.PubKey.RawString(),
 				Chains:     tt.fields.Chains,
 				Value:      tt.fields.Value,

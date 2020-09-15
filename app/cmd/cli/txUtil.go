@@ -83,7 +83,7 @@ func StakeNode(chains []string, serviceURL, fromAddr, passphrase, chainID string
 	if err != nil {
 		return nil, err
 	}
-	msg := nodeTypes.MsgStake{
+	msg := nodeTypes.MsgNodeStake{
 		Publickey:  kp.PublicKey.RawString(),
 		Chains:     chains,
 		Value:      amount,
@@ -180,7 +180,7 @@ func StakeApp(chains []string, fromAddr, passphrase, chainID string, amount sdk.
 	if amount.LTE(sdk.NewInt(0)) {
 		return nil, sdk.ErrInternal("must stake above zero")
 	}
-	msg := appsType.MsgAppStake{
+	msg := appsType.MsgApplicationStake{
 		PubKey: kp.PublicKey.String(),
 		Chains: chains,
 		Value:  amount,

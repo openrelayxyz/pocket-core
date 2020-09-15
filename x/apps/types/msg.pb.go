@@ -25,22 +25,22 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-type MsgAppStake struct {
+type MsgApplicationStake struct {
 	PubKey string                                        `protobuf:"bytes,1,opt,name=pub_key,json=pubKey,proto3" json:"pubkey" yaml:"pubkey"`
 	Chains []string                                      `protobuf:"bytes,2,rep,name=chains,proto3" json:"chains" yaml:"chains"`
 	Value  github_com_pokt_network_pocket_core_types.Int `protobuf:"bytes,3,opt,name=value,proto3,customtype=github.com/pokt-network/pocket-core/types.Int" json:"value" yaml:"value"`
 }
 
-func (m *MsgAppStake) Reset()         { *m = MsgAppStake{} }
-func (m *MsgAppStake) String() string { return proto.CompactTextString(m) }
-func (*MsgAppStake) ProtoMessage()    {}
-func (*MsgAppStake) Descriptor() ([]byte, []int) {
+func (m *MsgApplicationStake) Reset()         { *m = MsgApplicationStake{} }
+func (m *MsgApplicationStake) String() string { return proto.CompactTextString(m) }
+func (*MsgApplicationStake) ProtoMessage()    {}
+func (*MsgApplicationStake) Descriptor() ([]byte, []int) {
 	return fileDescriptor_fd58e5eb64f87460, []int{0}
 }
-func (m *MsgAppStake) XXX_Unmarshal(b []byte) error {
+func (m *MsgApplicationStake) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgAppStake) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgApplicationStake) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
 		return xxx_messageInfo_MsgAppStake.Marshal(b, m, deterministic)
 	} else {
@@ -52,13 +52,13 @@ func (m *MsgAppStake) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) 
 		return b[:n], nil
 	}
 }
-func (m *MsgAppStake) XXX_Merge(src proto.Message) {
+func (m *MsgApplicationStake) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_MsgAppStake.Merge(m, src)
 }
-func (m *MsgAppStake) XXX_Size() int {
+func (m *MsgApplicationStake) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgAppStake) XXX_DiscardUnknown() {
+func (m *MsgApplicationStake) XXX_DiscardUnknown() {
 	xxx_messageInfo_MsgAppStake.DiscardUnknown(m)
 }
 
@@ -139,7 +139,7 @@ func (m *MsgAppUnjail) XXX_DiscardUnknown() {
 var xxx_messageInfo_MsgAppUnjail proto.InternalMessageInfo
 
 func init() {
-	proto.RegisterType((*MsgAppStake)(nil), "x.apps.MsgAppStake")
+	proto.RegisterType((*MsgApplicationStake)(nil), "x.apps.MsgApplicationStake")
 	proto.RegisterType((*MsgBeginAppUnstake)(nil), "x.apps.MsgBeginAppUnstake")
 	proto.RegisterType((*MsgAppUnjail)(nil), "x.apps.MsgAppUnjail")
 }
@@ -174,14 +174,14 @@ var fileDescriptor_fd58e5eb64f87460 = []byte{
 	0xeb, 0x3f, 0x06, 0x00, 0x00, 0xff, 0xff, 0x07, 0x26, 0x90, 0x4a, 0x93, 0x02, 0x00, 0x00,
 }
 
-func (this *MsgAppStake) Equal(that interface{}) bool {
+func (this *MsgApplicationStake) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*MsgAppStake)
+	that1, ok := that.(*MsgApplicationStake)
 	if !ok {
-		that2, ok := that.(MsgAppStake)
+		that2, ok := that.(MsgApplicationStake)
 		if ok {
 			that1 = &that2
 		} else {
@@ -257,7 +257,7 @@ func (this *MsgAppUnjail) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (m *MsgAppStake) Marshal() (dAtA []byte, err error) {
+func (m *MsgApplicationStake) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -267,12 +267,12 @@ func (m *MsgAppStake) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgAppStake) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgApplicationStake) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgAppStake) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgApplicationStake) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -377,7 +377,7 @@ func encodeVarintMsg(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func (m *MsgAppStake) Size() (n int) {
+func (m *MsgApplicationStake) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -430,7 +430,7 @@ func sovMsg(x uint64) (n int) {
 func sozMsg(x uint64) (n int) {
 	return sovMsg(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (m *MsgAppStake) Unmarshal(dAtA []byte) error {
+func (m *MsgApplicationStake) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -453,10 +453,10 @@ func (m *MsgAppStake) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgAppStake: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgApplicationStake: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgAppStake: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgApplicationStake: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:

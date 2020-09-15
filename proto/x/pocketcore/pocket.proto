@@ -34,7 +34,7 @@ message MsgClaim {
 	int64 expirationHeight = 6 [(gogoproto.jsontag) = "expiration_height"];
 }
 
-message MsgProof {
+message MsgProtoProof {
 	option (gogoproto.goproto_getters) = false;
 
 	MerkleProof merkleProof = 1 [(gogoproto.jsontag) = "merkle_proofs", (gogoproto.nullable) = false];

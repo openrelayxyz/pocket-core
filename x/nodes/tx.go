@@ -16,7 +16,7 @@ import (
 func StakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, chains []string, serviceURL string, amount sdk.Int, kp keys.KeyPair, passphrase string) (*sdk.TxResponse, error) {
 	if cdc.IsAfterUpgrade() {
 		fromAddr := kp.GetAddress()
-		msg := types.MsgStake{
+		msg := types.MsgNodeStake{
 			Publickey:  kp.PublicKey.RawString(),
 			Value:      amount,
 			ServiceUrl: serviceURL, // url where pocket service api is hosted
@@ -126,7 +126,7 @@ func newTx(cdc *codec.Codec, msg sdk.Msg, fromAddr sdk.Address, tmNode client.Cl
 
 func LegacyStakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, chains []string, serviceURL string, amount sdk.Int, kp keys.KeyPair, passphrase string) (*sdk.TxResponse, error) {
 	fromAddr := kp.GetAddress()
-	msg := types.LegacyMsgStake{
+	msg := types.MsgStake{
 		PublicKey:  kp.PublicKey,
 		Value:      amount,
 		ServiceURL: serviceURL, // url where pocket service api is hosted
