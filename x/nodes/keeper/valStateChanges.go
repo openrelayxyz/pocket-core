@@ -416,7 +416,7 @@ func (k Keeper) IncrementJailedValidators(ctx sdk.Ctx) {
 
 // ValidateUnjailMessage - Check unjail message
 func (k Keeper) ValidateUnjailMessage(ctx sdk.Ctx, msg types.MsgUnjail) (addr sdk.Address, err sdk.Error) {
-	validator, found := k.GetValidator(ctx, msg.Address)
+	validator, found := k.GetValidator(ctx, msg.ValidatorAddr)
 	if !found {
 		return nil, types.ErrNoValidatorForAddress(k.Codespace())
 	}
