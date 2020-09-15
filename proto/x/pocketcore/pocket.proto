@@ -29,7 +29,7 @@ message MsgClaim {
 	SessionHeader sessionHeader = 1 [(gogoproto.jsontag) = "header", (gogoproto.nullable)= false];
 	HashRange merkleRoot = 2 [(gogoproto.jsontag) = "merkle_root", (gogoproto.nullable)= false];
 	int64 totalProofs = 3 [(gogoproto.jsontag) = "total_proofs"];
-	bytes fromAddress = 4 [(gogoproto.jsontag) = "header", (gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.Address"];
+	bytes fromAddress = 4 [(gogoproto.jsontag) = "from_address", (gogoproto.casttype) = "github.com/pokt-network/pocket-core/types.Address"];
 	int32 evidenceType = 5 [(gogoproto.jsontag) = "evidence_type", (gogoproto.casttype) = "EvidenceType"];
 	int64 expirationHeight = 6 [(gogoproto.jsontag) = "expiration_height"];
 }
