@@ -104,7 +104,7 @@ func handleMsgBeginUnstake(ctx sdk.Ctx, msg types.MsgBeginUnstake, k keeper.Keep
 // Validators must submit a transaction to unjail itself after todo
 // having been jailed (and thus unstaked) for downtime
 func handleMsgUnjail(ctx sdk.Ctx, msg types.MsgUnjail, k keeper.Keeper) sdk.Result {
-	ctx.Logger().Info("Unjail Message received from " + msg.Address.String())
+	ctx.Logger().Info("Unjail Message received from " + msg.ValidatorAddr.String())
 	addr, err := k.ValidateUnjailMessage(ctx, msg)
 	if err != nil {
 		return err.Result()
@@ -114,7 +114,7 @@ func handleMsgUnjail(ctx sdk.Ctx, msg types.MsgUnjail, k keeper.Keeper) sdk.Resu
 		sdk.Event(sdk.NewEvent(
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
-			sdk.NewAttribute(sdk.AttributeKeySender, msg.Address.String()),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.ValidatorAddr.String()),
 		)),
 	)
 	return sdk.Result{Events: ctx.EventManager().Events()}
