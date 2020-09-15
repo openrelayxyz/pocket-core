@@ -20,8 +20,8 @@ func init() {
 // RegisterCodec registers concrete types on the codec
 func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterStructure(MsgClaim{}, "pocketcore/claim")
-	cdc.RegisterStructure(MsgProtoProof{}, "pocketcore/proof")
-	cdc.RegisterStructure(MsgProof{}, "pocketcore/Legacyproof")
+	cdc.RegisterStructure(MsgProtoProof{}, "pocketcore/protoProof")
+	cdc.RegisterStructure(MsgProof{}, "pocketcore/proof")
 	cdc.RegisterStructure(Relay{}, "pocketcore/relay")
 	cdc.RegisterStructure(Session{}, "pocketcore/session")
 	cdc.RegisterStructure(RelayResponse{}, "pocketcore/relay_response")
