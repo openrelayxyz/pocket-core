@@ -137,7 +137,7 @@ func UnjailNode(fromAddr, passphrase, chainID string, fees int64) (*rpc.SendRawT
 		return nil, err
 	}
 	msg := nodeTypes.MsgUnjail{
-		Address: fa,
+		ValidatorAddr: fa,
 	}
 	kb, err := app.GetKeybase()
 	if err != nil {
