@@ -72,10 +72,10 @@ func handleStake(ctx sdk.Ctx, msg types.MsgNodeStake, k keeper.Keeper) sdk.Resul
 }
 
 func handleMsgBeginUnstake(ctx sdk.Ctx, msg types.MsgBeginUnstake, k keeper.Keeper) sdk.Result {
-	ctx.Logger().Info("Begin Unstaking Message received from " + msg.ValidatorAddress.String())
+	ctx.Logger().Info("Begin Unstaking Message received from " + msg.Address.String())
 	// move coins from the msg.Address account to a (self-delegation) delegator account
 	// the validator account and global shares are updated within here
-	validator, found := k.GetValidator(ctx, msg.ValidatorAddress)
+	validator, found := k.GetValidator(ctx, msg.Address)
 	if !found {
 		return types.ErrNoValidatorFound(k.Codespace()).Result()
 	}
@@ -90,12 +90,12 @@ func handleMsgBeginUnstake(ctx sdk.Ctx, msg types.MsgBeginUnstake, k keeper.Keep
 		sdk.NewEvent(
 			types.EventTypeWaitingToBeginUnstaking,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
-			sdk.NewAttribute(sdk.AttributeKeySender, msg.ValidatorAddress.String()),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Address.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
-			sdk.NewAttribute(sdk.AttributeKeySender, msg.ValidatorAddress.String()),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Address.String()),
 		),
 	})
 	return sdk.Result{Events: ctx.EventManager().Events()}

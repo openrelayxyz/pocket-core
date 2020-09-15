@@ -110,7 +110,7 @@ func UnstakeNode(fromAddr, passphrase, chainID string, fees int64) (*rpc.SendRaw
 		return nil, err
 	}
 	msg := nodeTypes.MsgBeginUnstake{
-		ValidatorAddress: fa,
+		Address: fa,
 	}
 	kb, err := app.GetKeybase()
 	if err != nil {

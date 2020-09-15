@@ -77,7 +77,7 @@ func (msg MsgNodeStake) GetFee() sdk.Int {
 
 // GetSigners return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgBeginUnstake) GetSigner() sdk.Address {
-	return msg.ValidatorAddress
+	return msg.Address
 }
 
 // GetSignBytes returns the message bytes to sign over.
@@ -88,7 +88,7 @@ func (msg MsgBeginUnstake) GetSignBytes() []byte {
 
 // ValidateBasic quick validity check, stateless
 func (msg MsgBeginUnstake) ValidateBasic() sdk.Error {
-	if msg.ValidatorAddress.Empty() {
+	if msg.Address.Empty() {
 		return ErrNilValidatorAddr(DefaultCodespace)
 	}
 	return nil
