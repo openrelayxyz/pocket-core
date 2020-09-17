@@ -43,7 +43,8 @@ func (k Keeper) EncodeSupply(supply exported.SupplyI) ([]byte, error) {
 	var bz []byte
 	var err error
 	if k.cdc.IsAfterUpgrade() {
-		bz, err = k.cdc.ProtoMarshalBinaryLengthPrefixed(supply.(*types.Supply))
+		ps := supply.(types.Supply)
+		bz, err = k.cdc.ProtoMarshalBinaryLengthPrefixed(&ps)
 	} else {
 		bz, err = k.cdc.LegacyMarshalBinaryLengthPrefixed(supply) // TODO only kept this way for backwards compatibility.. test if breaks when using supply.(*Supply)
 	}
@@ -52,6 +53,6 @@ func (k Keeper) EncodeSupply(supply exported.SupplyI) ([]byte, error) {
 
 func (k Keeper) DecodeSupply(bz []byte) (exported.SupplyI, error) {
 	var supply types.Supply
-	err := k.cdc.LegacyUnmarshalBinaryLengthPrefixed(bz, &supply)
+	err := k.cdc.UnmarshalBinaryLengthPrefixed(bz, &supply)
 	return supply, err
 }

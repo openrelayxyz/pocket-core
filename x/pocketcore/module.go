@@ -87,6 +87,7 @@ func (am AppModule) NewQuerierHandler() sdk.Querier {
 
 // "BeginBlock" - Functionality that is called at the beginning of (every) block
 func (am AppModule) BeginBlock(ctx sdk.Ctx, req abci.RequestBeginBlock) {
+	am.keeper.UpgradeCodec(ctx)
 	if am.keeper.IsSessionBlock(ctx) && ctx.BlockHeight() != 1 {
 		go func() {
 			// use this sleep timer to bypass the beginBlock lock over transactions
@@ -105,7 +106,6 @@ func (am AppModule) BeginBlock(ctx sdk.Ctx, req abci.RequestBeginBlock) {
 	}()
 	// delete the expired claims
 	am.keeper.DeleteExpiredClaims(ctx)
-	am.keeper.UpgradeCodec(ctx)
 }
 
 // "EndBlock" - Functionality that is called at the end of (every) block

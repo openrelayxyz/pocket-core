@@ -62,7 +62,7 @@ func (k Keeper) UpdateTendermintValidators(ctx sdk.Ctx) (updates []abci.Validato
 			i := sdk.IntProto{
 				Int: sdk.NewInt(curStatePower),
 			}
-			curStatePowerBytes, err = k.cdc.MarshalBinaryLengthPrefixed(i)
+			curStatePowerBytes, err = k.cdc.MarshalBinaryLengthPrefixed(&i)
 			if err != nil {
 				panic(err)
 			}

@@ -12,7 +12,7 @@ import (
 func QueryACL(cdc *codec.Codec, tmNode rpcclient.Client, height int64) (acl types.ACL, err error) {
 	cliCtx := util.NewCLIContext(tmNode, nil, "").WithCodec(cdc).WithHeight(height)
 	params := types.QueryACLParams{}
-	bz, err := cdc.MarshalBinaryBare(params)
+	bz, err := cdc.LegacyMarshalBinaryBare(params)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func QueryDAOOwner(cdc *codec.Codec, tmNode rpcclient.Client, height int64) (dao
 func QueryDAO(cdc *codec.Codec, tmNode rpcclient.Client, height int64) (daoCoins sdk.Int, err error) {
 	cliCtx := util.NewCLIContext(tmNode, nil, "").WithCodec(cdc).WithHeight(height)
 	params := types.QueryDAOParams{}
-	bz, err := cdc.MarshalBinaryBare(params)
+	bz, err := cdc.LegacyMarshalBinaryBare(params)
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
@@ -60,7 +60,7 @@ func QueryDAO(cdc *codec.Codec, tmNode rpcclient.Client, height int64) (daoCoins
 func QueryUpgrade(cdc *codec.Codec, tmNode rpcclient.Client, height int64) (upgrade types.Upgrade, err error) {
 	cliCtx := util.NewCLIContext(tmNode, nil, "").WithCodec(cdc).WithHeight(height)
 	params := types.QueryUpgradeParams{}
-	bz, err := cdc.MarshalBinaryBare(params)
+	bz, err := cdc.LegacyMarshalBinaryBare(params)
 	if err != nil {
 		return upgrade, err
 	}

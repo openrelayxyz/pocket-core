@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"github.com/pokt-network/pocket-core/x/auth/types"
 	"reflect"
 	"testing"
 
@@ -57,5 +58,10 @@ func TestKeeper_GetAccount(t *testing.T) {
 	ctx, accs, keeper := createTestInput(t, false)
 	acc := keeper.GetAccount(ctx, accs[0].GetAddress())
 	assert.NotNil(t, acc)
-	assert.Equal(t, accs[0], acc)
+	if ctx.IsAfterUpgradeHeight() {
+		v := accs[0].(*types.BaseAccount).ToProto()
+		assert.Equal(t, &v, acc)
+	} else {
+		assert.Equal(t, accs[0], acc)
+	}
 }

@@ -94,13 +94,22 @@ func Tx(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 	}
-	rpcResponse := ResultTxToRPC(res)
-	s, er := json.MarshalIndent(rpcResponse, "", "  ")
-	if er != nil {
-		WriteErrorResponse(w, 400, er.Error())
-		return
+	if app.Codec().IsAfterUpgrade() {
+		s, er := json.MarshalIndent(res, "", "  ")
+		if er != nil {
+			WriteErrorResponse(w, 400, er.Error())
+			return
+		}
+		WriteJSONResponse(w, string(s), r.URL.Path, r.Host)
+	} else {
+		rpcResponse := ResultTxToRPC(res)
+		s, er := json.MarshalIndent(rpcResponse, "", "  ")
+		if er != nil {
+			WriteErrorResponse(w, 400, er.Error())
+			return
+		}
+		WriteJSONResponse(w, string(s), r.URL.Path, r.Host)
 	}
-	WriteJSONResponse(w, string(s), r.URL.Path, r.Host)
 }
 
 // Result of searching for txs
@@ -168,13 +177,23 @@ func AccountTxs(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		WriteErrorResponse(w, 400, err.Error())
 		return
 	}
-	rpcResponse := ResultTxSearchToRPC(res)
-	s, er := json.MarshalIndent(rpcResponse, "", "  ")
-	if er != nil {
-		WriteErrorResponse(w, 400, er.Error())
-		return
+	if app.Codec().IsAfterUpgrade() {
+		s, er := json.MarshalIndent(res, "", "  ")
+		if er != nil {
+			WriteErrorResponse(w, 400, er.Error())
+			return
+		}
+		WriteJSONResponse(w, string(s), r.URL.Path, r.Host)
+	} else {
+		rpcResponse := ResultTxSearchToRPC(res)
+		s, er := json.MarshalIndent(rpcResponse, "", "  ")
+		if er != nil {
+			WriteErrorResponse(w, 400, er.Error())
+			return
+		}
+		WriteJSONResponse(w, string(s), r.URL.Path, r.Host)
 	}
-	WriteJSONResponse(w, string(s), r.URL.Path, r.Host)
+
 }
 
 func BlockTxs(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -187,13 +206,22 @@ func BlockTxs(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if err != nil {
 		WriteErrorResponse(w, 400, err.Error())
 	}
-	rpcResponse := ResultTxSearchToRPC(res)
-	s, er := json.MarshalIndent(rpcResponse, "", "  ")
-	if er != nil {
-		WriteErrorResponse(w, 400, er.Error())
-		return
+	if app.Codec().IsAfterUpgrade() {
+		s, er := json.MarshalIndent(res, "", "  ")
+		if er != nil {
+			WriteErrorResponse(w, 400, er.Error())
+			return
+		}
+		WriteJSONResponse(w, string(s), r.URL.Path, r.Host)
+	} else {
+		rpcResponse := ResultTxSearchToRPC(res)
+		s, er := json.MarshalIndent(rpcResponse, "", "  ")
+		if er != nil {
+			WriteErrorResponse(w, 400, er.Error())
+			return
+		}
+		WriteJSONResponse(w, string(s), r.URL.Path, r.Host)
 	}
-	WriteJSONResponse(w, string(s), r.URL.Path, r.Host)
 }
 
 type queryHeightResponse struct {

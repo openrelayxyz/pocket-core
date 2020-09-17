@@ -239,6 +239,16 @@ func (ctx CLIContext) GetAccountWithHeight(addr sdk.Address) (exported.Account, 
 	if err != nil {
 		return nil, height, err
 	}
+	if auth.ModuleCdc.IsAfterUpgrade() {
+		var acce, macce = types.BaseAccountEncodable{}, types.ModuleAccountEncodable{}
+		if err := auth.ModuleCdc.UnmarshalJSON(res, &acce); err != nil {
+			if err := auth.ModuleCdc.UnmarshalJSON(res, &macce); err != nil {
+				return nil, height, err
+			}
+			return &macce, height, nil
+		}
+		return &acce, height, nil
+	}
 	var account exported.Account
 	if err := auth.ModuleCdc.UnmarshalJSON(res, &account); err != nil {
 		return nil, height, err

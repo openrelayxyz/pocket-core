@@ -431,8 +431,17 @@ func TestQueryAccount(t *testing.T) {
 	res, err := queryAccount(context, req, keeper)
 	assert.Nil(t, err)
 	assert.NotNil(t, res)
-	var acc auth.BaseAccount
-	er := keeper.cdc.UnmarshalJSON(res, &acc)
-	assert.Nil(t, er)
-	assert.Equal(t, accs[0], &acc)
+	if keeper.cdc.IsAfterUpgrade() {
+		var acc auth.BaseAccountEncodable
+		er := keeper.cdc.UnmarshalJSON(res, &acc)
+		assert.Nil(t, er)
+		ap := accs[0].(*auth.BaseAccount).ToProto()
+		assert.Equal(t, &ap, &acc)
+	} else {
+		var acc auth.BaseAccount
+		er := keeper.cdc.UnmarshalJSON(res, &acc)
+		assert.Nil(t, er)
+		assert.Equal(t, accs[0], &acc)
+	}
+
 }

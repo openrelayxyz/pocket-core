@@ -74,6 +74,10 @@ func (msg MsgClaim) ValidateBasic() sdk.Error {
 
 // "GetSignBytes" - Encodes the message for signing
 func (msg MsgClaim) GetSignBytes() []byte {
+	if ModuleCdc.IsAfterUpgrade() {
+		bz := ModuleCdc.MustMarshalJSON(&msg)
+		return sdk.MustSortJSON(bz)
+	}
 	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
@@ -122,6 +126,10 @@ func (msg MsgProtoProof) ValidateBasic() sdk.Error {
 
 // "GetSignBytes" - Encodes the message for signing
 func (msg MsgProtoProof) GetSignBytes() []byte {
+	if ModuleCdc.IsAfterUpgrade() {
+		bz := ModuleCdc.MustMarshalJSON(&msg)
+		return sdk.MustSortJSON(bz)
+	}
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
@@ -198,6 +206,10 @@ func (msg MsgProof) ValidateBasic() sdk.Error {
 
 // "GetSignBytes" - Encodes the message for signing
 func (msg MsgProof) GetSignBytes() []byte {
+	if ModuleCdc.IsAfterUpgrade() {
+		bz := ModuleCdc.MustMarshalJSON(&msg)
+		return sdk.MustSortJSON(bz)
+	}
 	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 

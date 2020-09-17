@@ -180,6 +180,10 @@ func (k Keeper) EncodeAccount(acc exported.Account) ([]byte, error) {
 		return k.EncodeBaseAccount(a)
 	case *types.ModuleAccount:
 		return k.EncodeModuleAccount(a)
+	case *types.ModuleAccountEncodable:
+		return k.EncodeModuleAccountEncodable(a)
+	case *types.BaseAccountEncodable:
+		return k.EncodeBaseAccountEncodable(a)
 	}
 	return nil, fmt.Errorf("could not encode account: unrecognized account type")
 }
@@ -192,6 +196,9 @@ func (k Keeper) EncodeBaseAccount(acc *types.BaseAccount) ([]byte, error) {
 		return k.cdc.LegacyMarshalBinaryBare(&acc)
 	}
 }
+func (k Keeper) EncodeBaseAccountEncodable(acce *types.BaseAccountEncodable) ([]byte, error) {
+	return k.cdc.MarshalBinaryBare(acce)
+}
 
 // "DecodeModuleAccount" - encodes account interface into protobuf
 func (k Keeper) EncodeModuleAccount(macc *types.ModuleAccount) ([]byte, error) {
@@ -201,6 +208,11 @@ func (k Keeper) EncodeModuleAccount(macc *types.ModuleAccount) ([]byte, error) {
 	} else {
 		return k.cdc.LegacyMarshalBinaryBare(&macc)
 	}
+}
+
+// "DecodeModuleAccount" - encodes account interface into protobuf
+func (k Keeper) EncodeModuleAccountEncodable(macce *types.ModuleAccountEncodable) ([]byte, error) {
+	return k.cdc.MarshalBinaryBare(macce)
 }
 
 // "DecodeAccount" - decodes into account interface

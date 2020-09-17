@@ -16,6 +16,7 @@ import (
 // First TM block is at height 1, so state updates applied from
 // genesis.json are in block 0.
 func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, supplyKeeper types.AuthKeeper, data types.GenesisState) (res []abci.ValidatorUpdate) {
+	keeper.UpgradeCodec(ctx)
 	// zero out a staked tokens variable for traking the number of staked tokens
 	stakedTokens := sdk.ZeroInt()
 	// set the context

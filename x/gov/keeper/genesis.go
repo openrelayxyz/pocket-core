@@ -11,6 +11,7 @@ import (
 
 // InitGenesis - Init store state from genesis data
 func (k Keeper) InitGenesis(ctx sdk.Ctx, data types.GenesisState) []abci.ValidatorUpdate {
+	k.UpgradeCodec(ctx)
 	k.SetParams(ctx, data.Params)
 	// validate acl
 	if err := k.GetACL(ctx).Validate(k.GetAllParamNames(ctx)); err != nil {

@@ -201,7 +201,7 @@ func (bldr TxBuilder) SignMultisigTransaction(address sdk.Address, keys []crypto
 
 }
 
-func (bldr TxBuilder) BuildAndSignMultisigTransaction(address sdk.Address, publicKey crypto.PublicKeyMultiSig, m sdk.Msg, passphrase string, fees int64) (signedTx []byte, err error) {
+func (bldr TxBuilder) BuildAndSignMultisigTransaction(address sdk.Address, publicKey crypto.PublicKeyMultiSig, m sdk.Msg, passphrase string, fees int64, afterUpdate bool) (signedTx []byte, err error) {
 	if bldr.keybase == nil {
 		return nil, errors.New("cant build and sign transaciton: the keybase is nil")
 	}
@@ -228,7 +228,7 @@ func (bldr TxBuilder) BuildAndSignMultisigTransaction(address sdk.Address, publi
 		Signature: ms.Marshal(),
 	}
 	// create a new standard transaction object
-	tx := NewTx(m, fee, sig, "", entropy, false)
+	tx := NewTx(m, fee, sig, "", entropy, afterUpdate)
 	// encode it using the default encoder
 	return bldr.TxEncoder()(tx)
 }

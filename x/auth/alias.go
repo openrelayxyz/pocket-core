@@ -38,15 +38,16 @@ var (
 
 // Type exported types
 type (
-	GenesisState       = types.GenesisState
-	Keeper             = keeper.Keeper
-	Account            = exported.Account
-	BaseAccount        = types.BaseAccount
-	Params             = types.Params
-	QueryAccountParams = types.QueryAccountParams
-	StdTx              = types.StdTx
-	LegacyStdTx        = types.LegacyStdTx
-	StdSignDoc         = types.StdSignDoc
-	StdSignature       = types.StdSignature
-	TxBuilder          = types.TxBuilder
+	GenesisState         = types.GenesisState
+	Keeper               = keeper.Keeper
+	Account              = exported.Account
+	BaseAccount          = types.BaseAccount
+	BaseAccountEncodable = types.BaseAccountEncodable
+	Params               = types.Params
+	QueryAccountParams   = types.QueryAccountParams
+	StdTx                = types.StdTx
+	LegacyStdTx          = types.LegacyStdTx
+	StdSignDoc           = types.StdSignDoc
+	StdSignature         = types.StdSignature
+	TxBuilder            = types.TxBuilder
 )

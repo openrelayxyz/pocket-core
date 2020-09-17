@@ -110,8 +110,8 @@ func (am AppModule) ExportGenesis(ctx sdk.Ctx) json.RawMessage {
 
 // module begin-block
 func (am AppModule) BeginBlock(ctx sdk.Ctx, req abci.RequestBeginBlock) {
-	keeper.BeginBlocker(ctx, req, am.keeper)
 	am.keeper.UpgradeCodec(ctx)
+	keeper.BeginBlocker(ctx, req, am.keeper)
 
 }
 

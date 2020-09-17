@@ -143,11 +143,19 @@ func (cdc *Codec) MarshalJSONIndent(o interface{}, prefix string, indent string)
 }
 
 func (cdc *Codec) MarshalJSON(o interface{}) ([]byte, error) {
-	return cdc.legacyCdc.MarshalJSON(o)
+	bz, err := cdc.legacyCdc.MarshalJSON(o)
+	if err != nil {
+		return cdc.protoCdc.MarshalJSON(o)
+	}
+	return bz, err
 }
 
 func (cdc *Codec) UnmarshalJSON(bz []byte, o interface{}) error {
-	return cdc.legacyCdc.UnmarshalJSON(bz, o)
+	err := cdc.legacyCdc.UnmarshalJSON(bz, o)
+	if err != nil {
+		return cdc.protoCdc.UnmarshalJSON(bz, o)
+	}
+	return nil
 }
 
 func (cdc *Codec) MustMarshalJSON(o interface{}) []byte {

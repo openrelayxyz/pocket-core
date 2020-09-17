@@ -21,6 +21,7 @@ func GenerateAAT(appPubKey, clientPubKey string, key crypto.PrivateKey) (aatjson
 }
 
 func BuildMultisig(fromAddr, jsonMessage, passphrase, chainID string, pk crypto.PublicKeyMultiSig, fees int64) ([]byte, error) {
+	//TODO Codec().IsAfterUpgrade() here is always false, must update based on chain height or other mechanism
 	fa, err := sdk.AddressFromHex(fromAddr)
 	if err != nil {
 		return nil, err
@@ -38,7 +39,7 @@ func BuildMultisig(fromAddr, jsonMessage, passphrase, chainID string, pk crypto.
 		auth.DefaultTxDecoder(cdc),
 		chainID,
 		"", nil).WithKeybase(kb)
-	return txBuilder.BuildAndSignMultisigTransaction(fa, pk, m, passphrase, fees)
+	return txBuilder.BuildAndSignMultisigTransaction(fa, pk, m, passphrase, fees, Codec().IsAfterUpgrade())
 }
 
 func SignMultisigNext(fromAddr, txHex, passphrase, chainID string) ([]byte, error) {

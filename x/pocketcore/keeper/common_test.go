@@ -64,6 +64,8 @@ func makeTestCodec() *codec.Codec {
 	sdk.RegisterCodec(cdc)
 	crypto.RegisterAmino(cdc.AminoCodec().Amino)
 
+	//cdc.SetAfterUpgradeMod(true)
+
 	return cdc
 }
 

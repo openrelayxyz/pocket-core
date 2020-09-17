@@ -33,6 +33,10 @@ func (msg MsgApplicationStake) GetSigner() sdk.Address {
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgApplicationStake) GetSignBytes() []byte {
+	if ModuleCdc.IsAfterUpgrade() {
+		bz := ModuleCdc.MustMarshalJSON(&msg)
+		return sdk.MustSortJSON(bz)
+	}
 	bz := ModuleCdc.MustMarshalJSON(&msg)
 	return sdk.MustSortJSON(bz)
 }
@@ -83,6 +87,10 @@ func (msg MsgBeginAppUnstake) GetSigner() sdk.Address {
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgBeginAppUnstake) GetSignBytes() []byte {
+	if ModuleCdc.IsAfterUpgrade() {
+		bz := ModuleCdc.MustMarshalJSON(&msg)
+		return sdk.MustSortJSON(bz)
+	}
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
@@ -125,6 +133,10 @@ func (msg MsgAppUnjail) GetSigner() sdk.Address {
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgAppUnjail) GetSignBytes() []byte {
+	if ModuleCdc.IsAfterUpgrade() {
+		bz := ModuleCdc.MustMarshalJSON(&msg)
+		return sdk.MustSortJSON(bz)
+	}
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
@@ -165,6 +177,10 @@ func (msg MsgAppStake) GetSigner() sdk.Address {
 
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgAppStake) GetSignBytes() []byte {
+	if ModuleCdc.IsAfterUpgrade() {
+		bz := ModuleCdc.MustMarshalJSON(&msg)
+		return sdk.MustSortJSON(bz)
+	}
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }

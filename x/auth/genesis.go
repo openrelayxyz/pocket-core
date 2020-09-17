@@ -20,6 +20,7 @@ func ExportGenesis(ctx sdk.Ctx, ak keeper.Keeper) types.GenesisState {
 //
 // CONTRACT: all types of accounts must have been already initialized/created
 func InitGenesis(ctx sdk.Ctx, k keeper.Keeper, data types.GenesisState) {
+	k.UpgradeCodec(ctx)
 	// check for duplicate keys in fee multi
 	keys := make(map[string]struct{})
 	for _, feeM := range data.Params.FeeMultiplier.FeeMultis {

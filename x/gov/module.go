@@ -107,6 +107,7 @@ func (am AppModule) ExportGenesis(ctx sdk.Ctx) json.RawMessage {
 
 // module begin-block
 func (am AppModule) BeginBlock(ctx sdk.Ctx, req abci.RequestBeginBlock) {
+	am.keeper.UpgradeCodec(ctx)
 	u := am.keeper.GetUpgrade(ctx)
 	if ctx.AppVersion() < u.Version && ctx.BlockHeight() == u.UpgradeHeight() && ctx.BlockHeight() != 0 {
 		ctx.Logger().Error("MUST UPGRADE TO NEXT VERSION: ", u.Version)
@@ -126,7 +127,6 @@ func (am AppModule) BeginBlock(ctx sdk.Ctx, req abci.RequestBeginBlock) {
 		os.Exit(2)
 		select {}
 	}
-	am.keeper.UpgradeCodec(ctx)
 }
 
 // EndBlock returns the end blocker for the staking module. It returns no validator

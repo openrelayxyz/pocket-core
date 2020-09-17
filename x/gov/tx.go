@@ -96,7 +96,7 @@ func BuildAndSignMulti(cdc *codec.Codec, address sdk.Address, publicKey crypto.P
 		auth.DefaultTxDecoder(cdc),
 		genDoc.Genesis.ChainID,
 		"", nil).WithKeybase(keybase)
-	return txBuilder.BuildAndSignMultisigTransaction(address, publicKey, msg, passphrase, fee)
+	return txBuilder.BuildAndSignMultisigTransaction(address, publicKey, msg, passphrase, fee, cdc.IsAfterUpgrade())
 }
 
 func SignMulti(cdc *codec.Codec, fromAddr sdk.Address, tx []byte, keys []crypto.PublicKey, tmNode client.Client, keybase keys.Keybase, passphrase string) (txBytes []byte, err error) {

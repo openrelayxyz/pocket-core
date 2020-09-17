@@ -313,6 +313,6 @@ func TestMsgProof_ValidateBasic(t *testing.T) {
 
 func TestMsgProof_GetSignBytes(t *testing.T) {
 	assert.NotPanics(t, func() {
-		MsgProtoProof{}.GetSignBytes()
+		MsgProof{}.GetSignBytes()
 	})
 }

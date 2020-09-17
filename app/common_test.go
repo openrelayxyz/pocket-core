@@ -224,6 +224,7 @@ func memCodec() *codec.Codec {
 		sdk.RegisterCodec(memCDC)
 		crypto.RegisterAmino(memCDC.AminoCodec().Amino)
 	}
+	//memCDC.SetAfterUpgradeMod(true)
 	return memCDC
 }
 

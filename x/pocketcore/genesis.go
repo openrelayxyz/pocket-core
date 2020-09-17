@@ -9,6 +9,7 @@ import (
 
 // "InitGenesis" - Initializes the state with a genesis state object
 func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, data types.GenesisState) []abci.ValidatorUpdate {
+	keeper.UpgradeCodec(ctx)
 	// set the params in store
 	keeper.SetParams(ctx, data.Params)
 	// set the claim objects in store
