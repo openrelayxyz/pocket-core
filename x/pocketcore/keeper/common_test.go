@@ -1040,3 +1040,23 @@ func (_m *Ctx) WithVoteInfos(voteInfo []abcitypes.VoteInfo) pocketTypes.Context 
 
 	return r0
 }
+
+func (_m *Ctx) BlockHash(cdc *codec.Codec) ([]byte, error) {
+	ret := _m.Called()
+
+	var r0 []byte
+	if rf, ok := ret.Get(0).(func() []byte); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).([]byte)
+	}
+
+	var r1 error
+	if rf1, ok := ret.Get(1).(func() error); ok {
+		r1 = rf1()
+	} else {
+		r1 = ret.Get(1).(error)
+	}
+
+	return r0, r1
+}

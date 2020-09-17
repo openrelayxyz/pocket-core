@@ -52,7 +52,7 @@ func (k Keeper) SendProofTx(ctx sdk.Ctx, n client.Client, proofTx func(cliCtx ut
 		// get the merkle proof object for the pseudorandom index
 		mProof, leaf := evidence.GenerateMerkleProof(int(index))
 		// generate the auto txbuilder and clictx
-		txBuilder, cliCtx, err := newTxBuilderAndCliCtx(ctx, &pc.MsgProtoProof{}, n, kp, k)
+		txBuilder, cliCtx, err := newTxBuilderAndCliCtx(ctx, &pc.MsgProof{}, n, kp, k)
 		if err != nil {
 			ctx.Logger().Error(fmt.Sprintf("an error occured in the transaction process of the Proof Transaction:\n%v", err))
 			return
@@ -65,7 +65,7 @@ func (k Keeper) SendProofTx(ctx sdk.Ctx, n client.Client, proofTx func(cliCtx ut
 	}
 }
 
-func (k Keeper) ValidateProof(ctx sdk.Ctx, proof pc.MsgProtoProof) (servicerAddr sdk.Address, claim pc.MsgClaim, sdkError sdk.Error) {
+func (k Keeper) ValidateProof(ctx sdk.Ctx, proof pc.MsgProof) (servicerAddr sdk.Address, claim pc.MsgClaim, sdkError sdk.Error) {
 	// get the public key from the claim
 	addr := proof.GetSigner()
 	// get the claim for the address
@@ -118,7 +118,7 @@ func (k Keeper) ValidateProof(ctx sdk.Ctx, proof pc.MsgProtoProof) (servicerAddr
 	return addr, claim, nil
 }
 
-func (k Keeper) ExecuteProof(ctx sdk.Ctx, proof pc.MsgProtoProof, claim pc.MsgClaim) (tokens sdk.Int, err sdk.Error) {
+func (k Keeper) ExecuteProof(ctx sdk.Ctx, proof pc.MsgProof, claim pc.MsgClaim) (tokens sdk.Int, err sdk.Error) {
 	switch proof.GetLeaf().(type) {
 	case *pc.RelayProof:
 		ctx.Logger().Info(fmt.Sprintf("reward coins to %s, for %d relays", claim.FromAddress.String(), claim.TotalProofs))
@@ -162,9 +162,11 @@ func (k Keeper) getPseudorandomIndex(ctx sdk.Ctx, totalRelays int64, header pc.S
 	if err != nil {
 		return 0, err
 	}
-	// get the pseudorandomGenerator json bytes
-	proofBlockHeader := proofContext.BlockHeader()
-	blockHash := hex.EncodeToString(proofBlockHeader.GetLastBlockId().Hash)
+	blockHashBz, err := proofContext.BlockHash(k.cdc)
+	if err != nil {
+		return 0, err
+	}
+	blockHash := hex.EncodeToString(blockHashBz)
 	headerHash := header.HashString()
 	pseudoGenerator := pseudorandomGenerator{blockHash, headerHash}
 	r, err := json.Marshal(pseudoGenerator)

@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/pokt-network/pocket-core/codec"
 	"github.com/pokt-network/pocket-core/crypto"
 	sdk "github.com/pokt-network/pocket-core/types"
 	appexported "github.com/pokt-network/pocket-core/x/apps/exported"
@@ -31,7 +32,7 @@ type Relay struct {
 }
 
 // "Validate" - Checks the validity of a relay request using store data
-func (r *Relay) Validate(ctx sdk.Ctx, keeper PosKeeper, node nodeexported.ValidatorI, hb *HostedBlockchains, sessionBlockHeight int64,
+func (r *Relay) Validate(ctx sdk.Ctx, cdc *codec.Codec, keeper PosKeeper, node nodeexported.ValidatorI, hb *HostedBlockchains, sessionBlockHeight int64,
 	sessionNodeCount int, app appexported.ApplicationI) (maxPossibleRelays sdk.Int, err sdk.Error) {
 	// validate payload
 	if err := r.Payload.Validate(); err != nil {
@@ -85,7 +86,11 @@ func (r *Relay) Validate(ctx sdk.Ctx, keeper PosKeeper, node nodeexported.Valida
 	// if not found generate the session
 	if !found {
 		var err sdk.Error
-		session, err = NewSession(sessionContext, ctx, keeper, header, BlockHash(sessionContext), sessionNodeCount)
+		blockHashBz, er := sessionContext.BlockHash(cdc)
+		if er != nil {
+			return sdk.ZeroInt(), sdk.ErrInternal(er.Error())
+		}
+		session, err = NewSession(sessionContext, ctx, keeper, header, hex.EncodeToString(blockHashBz), sessionNodeCount)
 		if err != nil {
 			return sdk.ZeroInt(), err
 		}

@@ -85,7 +85,7 @@ func (mp MerkleProof) Validate(root HashRange, leaf Proof, totalRelays int64) (i
 			mp.Target.Range.Lower = sibling.Range.Lower
 			// **upper stays the same**
 			// generate the parent merkleHash and store it where the child used to be
-			mp.Target.Hash = parentHash(sibling.Hash, mp.Target.Hash, mp.Target.Range)
+			mp.Target.Hash = parentHash(sibling.Hash, mp.Target.Hash, mp.Target.Range, uint64(mp.TargetIndex-1), uint64(mp.TargetIndex))
 		} else { // even index
 			// target upper should be LTE sibling lower
 			if mp.Target.Range.Upper != sibling.Range.Lower {
@@ -95,7 +95,7 @@ func (mp MerkleProof) Validate(root HashRange, leaf Proof, totalRelays int64) (i
 			mp.Target.Range.Upper = sibling.Range.Upper
 			// **lower stays the same**
 			// generate the parent merkleHash and store it where the child used to be
-			mp.Target.Hash = parentHash(mp.Target.Hash, sibling.Hash, mp.Target.Range)
+			mp.Target.Hash = parentHash(mp.Target.Hash, sibling.Hash, mp.Target.Range, uint64(mp.TargetIndex), uint64(mp.TargetIndex+1))
 		}
 		// half the indices as we are going up one level
 		mp.TargetIndex /= 2
@@ -163,7 +163,10 @@ func merkleProof(data []HashRange, index int, p *MerkleProof) MerkleProof {
 }
 
 // "newParentHash" - Compute the merkleHash of the parent by hashing the hashes, sum and parent
-func parentHash(hash1, hash2 []byte, r Range) []byte {
+func parentHash(hash1, hash2 []byte, r Range, index1, index2 uint64) []byte {
+	if ModuleCdc.IsAfterUpgrade() {
+		return merkleHash(append(append(append(append(hash1, hash2...), uint64ToBytes(index1)...), uint64ToBytes(index2)...), r.Bytes()...))
+	}
 	return merkleHash(append(append(hash1, hash2...), r.Bytes()...))
 }
 
@@ -205,7 +208,7 @@ func levelUp(data []HashRange) (nextLevelData []HashRange, atRoot bool) {
 		// the left child lower is new lower
 		data[i/2].Range.Lower = data[i].Range.Lower
 		// calculate the parent merkleHash
-		data[i/2].Hash = parentHash(d.Hash, data[i+1].Hash, data[i/2].Range)
+		data[i/2].Hash = parentHash(d.Hash, data[i+1].Hash, data[i/2].Range, uint64(i), uint64(i+1))
 	}
 	// check to see if at root
 	dataLen := len(data) / 2

@@ -33,7 +33,7 @@ func (k Keeper) HandleRelay(ctx sdk.Ctx, relay pc.Relay) (*pc.RelayResponse, sdk
 	}
 	sessionNodeCount := k.SessionNodeCount(sessionCtx)
 	// ensure the validity of the relay
-	maxPossibleRelays, err := relay.Validate(ctx, k.posKeeper, selfNode, hostedBlockchains, sessionBlockHeight, int(sessionNodeCount), app)
+	maxPossibleRelays, err := relay.Validate(ctx, k.cdc, k.posKeeper, selfNode, hostedBlockchains, sessionBlockHeight, int(sessionNodeCount), app)
 	if err != nil {
 		ctx.Logger().Error(fmt.Errorf("could not validate relay for %v, %v, %v %v, %v", selfNode, hostedBlockchains, sessionBlockHeight, int(k.SessionNodeCount(sessionCtx)), app).Error())
 		return nil, err
@@ -101,7 +101,11 @@ func (k Keeper) HandleChallenge(ctx sdk.Ctx, challenge pc.ChallengeProofInvalidD
 	// if not found generate the session
 	if !found {
 		var err sdk.Error
-		session, err = pc.NewSession(sessionCtx, ctx, k.posKeeper, header, pc.BlockHash(sessionCtx), int(k.SessionNodeCount(sessionCtx)))
+		blockHashBz, er := sessionCtx.BlockHash(k.cdc)
+		if er != nil {
+			return nil, sdk.ErrInternal(er.Error())
+		}
+		session, err = pc.NewSession(sessionCtx, ctx, k.posKeeper, header, hex.EncodeToString(blockHashBz), int(k.SessionNodeCount(sessionCtx)))
 		if err != nil {
 			return nil, err
 		}

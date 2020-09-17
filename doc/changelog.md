@@ -1,3 +1,9 @@
+## RC-0.6.0
+- Security patch in merkle sum index
+- Security patch for BlockHash
+- Protobuf Encoding implemented
+- Pocketcore module event handler fixed
+
 ## RC-0.5.1
 - Add terminal completions
 - AllowDuplicateIP config default value is now true
