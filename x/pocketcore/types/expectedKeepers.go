@@ -29,5 +29,5 @@ type AppsKeeper interface {
 }
 
 type AuthKeeper interface {
-	GetFee(ctx sdk.Ctx, msg sdk.LegacyMsg) sdk.Int
+	GetFee(ctx sdk.Ctx, msg sdk.Msg) sdk.Int
 }

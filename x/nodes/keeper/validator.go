@@ -13,7 +13,7 @@ func (k Keeper) GetValidator(ctx sdk.Ctx, addr sdk.Address) (validator types.Val
 	if value == nil {
 		return validator, false
 	}
-	validator, err := types.UnmarshalValidator(k.cdc, value)
+	validator, err := types.UnmarshalValidator(k.Cdc, value)
 	if err != nil {
 		ctx.Logger().Error("can't get validator: " + err.Error())
 		return validator, false
@@ -24,7 +24,7 @@ func (k Keeper) GetValidator(ctx sdk.Ctx, addr sdk.Address) (validator types.Val
 // SetValidator - Store validator in the main store and state stores (stakingset/ unstakingset)
 func (k Keeper) SetValidator(ctx sdk.Ctx, validator types.Validator) {
 	store := ctx.KVStore(k.storeKey)
-	bz, err := types.MarshalValidator(k.cdc, validator)
+	bz, err := types.MarshalValidator(k.Cdc, validator)
 	if err != nil {
 		ctx.Logger().Error("could not marshal validator: " + err.Error())
 	}
@@ -58,7 +58,7 @@ func (k Keeper) GetAllValidators(ctx sdk.Ctx) (validators []types.Validator) {
 	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
-		validator, err := types.UnmarshalValidator(k.cdc, iterator.Value())
+		validator, err := types.UnmarshalValidator(k.Cdc, iterator.Value())
 		if err != nil {
 			ctx.Logger().Error("can't get validator in GetAllValidators: " + err.Error())
 			continue
@@ -75,7 +75,7 @@ func (k Keeper) GetAllValidatorsProto(ctx sdk.Ctx) (validators []*types.Validato
 	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
-		validator, _ := types.UnmarshalProtoValidator(k.cdc, iterator.Value())
+		validator, _ := types.UnmarshalProtoValidator(k.Cdc, iterator.Value())
 		validators = append(validators, &validator)
 	}
 	return validators
@@ -88,7 +88,7 @@ func (k Keeper) GetAllValidatorsWithOpts(ctx sdk.Ctx, opts types.QueryValidators
 	iterator, _ := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
-		validator, err := types.UnmarshalValidator(k.cdc, iterator.Value())
+		validator, err := types.UnmarshalValidator(k.Cdc, iterator.Value())
 		if err != nil {
 			ctx.Logger().Error("could not unmarshal validator in GetAllValidatorsWithOpts: ", err.Error())
 			continue
@@ -108,7 +108,7 @@ func (k Keeper) GetValidators(ctx sdk.Ctx, maxRetrieve uint16) (validators []typ
 	defer iterator.Close()
 	i := 0
 	for ; iterator.Valid() && i < int(maxRetrieve); iterator.Next() {
-		validator, err := types.UnmarshalValidator(k.cdc, iterator.Value())
+		validator, err := types.UnmarshalValidator(k.Cdc, iterator.Value())
 		if err != nil {
 			ctx.Logger().Error("could not unmarshal validator in GetValidators: ", err.Error())
 			continue
@@ -133,7 +133,7 @@ func (k Keeper) IterateAndExecuteOverVals(
 	defer iterator.Close()
 	i := int64(0)
 	for ; iterator.Valid(); iterator.Next() {
-		validator, err := types.UnmarshalValidator(k.cdc, iterator.Value())
+		validator, err := types.UnmarshalValidator(k.Cdc, iterator.Value())
 		if err != nil {
 			ctx.Logger().Error("could not unmarshal validator in IterateAndExecuteOverVals: ", err.Error())
 			continue

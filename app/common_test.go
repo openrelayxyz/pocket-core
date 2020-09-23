@@ -142,10 +142,10 @@ func inMemTendermintNode(genesisState []byte) (*node.Node, keys.Keybase) {
 			AppState:   genesisState,
 		}, nil
 	}
-	loggerFile, _ := os.Open(os.DevNull)
+	//loggerFile, _ := os.Open(os.DevNull)
 	c := config{
 		TmConfig: getTestConfig(),
-		Logger:   log.NewTMLogger(loggerFile),
+		Logger:   log.NewTMLogger(os.Stdout),
 	}
 	db := dbm.NewMemDB()
 	traceWriter, err := openTraceWriter(c.TraceWriter)
@@ -224,6 +224,7 @@ func memCodec() *codec.Codec {
 		sdk.RegisterCodec(memCDC)
 		crypto.RegisterAmino(memCDC.AminoCodec().Amino)
 	}
+	memCDC.SetAfterUpgradeMod(true)
 	return memCDC
 }
 
