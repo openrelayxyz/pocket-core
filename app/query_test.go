@@ -58,7 +58,7 @@ func TestQueryTx(t *testing.T) {
 	var tx *sdk.TxResponse
 	<-evtChan // Wait for block
 	memCli, stopCli, evtChan := subscribeTo(t, tmTypes.EventTx)
-	tx, err = nodes.Send(memCodec(false), memCli, kb, cb.GetAddress(), kp.GetAddress(), "test", sdk.NewInt(1000))
+	tx, err = nodes.Send(memCodec(), memCli, kb, cb.GetAddress(), kp.GetAddress(), "test", sdk.NewInt(1000))
 	assert.Nil(t, err)
 	assert.NotNil(t, tx)
 
@@ -104,7 +104,7 @@ func TestQueryApps(t *testing.T) {
 
 	<-evtChan // Wait for block
 	memCli, stopCli, evtChan := subscribeTo(t, tmTypes.EventTx)
-	tx, err = apps.StakeTx(memCodec(false), memCli, kb, chains, sdk.NewInt(1000000), kp, "test")
+	tx, err = apps.StakeTx(memCodec(), memCli, kb, chains, sdk.NewInt(1000000), kp, "test")
 	assert.Nil(t, err)
 	assert.NotNil(t, tx)
 
@@ -166,7 +166,7 @@ func TestQueryDaoBalance(t *testing.T) {
 	_, _, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
 	memCli, stopCli, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
 	<-evtChan // Wait for block
-	got, err := gov.QueryDAO(memCodec(false), memCli, 0)
+	got, err := gov.QueryDAO(memCodec(), memCli, 0)
 	assert.Nil(t, err)
 	assert.Equal(t, big.NewInt(1000), got.BigInt())
 
@@ -178,7 +178,7 @@ func TestQueryACL(t *testing.T) {
 	_, _, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
 	memCli, stopCli, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
 	<-evtChan // Wait for block
-	got, err := gov.QueryACL(memCodec(false), memCli, 0)
+	got, err := gov.QueryACL(memCodec(), memCli, 0)
 	assert.Nil(t, err)
 	assert.Equal(t, got, testACL)
 
@@ -195,7 +195,7 @@ func TestQueryDaoOwner(t *testing.T) {
 	}
 	memCli, stopCli, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
 	<-evtChan // Wait for block
-	got, err := gov.QueryDAOOwner(memCodec(false), memCli, 0)
+	got, err := gov.QueryDAOOwner(memCodec(), memCli, 0)
 	assert.Nil(t, err)
 	assert.Equal(t, got.String(), cb.GetAddress().String())
 
@@ -204,16 +204,31 @@ func TestQueryDaoOwner(t *testing.T) {
 }
 
 func TestQueryUpgrade(t *testing.T) {
-	_, _, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
-	memCli, stopCli, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
-	<-evtChan // Wait for block
-	var err error
-	got, err := gov.QueryUpgrade(memCodec(false), memCli, 0)
-	assert.Nil(t, err)
-	assert.Equal(t, got.UpgradeHeight(), int64(10000))
+	tt := []struct {
+		name string
+		*upgrades
+	}{
+		{name: "query upgrade with amino codec", upgrades: &upgrades{codecUpgrade{false, 7000}}},
+		{name: "query upgrade with proto codec", upgrades: &upgrades{codecUpgrade{true, 0}}},
+	}
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.upgrades != nil { // NOTE: Use to perform neccesary upgrades for test
+				sdk.UpgradeHeight = tc.upgrades.codecUpgrade.height
+				_ = memCodecMod(tc.upgrades.codecUpgrade.upgradeMod)
+			}
+			_, _, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+			memCli, stopCli, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
+			<-evtChan // Wait for block
+			var err error
+			got, err := gov.QueryUpgrade(memCodec(), memCli, 0)
+			assert.Nil(t, err)
+			assert.Equal(t, got.UpgradeHeight(), int64(10000))
 
-	cleanup()
-	stopCli()
+			cleanup()
+			stopCli()
+		})
+	}
 }
 
 func TestQuerySupply(t *testing.T) {
@@ -332,7 +347,7 @@ func TestQueryStakedpp(t *testing.T) {
 	var chains = []string{"0001"}
 	<-evtChan // Wait for block
 	memCli, stopCli, evtChan := subscribeTo(t, tmTypes.EventTx)
-	tx, err = apps.StakeTx(memCodec(false), memCli, kb, chains, sdk.NewInt(1000000), kp, "test")
+	tx, err = apps.StakeTx(memCodec(), memCli, kb, chains, sdk.NewInt(1000000), kp, "test")
 	assert.Nil(t, err)
 	assert.NotNil(t, tx)
 
