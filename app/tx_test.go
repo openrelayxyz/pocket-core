@@ -51,7 +51,6 @@ func TestUnstakeApp(t *testing.T) {
 	tx, err = apps.StakeTx(memCodec(), memCli, kb, chains, sdk.NewInt(1000000), kp, "test")
 	assert.Nil(t, err)
 	assert.NotNil(t, tx)
-
 	<-evtChan // Wait for tx
 	got, err := PCA.QueryApps(0, appsTypes.QueryApplicationsWithOpts{
 		Page:  1,
