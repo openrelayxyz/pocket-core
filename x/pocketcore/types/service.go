@@ -33,7 +33,7 @@ type Relay struct {
 
 // "Validate" - Checks the validity of a relay request using store data
 func (r *Relay) Validate(ctx sdk.Ctx, cdc *codec.Codec, keeper PosKeeper, node nodeexported.ValidatorI, hb *HostedBlockchains, sessionBlockHeight int64,
-	sessionNodeCount int, app appexported.ApplicationI) (maxPossibleRelays sdk.Int, err sdk.Error) {
+	sessionNodeCount int, app appexported.ApplicationI) (maxPossibleRelays sdk.BigInt, err sdk.Error) {
 	// validate payload
 	if err := r.Payload.Validate(); err != nil {
 		return sdk.ZeroInt(), NewEmptyPayloadDataError(ModuleName)

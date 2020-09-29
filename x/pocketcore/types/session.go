@@ -18,15 +18,15 @@ type Session struct {
 	SessionNodes  `json:"nodes"`
 }
 
-func (s Session) ToProto() SessionEncodable {
-	return SessionEncodable{
+func (s Session) ToProto() ProtoSession {
+	return ProtoSession{
 		SessionHeader: s.SessionHeader,
 		SessionKey:    s.SessionKey,
-		SessionNodes:  s.SessionNodes.ToSessionNodesEncodable(),
+		SessionNodes:  s.SessionNodes.ToProtoSessionNodes(),
 	}
 }
 
-func (se SessionEncodable) ToSession() Session {
+func (se ProtoSession) ToSession() Session {
 	return Session{
 		SessionHeader: se.SessionHeader,
 		SessionKey:    se.SessionKey,
@@ -104,7 +104,7 @@ func (s Session) MarshalObject() ([]byte, error) {
 }
 
 func (s Session) UnmarshalObject(b []byte) (CacheObject, error) {
-	var se SessionEncodable
+	var se ProtoSession
 	err := ModuleCdc.UnmarshalBinaryBare(b, &se)
 	if err != nil {
 		return s, fmt.Errorf("error unmarshalling session object: %s", err.Error())
@@ -214,23 +214,22 @@ func (sn SessionNodes) ContainsAddress(addr sdk.Address) bool {
 	return false
 }
 
-func (sn SessionNodes) ToSessionNodesEncodable() (res SessionNodesEncodable) {
+func (sn SessionNodes) ToProtoSessionNodes() (res ProtoSessionNodes) {
 	for _, vp := range sn {
 		v, ok := vp.(types.Validator)
 		if ok {
 			res = append(res, v.ToProto())
-		} else {
-			res = append(res, vp.(types.ValidatorProto))
 		}
 	}
 	return
 }
 
-type SessionNodesEncodable []types.ValidatorProto // TODO try to use exported.Node
+type ProtoSessionNodes []types.ProtoValidator // TODO try to use exported.Node
 
-func (sne SessionNodesEncodable) ToSessionNodes() (res SessionNodes) {
+func (sne ProtoSessionNodes) ToSessionNodes() (res SessionNodes) {
 	for _, vp := range sne {
-		res = append(res, vp)
+		v, _ := vp.FromProto()
+		res = append(res, v)
 	}
 	return
 }
@@ -320,7 +319,7 @@ func BlockHash(ctx sdk.Context) string {
 }
 
 // "MaxPossibleRelays" - Returns the maximum possible amount of relays for an App on a sessions
-func MaxPossibleRelays(app appexported.ApplicationI, sessionNodeCount int64) sdk.Int {
+func MaxPossibleRelays(app appexported.ApplicationI, sessionNodeCount int64) sdk.BigInt {
 	//GetMaxRelays Max value is bound to math.MaxUint64,
 	//current worse case is 1 chain and 5 nodes per session with a result of 3689348814741910323 which can be used safely as int64
 	return app.GetMaxRelays().ToDec().Quo(sdk.NewDec(int64(len(app.GetChains())))).Quo(sdk.NewDec(sessionNodeCount)).RoundInt()
