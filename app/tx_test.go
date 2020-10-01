@@ -539,85 +539,111 @@ func TestClaimTx(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping in short mode")
 	}
-	genBz, _, validators, app := fiveValidatorsOneAppGenesis()
-	kb := getInMemoryKeybase()
-	for i := 0; i < 5; i++ {
-		appPrivateKey, err := kb.ExportPrivateKeyObject(app.Address, "test")
-		assert.Nil(t, err)
-		// setup AAT
-		aat := pocketTypes.AAT{
-			Version:              "0.0.1",
-			ApplicationPublicKey: appPrivateKey.PublicKey().RawString(),
-			ClientPublicKey:      appPrivateKey.PublicKey().RawString(),
-			ApplicationSignature: "",
-		}
-		sig, err := appPrivateKey.Sign(aat.Hash())
-		if err != nil {
-			panic(err)
-		}
-		aat.ApplicationSignature = hex.EncodeToString(sig)
-		proof := pocketTypes.RelayProof{
-			Entropy:            int64(rand.Int()),
-			RequestHash:        hex.EncodeToString(pocketTypes.Hash([]byte("fake"))),
-			SessionBlockHeight: 1,
-			ServicerPubKey:     validators[0].PublicKey.RawString(),
-			Blockchain:         PlaceholderHash,
-			Token:              aat,
-			Signature:          "",
-		}
-		sig, err = appPrivateKey.Sign(proof.Hash())
-		if err != nil {
-			t.Fatal(err)
-		}
-		proof.Signature = hex.EncodeToString(sig)
-		pocketTypes.SetProof(pocketTypes.SessionHeader{
-			ApplicationPubKey:  appPrivateKey.PublicKey().RawString(),
-			Chain:              PlaceholderHash,
-			SessionBlockHeight: 1,
-		}, pocketTypes.RelayEvidence, proof, sdk.NewInt(1000000))
-		assert.Nil(t, err)
+	tt := []struct {
+		name         string
+		memoryNodeFn func(t *testing.T, genesisState []byte) (tendermint *node.Node, keybase keys.Keybase, cleanup func())
+		*upgrades
+	}{
+		{name: "claim tx from amino with amino codec ", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{false, 7000}}},
+		{name: "claim tx from an amino with proto codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{true, 0}}},
+		{name: "claim tx from a proto with proto codec", memoryNodeFn: NewInMemoryTendermintNodeProto, upgrades: &upgrades{codecUpgrade{true, 0}}}, // TODO: FULL PROT SCENARIO
 	}
-	_, _, cleanup := NewInMemoryTendermintNodeAmino(t, genBz)
-	_, _, evtChan := subscribeTo(t, tmTypes.EventTx)
-	res := <-evtChan
-	fmt.Println(res)
-	if res.Events["message.action"][0] != pocketTypes.EventTypeClaim {
-		t.Fatal("claim message was not received first")
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			genBz, _, validators, app := fiveValidatorsOneAppGenesis()
+			kb := getInMemoryKeybase()
+			for i := 0; i < 5; i++ {
+				appPrivateKey, err := kb.ExportPrivateKeyObject(app.Address, "test")
+				assert.Nil(t, err)
+				// setup AAT
+				aat := pocketTypes.AAT{
+					Version:              "0.0.1",
+					ApplicationPublicKey: appPrivateKey.PublicKey().RawString(),
+					ClientPublicKey:      appPrivateKey.PublicKey().RawString(),
+					ApplicationSignature: "",
+				}
+				sig, err := appPrivateKey.Sign(aat.Hash())
+				if err != nil {
+					panic(err)
+				}
+				aat.ApplicationSignature = hex.EncodeToString(sig)
+				proof := pocketTypes.RelayProof{
+					Entropy:            int64(rand.Int()),
+					RequestHash:        hex.EncodeToString(pocketTypes.Hash([]byte("fake"))),
+					SessionBlockHeight: 1,
+					ServicerPubKey:     validators[0].PublicKey.RawString(),
+					Blockchain:         PlaceholderHash,
+					Token:              aat,
+					Signature:          "",
+				}
+				sig, err = appPrivateKey.Sign(proof.Hash())
+				if err != nil {
+					t.Fatal(err)
+				}
+				proof.Signature = hex.EncodeToString(sig)
+				pocketTypes.SetProof(pocketTypes.SessionHeader{
+					ApplicationPubKey:  appPrivateKey.PublicKey().RawString(),
+					Chain:              PlaceholderHash,
+					SessionBlockHeight: 1,
+				}, pocketTypes.RelayEvidence, proof, sdk.NewInt(1000000))
+				assert.Nil(t, err)
+			}
+			_, _, cleanup := tc.memoryNodeFn(t, genBz)
+			_, _, evtChan := subscribeTo(t, tmTypes.EventTx)
+			res := <-evtChan
+			fmt.Println(res)
+			if res.Events["message.action"][0] != pocketTypes.EventTypeClaim {
+				t.Fatal("claim message was not received first")
+			}
+			_, stopCli, evtChan := subscribeTo(t, tmTypes.EventTx)
+			res = <-evtChan
+			fmt.Println(res)
+			if res.Events["message.action"][0] != pocketTypes.EventTypeProof {
+				t.Fatal("proof message was not received afterward")
+			}
+			cleanup()
+			stopCli()
+		})
 	}
-	_, stopCli, evtChan := subscribeTo(t, tmTypes.EventTx)
-	res = <-evtChan
-	fmt.Println(res)
-	if res.Events["message.action"][0] != pocketTypes.EventTypeProof {
-		t.Fatal("proof message was not received afterward")
-	}
-	cleanup()
-	stopCli()
 }
 
 func TestClaimTxChallenge(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping in short mode")
 	}
-	genBz, keys, _, _ := fiveValidatorsOneAppGenesis()
-	challenges := NewValidChallengeProof(t, keys, 5)
-	for _, c := range challenges {
-		c.Store(sdk.NewInt(1000000))
+	tt := []struct {
+		name         string
+		memoryNodeFn func(t *testing.T, genesisState []byte) (tendermint *node.Node, keybase keys.Keybase, cleanup func())
+		*upgrades
+	}{
+		{name: "challenge a claim tx from amino with amino codec ", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{false, 7000}}},
+		{name: "challenge a claim tx from an amino with proto codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{true, 0}}},
+		{name: "challenge a claim tx from a proto with proto codec", memoryNodeFn: NewInMemoryTendermintNodeProto, upgrades: &upgrades{codecUpgrade{true, 0}}}, // TODO: FULL PROT SCENARIO
 	}
-	_, _, cleanup := NewInMemoryTendermintNodeAmino(t, genBz)
-	_, _, evtChan := subscribeTo(t, tmTypes.EventTx)
-	res := <-evtChan // Wait for tx
-	if res.Events["message.action"][0] != pocketTypes.EventTypeClaim {
-		t.Fatal("claim message was not received first")
-	}
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			genBz, keys, _, _ := fiveValidatorsOneAppGenesis()
+			challenges := NewValidChallengeProof(t, keys, 5)
+			for _, c := range challenges {
+				c.Store(sdk.NewInt(1000000))
+			}
+			_, _, cleanup := tc.memoryNodeFn(t, genBz)
+			_, _, evtChan := subscribeTo(t, tmTypes.EventTx)
+			res := <-evtChan // Wait for tx
+			if res.Events["message.action"][0] != pocketTypes.EventTypeClaim {
+				t.Fatal("claim message was not received first")
+			}
 
-	_, stopCli, evtChan := subscribeTo(t, tmTypes.EventTx)
-	res = <-evtChan // Wait for tx
-	fmt.Println(res)
-	if res.Events["message.action"][0] != pocketTypes.EventTypeProof {
-		t.Fatal("proof message was not received afterward")
+			_, stopCli, evtChan := subscribeTo(t, tmTypes.EventTx)
+			res = <-evtChan // Wait for tx
+			fmt.Println(res)
+			if res.Events["message.action"][0] != pocketTypes.EventTypeProof {
+				t.Fatal("proof message was not received afterward")
+			}
+			cleanup()
+			stopCli()
+		})
 	}
-	cleanup()
-	stopCli()
 }
 
 func NewValidChallengeProof(t *testing.T, privateKeys []crypto.PrivateKey, numOfChallenges int) (challenge []pocketTypes.ChallengeProofInvalidData) {
