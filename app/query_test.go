@@ -24,7 +24,7 @@ import (
 )
 
 func TestQueryBlock(t *testing.T) {
-	_, _, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, _, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	_, stopCli, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
 	height := int64(1)
 	<-evtChan // Wait for block
@@ -37,7 +37,7 @@ func TestQueryBlock(t *testing.T) {
 }
 
 func TestQueryChainHeight(t *testing.T) {
-	_, _, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, _, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	_, stopCli, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
 	<-evtChan // Wait for block
 	got, err := PCA.QueryHeight()
@@ -49,7 +49,7 @@ func TestQueryChainHeight(t *testing.T) {
 }
 
 func TestQueryTx(t *testing.T) {
-	_, kb, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, kb, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	cb, err := kb.GetCoinbase()
 	assert.Nil(t, err)
 	kp, err := kb.Create("test")
@@ -75,7 +75,7 @@ func TestQueryTx(t *testing.T) {
 }
 
 func TestQueryValidators(t *testing.T) {
-	_, _, cleanup := NewInMemoryTendermintNode(t, twoValTwoNodeGenesisState())
+	_, _, cleanup := NewInMemoryTendermintNodeAmino(t, twoValTwoNodeGenesisState())
 	_, stopCli, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
 	<-evtChan // Wait for block
 	got, err := PCA.QueryNodes(1, types2.QueryValidatorsParams{Page: 1, Limit: 1})
@@ -95,7 +95,7 @@ func TestQueryValidators(t *testing.T) {
 	stopCli()
 }
 func TestQueryApps(t *testing.T) {
-	_, kb, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, kb, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	kp, err := kb.GetCoinbase()
 	assert.Nil(t, err)
 	_, _, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
@@ -145,7 +145,7 @@ func TestQueryApps(t *testing.T) {
 }
 
 func TestQueryValidator(t *testing.T) {
-	_, kb, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, kb, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	cb, err := kb.GetCoinbase()
 	if err != nil {
 		t.Fatal(err)
@@ -163,7 +163,7 @@ func TestQueryValidator(t *testing.T) {
 }
 
 func TestQueryDaoBalance(t *testing.T) {
-	_, _, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, _, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	memCli, stopCli, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
 	<-evtChan // Wait for block
 	got, err := gov.QueryDAO(memCodec(), memCli, 0)
@@ -175,7 +175,7 @@ func TestQueryDaoBalance(t *testing.T) {
 }
 
 func TestQueryACL(t *testing.T) {
-	_, _, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, _, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	memCli, stopCli, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
 	<-evtChan // Wait for block
 	got, err := gov.QueryACL(memCodec(), memCli, 0)
@@ -187,7 +187,7 @@ func TestQueryACL(t *testing.T) {
 }
 
 func TestQueryDaoOwner(t *testing.T) {
-	_, _, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, _, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	kb := getInMemoryKeybase()
 	cb, err := kb.GetCoinbase()
 	if err != nil {
@@ -217,7 +217,7 @@ func TestQueryUpgrade(t *testing.T) {
 				sdk.UpgradeHeight = tc.upgrades.codecUpgrade.height
 				_ = memCodecMod(tc.upgrades.codecUpgrade.upgradeMod)
 			}
-			_, _, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+			_, _, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 			memCli, stopCli, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
 			<-evtChan // Wait for block
 			var err error
@@ -232,7 +232,7 @@ func TestQueryUpgrade(t *testing.T) {
 }
 
 func TestQuerySupply(t *testing.T) {
-	_, _, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, _, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	_, stopCli, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
 	<-evtChan // Wait for block
 	gotStaked, total, err := PCA.QueryTotalNodeCoins(0)
@@ -247,7 +247,7 @@ func TestQuerySupply(t *testing.T) {
 }
 
 func TestQueryPOSParams(t *testing.T) {
-	_, _, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, _, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	_, stopCli, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
 	<-evtChan // Wait for block
 	got, err := PCA.QueryNodeParams(0)
@@ -262,7 +262,7 @@ func TestQueryPOSParams(t *testing.T) {
 }
 
 func TestAccountBalance(t *testing.T) {
-	_, kb, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, kb, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	cb, err := kb.GetCoinbase()
 	assert.Nil(t, err)
 	_, stopCli, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
@@ -277,7 +277,7 @@ func TestAccountBalance(t *testing.T) {
 }
 
 func TestQuerySigningInfo(t *testing.T) {
-	_, kb, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, kb, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	cb, err := kb.GetCoinbase()
 	assert.Nil(t, err)
 	cbAddr := cb.GetAddress()
@@ -294,7 +294,7 @@ func TestQuerySigningInfo(t *testing.T) {
 }
 
 func TestQueryPocketSupportedBlockchains(t *testing.T) {
-	_, _, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, _, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	_, stopCli, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
 	<-evtChan // Wait for block
 	var err error
@@ -308,7 +308,7 @@ func TestQueryPocketSupportedBlockchains(t *testing.T) {
 }
 
 func TestQueryPocketParams(t *testing.T) {
-	_, _, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, _, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	_, stopCli, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
 	<-evtChan // Wait for block
 	got, err := PCA.QueryPocketParams(0)
@@ -324,7 +324,7 @@ func TestQueryPocketParams(t *testing.T) {
 }
 
 func TestQueryAccount(t *testing.T) {
-	_, kb, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, kb, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	_, stopCli, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
 	acc := getUnstakedAccount(kb)
 	assert.NotNil(t, acc)
@@ -339,7 +339,7 @@ func TestQueryAccount(t *testing.T) {
 }
 
 func TestQueryStakedpp(t *testing.T) {
-	_, kb, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, kb, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	kp, err := kb.GetCoinbase()
 	assert.Nil(t, err)
 	_, _, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
@@ -426,7 +426,7 @@ func TestQueryRelay(t *testing.T) {
 		MatchHeader(headerKey, headerVal).
 		Reply(200).
 		BodyString(expectedResponse)
-	_, kb, cleanup := NewInMemoryTendermintNode(t, genBz)
+	_, kb, cleanup := NewInMemoryTendermintNodeAmino(t, genBz)
 	appPrivateKey, err := kb.ExportPrivateKeyObject(app.Address, "test")
 	assert.Nil(t, err)
 	// setup AAT
@@ -494,7 +494,7 @@ func TestQueryRelay(t *testing.T) {
 
 func TestQueryDispatch(t *testing.T) {
 	genBz, _, validators, app := fiveValidatorsOneAppGenesis()
-	_, kb, cleanup := NewInMemoryTendermintNode(t, genBz)
+	_, kb, cleanup := NewInMemoryTendermintNodeAmino(t, genBz)
 	appPrivateKey, err := kb.ExportPrivateKeyObject(app.Address, "test")
 	assert.Nil(t, err)
 	// Setup HandleDispatch Request
@@ -517,7 +517,7 @@ func TestQueryDispatch(t *testing.T) {
 
 func TestQueryAllParams(t *testing.T) {
 	resetTestACL()
-	_, _, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, _, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	res, err := PCA.QueryAllParams(0)
 	assert.Nil(t, err)
 	assert.NotNil(t, res)
@@ -527,7 +527,7 @@ func TestQueryAllParams(t *testing.T) {
 }
 func TestQueryParam(t *testing.T) {
 	resetTestACL()
-	_, _, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, _, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	res, err := PCA.QueryParam(0, "pocketcore/SupportedBlockchains")
 	assert.Nil(t, err)
 	assert.NotNil(t, res)
@@ -537,7 +537,7 @@ func TestQueryParam(t *testing.T) {
 }
 
 func TestQueryAccountBalance(t *testing.T) {
-	_, kb, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, kb, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	_, stopCli, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
 	acc := getUnstakedAccount(kb)
 	assert.NotNil(t, acc)
@@ -551,7 +551,7 @@ func TestQueryAccountBalance(t *testing.T) {
 }
 
 func TestQueryNonExistingAccountBalance(t *testing.T) {
-	_, _, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+	_, _, cleanup := NewInMemoryTendermintNodeAmino(t, oneValTwoNodeGenesisState())
 	_, stopCli, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
 	<-evtChan // Wait for block
 	got, err := PCA.QueryBalance("802fddec29f99cae7a601cf648eafced1c062d39", 0)

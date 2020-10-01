@@ -12,7 +12,9 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	rand2 "github.com/tendermint/tendermint/libs/rand"
 
+	"github.com/pokt-network/pocket-core/crypto/keys"
 	appsTypes "github.com/pokt-network/pocket-core/x/apps/types"
+	"github.com/tendermint/tendermint/node"
 
 	"github.com/pokt-network/pocket-core/crypto"
 	sdk "github.com/pokt-network/pocket-core/types"
@@ -42,11 +44,13 @@ func TestMain(m *testing.M) {
 
 func TestUnstakeApp(t *testing.T) {
 	tt := []struct {
-		name string
+		name         string
+		memoryNodeFn func(t *testing.T, genesisState []byte) (tendermint *node.Node, keybase keys.Keybase, cleanup func())
 		*upgrades
 	}{
-		{name: "unstake app with amino codec", upgrades: &upgrades{codecUpgrade{false, 7000}}},
-		{name: "unstake app with proto codec", upgrades: &upgrades{codecUpgrade{true, 0}}},
+		{name: "unstake an amino app with amino codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{false, 7000}}},
+		{name: "unstake an amino app with proto codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{true, 0}}},
+		{name: "unstake a proto app with proto codec", memoryNodeFn: NewInMemoryTendermintNodeProto, upgrades: &upgrades{codecUpgrade{true, 0}}}, // todo: FULL PROTO SCENARIO
 	}
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
@@ -54,7 +58,7 @@ func TestUnstakeApp(t *testing.T) {
 				sdk.UpgradeHeight = tc.upgrades.codecUpgrade.height
 				_ = memCodecMod(tc.upgrades.codecUpgrade.upgradeMod)
 			}
-			_, kb, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+			_, kb, cleanup := tc.memoryNodeFn(t, oneValTwoNodeGenesisState())
 			kp, err := kb.GetCoinbase()
 			assert.Nil(t, err)
 			_, _, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
@@ -102,11 +106,13 @@ func TestUnstakeApp(t *testing.T) {
 
 func TestUnstakeNode(t *testing.T) {
 	tt := []struct {
-		name string
+		name         string
+		memoryNodeFn func(t *testing.T, genesisState []byte) (tendermint *node.Node, keybase keys.Keybase, cleanup func())
 		*upgrades
 	}{
-		{name: "stake node with amino codec", upgrades: &upgrades{codecUpgrade{false, 7000}}},
-		{name: "stake node with proto codec", upgrades: &upgrades{codecUpgrade{true, 0}}},
+		{name: "unstake an amino node with amino codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{false, 7000}}},
+		{name: "unstake an amino node with proto codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{true, 0}}},
+		{name: "unstake a proto node with proto codec", memoryNodeFn: NewInMemoryTendermintNodeProto, upgrades: &upgrades{codecUpgrade{true, 0}}}, // TODO: PROTO FULL SCENARIO
 	}
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
@@ -115,7 +121,7 @@ func TestUnstakeNode(t *testing.T) {
 				_ = memCodecMod(tc.upgrades.codecUpgrade.upgradeMod)
 			}
 			var chains = []string{"0001"}
-			_, kb, cleanup := NewInMemoryTendermintNode(t, twoValTwoNodeGenesisState())
+			_, kb, cleanup := tc.memoryNodeFn(t, twoValTwoNodeGenesisState())
 			kp, err := kb.GetCoinbase()
 			assert.Nil(t, err)
 			_, _, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
@@ -174,11 +180,13 @@ func TestUnstakeNode(t *testing.T) {
 
 func TestStakeNode(t *testing.T) {
 	tt := []struct {
-		name string
+		name         string
+		memoryNodeFn func(t *testing.T, genesisState []byte) (tendermint *node.Node, keybase keys.Keybase, cleanup func())
 		*upgrades
 	}{
-		{name: "stake node with amino codec", upgrades: &upgrades{codecUpgrade{false, 7000}}},
-		{name: "stake node with proto codec", upgrades: &upgrades{codecUpgrade{true, 0}}},
+		{name: "stake node with amino codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{false, 7000}}},
+		{name: "stake an amino node with proto codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{true, 0}}},
+		{name: "stake a proto node with proto codec", memoryNodeFn: NewInMemoryTendermintNodeProto, upgrades: &upgrades{codecUpgrade{true, 0}}}, // TODO: FULL PROTO SCENARIO
 	}
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
@@ -186,7 +194,7 @@ func TestStakeNode(t *testing.T) {
 				sdk.UpgradeHeight = tc.upgrades.codecUpgrade.height
 				_ = memCodecMod(tc.upgrades.codecUpgrade.upgradeMod)
 			}
-			_, kb, cleanup := NewInMemoryTendermintNode(t, twoValTwoNodeGenesisState())
+			_, kb, cleanup := tc.memoryNodeFn(t, twoValTwoNodeGenesisState())
 			kp, err := kb.GetCoinbase()
 			assert.Nil(t, err)
 			_, _, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
@@ -207,11 +215,13 @@ func TestStakeNode(t *testing.T) {
 
 func TestStakeApp(t *testing.T) {
 	tt := []struct {
-		name string
+		name         string
+		memoryNodeFn func(t *testing.T, genesisState []byte) (tendermint *node.Node, keybase keys.Keybase, cleanup func())
 		*upgrades
 	}{
-		{name: "stake app with amino codec", upgrades: &upgrades{codecUpgrade{false, 7000}}},
-		{name: "stake app with proto codec", upgrades: &upgrades{codecUpgrade{true, 0}}}, // TODO: FIX !!
+		{name: "stake app with amino codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{false, 7000}}},
+		{name: "stake an amino app with proto codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{true, 0}}},
+		{name: "stake a proto app with proto codec", memoryNodeFn: NewInMemoryTendermintNodeProto, upgrades: &upgrades{codecUpgrade{true, 0}}}, // TODO FULL PROTO SCENARIO
 	}
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
@@ -220,7 +230,7 @@ func TestStakeApp(t *testing.T) {
 				_ = memCodecMod(tc.upgrades.codecUpgrade.upgradeMod)
 			}
 
-			_, kb, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+			_, kb, cleanup := tc.memoryNodeFn(t, oneValTwoNodeGenesisState())
 			kp, err := kb.GetCoinbase()
 			assert.Nil(t, err)
 			_, _, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
@@ -250,11 +260,13 @@ func TestStakeApp(t *testing.T) {
 
 func TestSendTransaction(t *testing.T) {
 	tt := []struct {
-		name string
+		name         string
+		memoryNodeFn func(t *testing.T, genesisState []byte) (tendermint *node.Node, keybase keys.Keybase, cleanup func())
 		*upgrades
 	}{
-		{name: "send tx with amino codec", upgrades: &upgrades{codecUpgrade{false, 7000}}},
-		{name: "send tx with proto codec", upgrades: &upgrades{codecUpgrade{true, 0}}}, // TODO: FIX !!
+		{name: "send tx from an amino account with amino codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{false, 7000}}},
+		{name: "send tx from an amino account with proto codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{true, 0}}},
+		{name: "send tx from a proto account with proto codec", memoryNodeFn: NewInMemoryTendermintNodeProto, upgrades: &upgrades{codecUpgrade{true, 0}}},
 	}
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
@@ -262,7 +274,7 @@ func TestSendTransaction(t *testing.T) {
 				sdk.UpgradeHeight = tc.upgrades.codecUpgrade.height
 				_ = memCodecMod(tc.upgrades.codecUpgrade.upgradeMod)
 			}
-			_, kb, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+			_, kb, cleanup := tc.memoryNodeFn(t, oneValTwoNodeGenesisState())
 			cb, err := kb.GetCoinbase()
 			assert.Nil(t, err)
 			kp, err := kb.Create("test")
@@ -293,11 +305,13 @@ func TestSendTransaction(t *testing.T) {
 
 func TestDuplicateTxWithRawTx(t *testing.T) {
 	tt := []struct {
-		name string
+		name         string
+		memoryNodeFn func(t *testing.T, genesisState []byte) (tendermint *node.Node, keybase keys.Keybase, cleanup func())
 		*upgrades
 	}{
-		{name: "send duplicate tx with amino codec", upgrades: &upgrades{codecUpgrade{false, 7000}}},
-		{name: "send duplicate tx with proto codec", upgrades: &upgrades{codecUpgrade{true, 0}}}, // TODO: FIX !!
+		{name: "send duplicate tx from an amino account with amino codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{false, 7000}}},
+		{name: "send duplicate tx from an amino account with proto codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{true, 0}}},
+		{name: "send duplicate tx from a proto account with proto codec", memoryNodeFn: NewInMemoryTendermintNodeProto, upgrades: &upgrades{codecUpgrade{true, 0}}}, // TODO:  FULL PROTO SCENARIO
 	}
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
@@ -305,7 +319,7 @@ func TestDuplicateTxWithRawTx(t *testing.T) {
 				sdk.UpgradeHeight = tc.upgrades.codecUpgrade.height
 				_ = memCodecMod(tc.upgrades.codecUpgrade.upgradeMod)
 			}
-			_, kb, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+			_, kb, cleanup := tc.memoryNodeFn(t, oneValTwoNodeGenesisState())
 			cb, err := kb.GetCoinbase()
 			assert.Nil(t, err)
 			kp, err := kb.Create("test")
@@ -357,11 +371,13 @@ func TestDuplicateTxWithRawTx(t *testing.T) {
 }
 func TestChangeParamsComplexTypeTx(t *testing.T) {
 	tt := []struct {
-		name string
+		name         string
+		memoryNodeFn func(t *testing.T, genesisState []byte) (tendermint *node.Node, keybase keys.Keybase, cleanup func())
 		*upgrades
 	}{
-		{name: "change complex type params with amino codec", upgrades: &upgrades{codecUpgrade{false, 7000}}},
-		{name: "change complex type params with proto codec", upgrades: &upgrades{codecUpgrade{true, 0}}}, // TODO: FIX !!
+		{name: "change complex type params from an amino account with amino codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{false, 7000}}},
+		{name: "change complex type params from an amino account with proto codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{true, 0}}}, // TODO: FIX !!
+		{name: "change complex type params from a proto account with proto codec", memoryNodeFn: NewInMemoryTendermintNodeProto, upgrades: &upgrades{codecUpgrade{true, 0}}},  // TODO: FIX !!
 	}
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
@@ -370,7 +386,7 @@ func TestChangeParamsComplexTypeTx(t *testing.T) {
 				_ = memCodecMod(tc.upgrades.codecUpgrade.upgradeMod)
 			}
 			resetTestACL()
-			_, kb, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+			_, kb, cleanup := tc.memoryNodeFn(t, oneValTwoNodeGenesisState())
 			cb, err := kb.GetCoinbase()
 			assert.Nil(t, err)
 			kps, err := kb.List()
@@ -400,11 +416,13 @@ func TestChangeParamsComplexTypeTx(t *testing.T) {
 
 func TestChangeParamsSimpleTx(t *testing.T) {
 	tt := []struct {
-		name string
+		name         string
+		memoryNodeFn func(t *testing.T, genesisState []byte) (tendermint *node.Node, keybase keys.Keybase, cleanup func())
 		*upgrades
 	}{
-		{name: "change complex type params with amino codec", upgrades: &upgrades{codecUpgrade{false, 7000}}},
-		{name: "change complex type params with proto codec", upgrades: &upgrades{codecUpgrade{true, 0}}}, // TODO: FIX !!
+		{name: "change complex type params from an amino account with amino codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{false, 7000}}},
+		{name: "change complex type params from an amino account with proto codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{true, 0}}},
+		{name: "change complex type params from a proto account with proto codec", memoryNodeFn: NewInMemoryTendermintNodeProto, upgrades: &upgrades{codecUpgrade{true, 0}}}, // TODO: FULL PROTO SCENARIO
 	}
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
@@ -413,7 +431,7 @@ func TestChangeParamsSimpleTx(t *testing.T) {
 				_ = memCodecMod(tc.upgrades.codecUpgrade.upgradeMod)
 			}
 			resetTestACL()
-			_, kb, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+			_, kb, cleanup := tc.memoryNodeFn(t, oneValTwoNodeGenesisState())
 			cb, err := kb.GetCoinbase()
 			assert.Nil(t, err)
 			_, err = kb.List()
@@ -439,11 +457,13 @@ func TestChangeParamsSimpleTx(t *testing.T) {
 
 func TestUpgrade(t *testing.T) {
 	tt := []struct {
-		name string
+		name         string
+		memoryNodeFn func(t *testing.T, genesisState []byte) (tendermint *node.Node, keybase keys.Keybase, cleanup func())
 		*upgrades
 	}{
-		{name: "change complex type params with amino codec", upgrades: &upgrades{codecUpgrade{false, 7000}}},
-		{name: "change complex type params with proto codec", upgrades: &upgrades{codecUpgrade{true, 0}}}, // TODO: FIX !!
+		{name: "change complex type params from an amino account with amino codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{false, 7000}}},
+		{name: "change complex type params from an amino account with proto codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{true, 0}}},
+		{name: "change complex type params from a proto account with proto codec", memoryNodeFn: NewInMemoryTendermintNodeProto, upgrades: &upgrades{codecUpgrade{true, 0}}}, // TODO: FULL PROTO SCENARIO
 	}
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
@@ -451,7 +471,7 @@ func TestUpgrade(t *testing.T) {
 				sdk.UpgradeHeight = tc.upgrades.codecUpgrade.height
 				_ = memCodecMod(tc.upgrades.codecUpgrade.upgradeMod)
 			}
-			_, kb, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+			_, kb, cleanup := tc.memoryNodeFn(t, oneValTwoNodeGenesisState())
 			cb, err := kb.GetCoinbase()
 			assert.Nil(t, err)
 			_, _, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
@@ -478,11 +498,13 @@ func TestUpgrade(t *testing.T) {
 
 func TestDAOTransfer(t *testing.T) {
 	tt := []struct {
-		name string
+		name         string
+		memoryNodeFn func(t *testing.T, genesisState []byte) (tendermint *node.Node, keybase keys.Keybase, cleanup func())
 		*upgrades
 	}{
-		{name: "change complex type params with amino codec", upgrades: &upgrades{codecUpgrade{false, 7000}}},
-		{name: "change complex type params with proto codec", upgrades: &upgrades{codecUpgrade{true, 0}}}, // TODO: FIX !!
+		{name: "change complex type params from an amino account with amino codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{false, 7000}}},
+		{name: "change complex type params from an amino account with proto codec", memoryNodeFn: NewInMemoryTendermintNodeAmino, upgrades: &upgrades{codecUpgrade{true, 0}}},
+		{name: "change complex type params from a proto account with proto codec", memoryNodeFn: NewInMemoryTendermintNodeProto, upgrades: &upgrades{codecUpgrade{true, 0}}}, // TODO: FULL PROT SCENARIO
 	}
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
@@ -490,7 +512,7 @@ func TestDAOTransfer(t *testing.T) {
 				sdk.UpgradeHeight = tc.upgrades.codecUpgrade.height
 				_ = memCodecMod(tc.upgrades.codecUpgrade.upgradeMod)
 			}
-			_, kb, cleanup := NewInMemoryTendermintNode(t, oneValTwoNodeGenesisState())
+			_, kb, cleanup := tc.memoryNodeFn(t, oneValTwoNodeGenesisState())
 			cb, err := kb.GetCoinbase()
 			assert.Nil(t, err)
 			_, _, evtChan := subscribeTo(t, tmTypes.EventNewBlock)
@@ -555,7 +577,7 @@ func TestClaimTx(t *testing.T) {
 		}, pocketTypes.RelayEvidence, proof, sdk.NewInt(1000000))
 		assert.Nil(t, err)
 	}
-	_, _, cleanup := NewInMemoryTendermintNode(t, genBz)
+	_, _, cleanup := NewInMemoryTendermintNodeAmino(t, genBz)
 	_, _, evtChan := subscribeTo(t, tmTypes.EventTx)
 	res := <-evtChan
 	fmt.Println(res)
@@ -581,7 +603,7 @@ func TestClaimTxChallenge(t *testing.T) {
 	for _, c := range challenges {
 		c.Store(sdk.NewInt(1000000))
 	}
-	_, _, cleanup := NewInMemoryTendermintNode(t, genBz)
+	_, _, cleanup := NewInMemoryTendermintNodeAmino(t, genBz)
 	_, _, evtChan := subscribeTo(t, tmTypes.EventTx)
 	res := <-evtChan // Wait for tx
 	if res.Events["message.action"][0] != pocketTypes.EventTypeClaim {
