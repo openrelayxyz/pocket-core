@@ -13,7 +13,7 @@ import (
 var (
 	// cache for session objects
 	globalSessionCache *CacheStorage
-	// cache for evidence objects
+	// cache for GOBEvidence objects
 	globalEvidenceCache *CacheStorage
 	// sync.once to perform initialization
 	cacheOnce sync.Once
@@ -202,9 +202,9 @@ func SessionIterator() SessionIt {
 	}
 }
 
-// "GetEvidence" - Retrieves the evidence object from the storage
+// "GetEvidence" - Retrieves the GOBEvidence object from the storage
 func GetEvidence(header SessionHeader, evidenceType EvidenceType, max sdk.BigInt) (evidence Evidence, err error) {
-	// generate the key for the evidence
+	// generate the key for the GOBEvidence
 	key, err := KeyForEvidence(header, evidenceType)
 	if err != nil {
 		return
@@ -212,7 +212,7 @@ func GetEvidence(header SessionHeader, evidenceType EvidenceType, max sdk.BigInt
 	// get the bytes from the storage
 	val, found := globalEvidenceCache.Get(key, evidence)
 	if !found && max.Equal(sdk.ZeroInt()) {
-		return Evidence{}, fmt.Errorf("evidence not found")
+		return Evidence{}, fmt.Errorf("GOBEvidence not found")
 	}
 	if !found {
 		bloomFilter := bloom.NewWithEstimates(uint(sdk.NewUintFromBigInt(max.BigInt()).Uint64()), .01)
@@ -234,9 +234,9 @@ func GetEvidence(header SessionHeader, evidenceType EvidenceType, max sdk.BigInt
 	return
 }
 
-// "SetEvidence" - Sets an evidence object in the storage
+// "SetEvidence" - Sets an GOBEvidence object in the storage
 func SetEvidence(evidence Evidence) {
-	// generate the key for the evidence
+	// generate the key for the GOBEvidence
 	key, err := KeyForEvidence(evidence.SessionHeader, evidence.EvidenceType)
 	if err != nil {
 		return
@@ -244,9 +244,9 @@ func SetEvidence(evidence Evidence) {
 	globalEvidenceCache.Set(key, evidence)
 }
 
-// "DeleteEvidence" - Delete the evidence from the stores
+// "DeleteEvidence" - Delete the GOBEvidence from the stores
 func DeleteEvidence(header SessionHeader, evidenceType EvidenceType) error {
-	// generate key for evidence
+	// generate key for GOBEvidence
 	key, err := KeyForEvidence(header, evidenceType)
 	if err != nil {
 		return err
@@ -256,28 +256,28 @@ func DeleteEvidence(header SessionHeader, evidenceType EvidenceType) error {
 	return nil
 }
 
-// "ClearEvidence" - Clear stores of all evidence
+// "ClearEvidence" - Clear stores of all GOBEvidence
 func ClearEvidence() {
 	if globalEvidenceCache != nil {
 		globalEvidenceCache.Clear()
 	}
 }
 
-// "EvidenceIt" - An evidence iterator instance of the globalEvidenceCache
+// "EvidenceIt" - An GOBEvidence iterator instance of the globalEvidenceCache
 type EvidenceIt struct {
 	db.Iterator
 }
 
-// "Value" - Returns the evidence object value of the iterator
+// "Value" - Returns the GOBEvidence object value of the iterator
 func (ei *EvidenceIt) Value() (evidence Evidence) {
-	// unmarshal the value (bz) into an evidence object
+	// unmarshal the value (bz) into an GOBEvidence object
 	e, err := evidence.UnmarshalObject(ei.Iterator.Value())
 	if err != nil {
-		log.Fatal(fmt.Errorf("can't unmarshal evidence iterator value into evidence: %s", err.Error()))
+		log.Fatal(fmt.Errorf("can't unmarshal GOBEvidence iterator value into GOBEvidence: %s", err.Error()))
 	}
 	evidence, ok := e.(Evidence)
 	if !ok {
-		log.Fatal("can't unmarshal evidence iterator value into evidence: cache object is not evidence")
+		log.Fatal("can't unmarshal GOBEvidence iterator value into GOBEvidence: cache object is not GOBEvidence")
 	}
 	return
 }
@@ -291,9 +291,9 @@ func EvidenceIterator() EvidenceIt {
 	}
 }
 
-// "GetProof" - Returns the Proof object from a specific piece of evidence at a certain index
+// "GetProof" - Returns the Proof object from a specific piece of GOBEvidence at a certain index
 func GetProof(header SessionHeader, evidenceType EvidenceType, index int64) Proof {
-	// retrieve the evidence
+	// retrieve the GOBEvidence
 	evidence, err := GetEvidence(header, evidenceType, sdk.ZeroInt())
 	if err != nil {
 		return nil
@@ -306,17 +306,17 @@ func GetProof(header SessionHeader, evidenceType EvidenceType, index int64) Proo
 	return evidence.Proofs[index]
 }
 
-// "SetProof" - Sets a proof object in the evidence, using the header and evidence type
+// "SetProof" - Sets a proof object in the GOBEvidence, using the header and GOBEvidence type
 func SetProof(header SessionHeader, evidenceType EvidenceType, p Proof, max sdk.BigInt) {
-	// retireve the evidence
+	// retireve the GOBEvidence
 	evidence, err := GetEvidence(header, evidenceType, max)
-	// if not found generate the evidence object
+	// if not found generate the GOBEvidence object
 	if err != nil {
 		log.Fatalf("could not set proof object: %s", err.Error())
 	}
 	// add proof
 	evidence.AddProof(p)
-	// set evidence back
+	// set GOBEvidence back
 	SetEvidence(evidence)
 }
 
@@ -324,12 +324,12 @@ func IsUniqueProof(p Proof, evidence Evidence) bool {
 	return !evidence.Bloom.Test(p.Hash())
 }
 
-// "GetTotalProofs" - Returns the total number of proofs for a piece of evidence
+// "GetTotalProofs" - Returns the total number of proofs for a piece of GOBEvidence
 func GetTotalProofs(h SessionHeader, et EvidenceType, maxPossibleRelays sdk.BigInt) (Evidence, int64) {
-	// retrieve the evidence
+	// retrieve the GOBEvidence
 	evidence, err := GetEvidence(h, et, maxPossibleRelays)
 	if err != nil {
-		log.Fatalf("could not get total proofs for evidence: %s", err.Error())
+		log.Fatalf("could not get total proofs for GOBEvidence: %s", err.Error())
 	}
 	// return number of proofs
 	return evidence, evidence.NumOfProofs

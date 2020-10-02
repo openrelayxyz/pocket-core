@@ -100,12 +100,12 @@ var _ CacheObject = Session{} // satisfies the cache object interface
 
 func (s Session) MarshalObject() ([]byte, error) {
 	se := s.ToProto()
-	return ModuleCdc.MarshalBinaryBare(&se)
+	return ModuleCdc.ProtoMarshalBinaryBare(&se)
 }
 
 func (s Session) UnmarshalObject(b []byte) (CacheObject, error) {
 	var se ProtoSession
-	err := ModuleCdc.UnmarshalBinaryBare(b, &se)
+	err := ModuleCdc.ProtoUnmarshalBinaryBare(b, &se)
 	if err != nil {
 		return s, fmt.Errorf("error unmarshalling session object: %s", err.Error())
 	}
