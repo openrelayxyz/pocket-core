@@ -109,6 +109,7 @@ func WriteResponse(w http.ResponseWriter, jsn, path, ip string) {
 
 func WriteRaw(w http.ResponseWriter, jsn, path, ip string) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set("Content-Length", fmt.Sprintf("%v", len(jsn)))
 	w.WriteHeader(http.StatusOK)
 	_, err := w.Write([]byte(jsn))
 	if err != nil {
